@@ -125,6 +125,7 @@ typedef struct {
 
 typedef struct {
 	char ch;
+	SDL_Color color;
 	u8   isWall;
 	} Tile;
 #define MAP(map, x, y)      map[((x) % MAP_X) + ((y) % MAP_Y) * MAP_X]
@@ -134,6 +135,7 @@ typedef struct {
 
 typedef struct {
 	Position pos;
+	SDL_Color color;
 	char ch;
 	} Entitiy;
 
@@ -274,25 +276,72 @@ void connect_room_centers(Position centerOne, Position centerTwo, Tile* map) {
 		}
 	}
 
-void add_walls_around_roads(Tile* map){
-		for(i32 y = 1; y < MAP_Y-1; y++){
-			for(i32 x = 1; x < MAP_X-1; x++){
-			if(MAP_CH(map, x, y) == ','){
-				if(MAP_CH(map, x+1, y) != ','){
+void add_walls_around_roads(Tile* map) {
+	for(i32 y = 1; y < MAP_Y-1; y++) {
+		for(i32 x = 1; x < MAP_X-1; x++) {
+			if(MAP_CH(map, x, y) == ',') {
+				if(MAP_CH(map, x+1, y) != ',') {
 					MAP_CH(map, x+1, y) = '#';
-				}
-				if(MAP_CH(map, x+1, y+1) != ','){
+					}
+				if(MAP_CH(map, x+1, y+1) != ',') {
 					MAP_CH(map, x+1, y+1) = '#';
-				}
-				if(MAP_CH(map, x, y+1) != ','){
+					}
+				if(MAP_CH(map, x, y+1) != ',') {
 					MAP_CH(map, x, y+1) = '#';
-				}
-				
-			}
-		}	
-		}
-}
+					}
 
+				}
+			}
+		}
+	}
+
+void caved_part(Tile *map, i32 x, i32 y) {
+	for(i32 carved = 0; carved < rand()%10 + 3; carved++) {
+		i32 xr = rand()%3 - 1;
+		i32 yr = rand()%3 - 1;
+		MAP_CH(map, x + xr, y + yr) = '.';
+		MAP_ISW(map, x + xr, y + yr) = SDL_TRUE;
+
+		}
+	}
+void caved_map(Tile *map, f64 percantage) {
+
+	for(i32 y = 1; y < MAP_Y - 1; y++) {
+		for(i32 x = 1; x < MAP_X - 1; x++) {
+			if(rand_f64() < percantage) {
+
+				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x - 1, y) == '#') {
+					MAP_CH(map, x - 1, y) = '.';
+					MAP_ISW(map, x - 1, y) = SDL_TRUE;
+					caved_part(map, x, y);
+					}
+				}
+			if(rand_f64() < percantage) {
+				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x + 1, y) == '#') {
+					MAP_CH(map, x + 1, y) = '.';
+					MAP_ISW(map, x + 1, y) = SDL_TRUE;
+					caved_part(map, x, y);
+					}
+				}
+			if(rand_f64() < percantage) {
+				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x, y + 1) == '#') {
+					MAP_CH(map, x, y + 1) = '.';
+					MAP_ISW(map, x , y + 1) = SDL_TRUE;
+					caved_part(map, x, y);
+					}
+				}
+			if(rand_f64() < percantage) {
+				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x, y - 1) == '#') {
+					MAP_CH(map, x, y - 1) = '.';
+					MAP_ISW(map, x, y - 1) = SDL_TRUE;
+					caved_part(map, x, y);
+					}
+				}
+			}
+		}
+	}
+
+	
 
 void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	i32 width, height, x, y, nRooms;
@@ -305,7 +354,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	Room *rooms = calloc(nRooms, sizeof(Room));
 	rooms[0] = create_room(9, 9, 10, 10);
 	add_room_to_map(map, rooms[0]);
-	add_room_wall_to_map(map, rooms[0]);
+	//add_room_wall_to_map(map, rooms[0]);
 	for(i32 i = 1; i < nRooms; i++) {
 		y = (rand() % (MAP_Y - 22));
 		x = (rand() % (MAP_X - 22));
@@ -314,24 +363,21 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		rooms[i] = create_room(x, y, height, width);
 
 		add_room_to_map(map, rooms[i]);
-		add_room_wall_to_map(map, rooms[i]);
-		//connect_room_centers(rooms[i-1].center, rooms[i].center, map);
+		//add_room_wall_to_map(map, rooms[i]);
+		connect_room_centers(rooms[i-1].center, rooms[i].center, map);
 		}
-	for(i32 y = nRooms/2; y < nRooms; y++) {
-		for(i32 x = 0; x < nRooms/2; x++) {
+	/*
+	for(i32 y = nRooms/2-1; y < nRooms; y++) {
+		for(i32 x = 0; x < nRooms/2+1; x++) {
 			if(x != y) {
 				connect_room_centers(rooms[x].center, rooms[y].center, map);
 				}
 
 			}
 		}
-		//*/
-		//add_walls_around_roads(map);
-
-
-
-
-	//system("pause");
+	//*/
+	//add_walls_around_roads(map);
+	caved_map(map, 0.40f);
 	free(rooms);
 	}
 
@@ -362,14 +408,14 @@ Tile* init_map() {
 	Tile *map;
 	map = calloc(MAP_Y*MAP_Y, sizeof(Tile));
 	for(i32 y = 0; y < MAP_Y*MAP_Y; y++) {
-		map[y].ch = '.';
+		map[y].ch = '#';
 		}
 	//memset(map. , '.', sizeof(Tile) * MAP_Y * MAP_Y);
 	if(map == NULL) {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	generete_dungons(map, 5, 10);
+	generete_dungons(map, 2, 30);
 	return map;
 	}
 
@@ -388,48 +434,48 @@ void render_map(Tile *map) {
 			else if(ch == ',') {
 				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 				SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
-				SDL_RenderFillRect(RENDERER, &textRect);
-				}
-			else if(ch != '.') {
-				Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
-				}
-
-			}
+				//SDL_RenderFillRect(RENDERER, &textRect);
 		}
+				else if(ch != '.') {
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
+					}
 
-	}
+				}
+			}
+
+		}
 
 
 //static i32 asd = 0;
-void main_renderer(Entitiy* player, Tile *map) {
-	SDL_ERR(SDL_RenderClear(RENDERER));
-	render_map(map);
-	render_player(player);
-	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
-	SDL_RenderPresent(RENDERER);
-	}
+	void main_renderer(Entitiy* player, Tile *map) {
+		SDL_ERR(SDL_RenderClear(RENDERER));
+		render_map(map);
+		render_player(player);
+		SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
+		SDL_RenderPresent(RENDERER);
+		}
 
-void event_user(Entitiy *player, Tile* map) {
-	if(SDL_WaitEvent(&EVENT)) {
-		if(EVENT.type == SDL_QUIT) {
-			QUIT = 1;
-			}
-		else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
-			SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
-			FONT_H = HEIGHT / MAP_Y + 1;
-			FONT_W = WIDTH  / MAP_X;
-			//FONT_H = 15;
-			//FONT_W = 10;
-			if(WIDTH > 4096 || HEIGHT > 2048) {
-				ASSERT("Oversized window\n");
+	void event_user(Entitiy *player, Tile* map) {
+		if(SDL_WaitEvent(&EVENT)) {
+			if(EVENT.type == SDL_QUIT) {
+				QUIT = 1;
 				}
-			//LOG("width %d, height %d\n", WIDTH, HEIGHT);
-			}
-		else if(EVENT.type==SDL_KEYDOWN) {
-			player_input(&EVENT, player, map);
+			else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
+				SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
+				FONT_H = HEIGHT / MAP_Y + 1;
+				FONT_W = WIDTH  / MAP_X;
+				//FONT_H = 15;
+				//FONT_W = 10;
+				if(WIDTH > 4096 || HEIGHT > 2048) {
+					ASSERT("Oversized window\n");
+					}
+				//LOG("width %d, height %d\n", WIDTH, HEIGHT);
+				}
+			else if(EVENT.type==SDL_KEYDOWN) {
+				player_input(&EVENT, player, map);
+				}
 			}
 		}
-	}
 
 
 
@@ -437,33 +483,32 @@ void event_user(Entitiy *player, Tile* map) {
 #define SEED 12344
 #include<time.h>
 
-int main() {
+	int main() {
 
 
-	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
-	SDL_ERR(TTF_Init());
-	srand(time(0));
-	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 800,  SDL_WINDOW_OPENGL);
-	(void*)P_SDL_ERR(WINDOW);
-	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
-	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
-	FONT = TTF_OpenFont(fontLoc, 64);
-	(void*)P_SDL_ERR(FONT);
-	(void*)P_SDL_ERR(RENDERER);
-	QUIT = 0;
+		SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
+		SDL_ERR(TTF_Init());
+		srand(time(0));
+		WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 800,  SDL_WINDOW_OPENGL);
+		(void*)P_SDL_ERR(WINDOW);
+		RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
+		SDL_SetWindowResizable(WINDOW, SDL_TRUE);
+		FONT = TTF_OpenFont(fontLoc, 64);
+		(void*)P_SDL_ERR(FONT);
+		(void*)P_SDL_ERR(RENDERER);
+		QUIT = 0;
 
-	Entitiy* player = create_player((Position) {
-		10, 10
-		});
-	Tile *map = init_map();
-	//MAP_STDOUT();
-	while(!QUIT) {
-		main_renderer(player, map);
-		event_user(player, map);
-		//SDL_Delay(10);
+		Entitiy* player = create_player((Position) {
+			10, 10
+			});
+		Tile *map = init_map();
+		//MAP_STDOUT();
+		while(!QUIT) {
+			main_renderer(player, map);
+			event_user(player, map);
+			//SDL_Delay(10);
+			}
+
+		return 0;
+		ASSERT("UNREACHABLE");
 		}
-
-	return 0;
-	ASSERT("UNREACHABLE");
-	}
-
