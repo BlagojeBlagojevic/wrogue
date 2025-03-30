@@ -73,8 +73,8 @@ void *P_SDL_ERR(void *ptr) {
 	return ptr;
 	}
 
-#define MAP_X 100
-#define MAP_Y 100
+#define MAP_X 50
+#define MAP_Y 50
 
 typedef struct Graphics_State {
 	SDL_Window   *window;
@@ -117,6 +117,7 @@ void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 sta
 	}
 
 
+
 typedef struct {
 	i32 x;
 	i32 y;
@@ -135,6 +136,13 @@ typedef struct {
 	Position pos;
 	char ch;
 	} Entitiy;
+
+typedef struct {
+	i32 width;
+	i32 height;
+	Position pos;
+	Position center;
+	} Room;
 
 Entitiy* create_player(Position startPos) {
 	Entitiy* player = calloc(1, sizeof(Entitiy));
@@ -155,52 +163,149 @@ void player_input(SDL_Event *event, Entitiy* player, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 
 	if(key == UP_ARROW) {
-		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_FALSE) {
+		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
 			player->pos.y--;
 			}
 		}
 	else if(key == DOWN_ARROW) {
-		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_FALSE) {
+		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_TRUE) {
 			player->pos.y++;
 			}
 		}
 	else if(key == LEFT_ARROW) {
-		if(player->pos.x > 0 && MAP_ISW(map, player->pos.x-1, player->pos.y) == SDL_FALSE) {
+		if(player->pos.x > 0 && MAP_ISW(map, player->pos.x-1, player->pos.y) == SDL_TRUE) {
 			player->pos.x--;
 			}
 		}
 	else if(key == RIGHT_ARROW) {
-		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x+1, player->pos.y) == SDL_FALSE) {
+		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x+1, player->pos.y) == SDL_TRUE) {
 			player->pos.x++;
 			}
 		}
 	}
 
+Room create_room(i32 x, i32 y, i32 height, i32 width) {
+	Room newRoom;
+	if(height > MAP_Y) {
+		ASSERT("height too large for room creation");
+		}
+	if(width > MAP_X) {
+		ASSERT("width too large for room creation");
+		}
+	LOG("Created room (x, y, height, width ) (%d %d %d %d)\n", x, y, height, width);
+	newRoom.height   = height;
+	newRoom.width    = width;
+	newRoom.pos.x    = x;
+	newRoom.pos.y    = y;
+	newRoom.center.x = x +  (i32)(height / 2);
+	newRoom.center.y = y +  (i32)(width / 2);
+	if(newRoom.center.y > MAP_Y) {
+		ASSERT("newRoom.center.x too large for room creation");
+		}
+	if(newRoom.center.x > MAP_X) {
+		ASSERT("newRoom.center.x too large for room creation");
+		}
+	return newRoom;
+	}
+
+void add_room_to_map(Tile *map, Room room) {
+	for(i32 y = room.pos.y; y < room.pos.y + room.height; y++) {
+		for(i32 x = room.pos.x; x < room.pos.x + room.width; x++) {
+			MAP_CH(map, x, y)  = '.';
+			MAP_ISW(map, x, y) = SDL_TRUE;
+			}
+		}
+	}
+
+void add_room_wall_to_map(Tile *map, Room room) {
+	for(i32 y = room.pos.y; y < room.pos.y + room.height; y++) {
+		for(i32 x = room.pos.x; x < room.pos.x + room.width; x++) {
+			if(y == room.pos.y) {
+				MAP_CH(map, x, y)  = '#';
+				MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+		 else if(x == room.pos.x) {
+				MAP_CH(map, x, y)  = '#';
+				MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+		else if(x == room.pos.x + room.width - 1) {
+				MAP_CH(map, x, y)  = '#';
+				MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+		else if(y == room.pos.y + room.height - 1) {
+				MAP_CH(map, x, y)  = '#';
+				MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+			}
+		}
+	}
+
+
+void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
+	i32 width, height, x, y, nRooms;
+	if(minRooms >= maxRooms) {
+		ASSERT("We have a larger amount of minRooms >= maxRooms");
+		}
+	nRooms = (i32)(rand()%(u32)(maxRooms)) + minRooms;
+
+	//nRooms = 5;
+	Room *rooms = calloc(nRooms, sizeof(Room));
+	rooms[0] = create_room(9, 9, 5, 5);
+	add_room_to_map(map, rooms[0]);
+	add_room_wall_to_map(map, rooms[0]);
+	for(i32 i = 1; i < nRooms; i++) {
+		y = (rand() % (MAP_Y - 10)) + 1;
+		x = (rand() % (MAP_X - 20)) + 1;
+		height = (rand() % 15) + 3;
+		width  = (rand() % 15) + 3;
+		rooms[i] = create_room(x, y, height, width);
+		add_room_to_map(map, rooms[i]);
+		add_room_wall_to_map(map, rooms[i]);
+		}
+	//system("pause");
+	free(rooms);
+	}
+
+
+#define RAND_MAP()\
+	for(i32 y = 0; y < MAP_Y; y++) {\
+		for(i32 x = 0; x < MAP_X; x++) {\
+			f64 r = rand_f64();\
+			if(r < 1.0f/100.0f) {\
+				MAP_CH(map, x, y) = '#';\
+				MAP_ISW(map, x, y) = SDL_FALSE;\
+				}\
+			else {\
+				MAP_CH(map, x, y)= '.';\
+				MAP_ISW(map, x, y) = SDL_TRUE;\
+				}\
+			}
+
+#define MAP_STDOUT()\
+for(int y = 0; y < MAP_Y; y++){\
+		for(int x = 0; x < MAP_X; x++){\
+		printf("%c", MAP(map, x, y));\
+	}	\
+	printf("\n");\
+	}
 
 Tile* init_map() {
 	Tile *map;
 	map = calloc(MAP_Y*MAP_Y, sizeof(Tile));
+	for(i32 y = 0; y < MAP_Y*MAP_Y; y++){
+		map[y].ch = '.';
+	}
+	//memset(map. , '.', sizeof(Tile) * MAP_Y * MAP_Y);
 	if(map == NULL) {
 		ASSERT("alloc of map failed!!!");
 		}
-	for(i32 y = 0; y < MAP_Y; y++) {
-		for(i32 x = 0; x < MAP_X; x++) {
-			f64 r = rand_f64();
-			if(r < 1.0f/100.0f) {
-				MAP_CH(map, x, y) = '#';
-				MAP_ISW(map, x, y) = SDL_TRUE;
-				}
-			else {
-				MAP_CH(map, x, y)= '.';
-				MAP_ISW(map, x, y) = SDL_FALSE;
-				}
-
-			}
-		}
-
+	//RAND_MAP();
+	generete_dungons(map, 5, 15);
 	return map;
 	}
+
 void render_map(Tile *map) {
+	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, FONT_W * 10, FONT_H, "ROUGE GAME", WHITE);
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			i32 startX = x * FONT_W;
@@ -214,24 +319,24 @@ void render_map(Tile *map) {
 	}
 
 
-
+//static i32 asd = 0;
 void main_renderer(Entitiy* player, Tile *map) {
 	SDL_ERR(SDL_RenderClear(RENDERER));
+	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
 	render_map(map);
 	render_player(player);
-	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
 	SDL_RenderPresent(RENDERER);
 	}
 
 void event_user(Entitiy *player, Tile* map) {
-	while(SDL_PollEvent(&EVENT)) {
+	if(SDL_WaitEvent(&EVENT)) {
 		if(EVENT.type == SDL_QUIT) {
 			QUIT = 1;
 			}
 		else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
 			SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
-			//FONT_H = HEIGHT/MAP_X;
-			//FONT_W = WIDTH/MAP_Y;
+			FONT_H = HEIGHT/MAP_X;
+			FONT_W = WIDTH/MAP_Y;
 			FONT_H = 15;
 			FONT_W = 10;
 			if(WIDTH > 4096 || HEIGHT > 2048) {
@@ -248,13 +353,15 @@ void event_user(Entitiy *player, Tile* map) {
 
 
 
-
+#define SEED 12344
+#include<time.h>
 
 int main() {
 
 
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
+	srand(time(0));
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 800,  SDL_WINDOW_OPENGL);
 	(void*)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
@@ -268,11 +375,11 @@ int main() {
 		10, 10
 		});
 	Tile *map = init_map();
-
+	MAP_STDOUT();
 	while(!QUIT) {
 		main_renderer(player, map);
 		event_user(player, map);
-		SDL_Delay(10);
+		//SDL_Delay(10);
 		}
 
 	return 0;
