@@ -102,6 +102,7 @@ typedef struct Graphics_State {
 	i32           width;
 	i32           height;
 	u8            isQuit;
+	SDL_bool      isMovmentEvent;
 	} Graphics_State;
 
 const char* title = "Ime kakvo";
@@ -116,6 +117,7 @@ Graphics_State mainGraphics;
 #define EVENT    mainGraphics.event
 #define WIDTH    mainGraphics.width
 #define HEIGHT   mainGraphics.height
+#define MOVMENT  mainGraphics.isMovmentEvent
 
 void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 startY, i32 w_c, i32 h_c, char *c, SDL_Color textColor) {
 	if(renderer == NULL) {
@@ -191,25 +193,37 @@ void render_player(Entitiy *player) {
 
 void player_input(SDL_Event *event, Entitiy* player, Tile* map) {
 	const u32 key = event->key.keysym.sym;
-
+	MOVMENT = SDL_FALSE;  //NOT PROB
 	if(key == UP_ARROW) {
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y--;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_FALSE;
+			MOVMENT = SDL_TRUE;
 			}
 		}
 	else if(key == DOWN_ARROW) {
 		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y++;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_FALSE;
+			MOVMENT = SDL_TRUE;
 			}
 		}
 	else if(key == LEFT_ARROW) {
 		if(player->pos.x > 0 && MAP_ISW(map, player->pos.x-1, player->pos.y) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x--;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			MOVMENT = SDL_TRUE;
 			}
 		}
 	else if(key == RIGHT_ARROW) {
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x+1, player->pos.y) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x++;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			MOVMENT = SDL_TRUE;
 			}
 		}
 	}
@@ -532,27 +546,30 @@ void main_renderer(Entitiy* player, Entitiy_DA *monster, Tile *map) {
 	}
 
 void event_user(Entitiy *player, Tile* map) {
-	if(SDL_WaitEvent(&EVENT)) {
-		if(EVENT.type == SDL_QUIT) {
-			QUIT = 1;
-			}
-		else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
-			SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
-			FONT_H = HEIGHT / MAP_Y + 1;
-			FONT_W = WIDTH  / MAP_X;
-			//FONT_H = 15;
-			//FONT_W = 10;
-			if(WIDTH > 4096 || HEIGHT > 2048) {
-				ASSERT("Oversized window\n");
+	MOVMENT = SDL_FALSE;
+	while(MOVMENT == SDL_FALSE) {
+		if(SDL_WaitEvent(&EVENT)) {
+			if(EVENT.type == SDL_QUIT) {
+				MOVMENT = SDL_TRUE;
+				QUIT = 1;
 				}
-			//LOG("width %d, height %d\n", WIDTH, HEIGHT);
-			}
-		else if(EVENT.type==SDL_KEYDOWN) {
-			player_input(&EVENT, player, map);
+			else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
+				SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
+				FONT_H = HEIGHT / MAP_Y + 1;
+				FONT_W = WIDTH  / MAP_X;
+				//FONT_H = 15;
+				//FONT_W = 10;
+				if(WIDTH > 4096 || HEIGHT > 2048) {
+					ASSERT("Oversized window\n");
+					}
+				//LOG("width %d, height %d\n", WIDTH, HEIGHT);
+				}
+			else if(EVENT.type==SDL_KEYDOWN) {
+				player_input(&EVENT, player, map);
+				}
 			}
 		}
 	}
-
 
 void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	for(i32 y = 0; y < MAP_Y; y++) {
@@ -580,29 +597,154 @@ void block_movement(Entitiy_DA *entitys, Tile *map) {
 			}
 		}
 	}
+//check if 2 fieled of vison colide
+SDL_bool check_colison_entitiy(Entitiy* player, Entitiy*  ent) {
+	SDL_Rect A = {.h = player->radius, .w = player->radius, .x = player->pos.x, .y = player->pos.y };
+	SDL_Rect B = {.h = ent->radius, .w = ent->radius, .x = ent->pos.x, .y = ent->pos.y };
+
+	i32 leftA, leftB;
+	i32 rightA, rightB;
+	i32 topA, topB;
+	i32 bottomA, bottomB;
+
+	leftA = A.x;
+	rightA = A.x + A.w;
+	topA = A.y;
+	bottomA = A.y + A.h;
+
+	leftB = B.x;
+	rightB = B.x + B.w;
+	topB = B.y;
+	bottomB = B.y + B.h;
+
+	if( bottomA <= topB ) {
+		return SDL_FALSE;
+		}
+
+	if( topA >= bottomB ) {
+		return SDL_FALSE;
+		}
+
+	if( rightA <= leftB ) {
+		return SDL_FALSE;
+		}
+
+	if( leftA >= rightB ) {
+		return SDL_FALSE;
+		}
+
+	return SDL_TRUE;
+	}
+
+#define INF (f64)100000.0f
+#define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
+f64 distnace_move(i32 x1, i32 y1, i32 x2, i32 y2, Tile *map) {
+	CLAMP(x2, 0, MAP_X-1);
+	CLAMP(y2, 0, MAP_Y-1);
+	if(MAP_ISW(map, x2, y2) == SDL_TRUE) {
+		//LOG("dist %f\n", DISTANCE(x1, y1, x2, y2));
+		//system("pause");
+		return DISTANCE(x1, y1, x2, y2);
+		}
+	//LOG("dist INF\n");
+	//system("pause");
+	return INF;
+	}
+//WE WILL SEE IF A* or Diakstra or This CRAP
+void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
+	i32 x1 = player->pos.x;
+	i32 y1 = player->pos.y;
+	i32 x2 = ent->pos.x;
+	i32 y2 = ent->pos.y;
+	f64 distance  = DISTANCE(x1, y1, x2, y2);
+
+	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
+
+	//+1x
+	f64 distancesMin = distnace_move(x1, y1, (x2 + 1), y2, map);
+	i32 index = 0;
+	//-1x
+	distance = distnace_move(x1, y1, (x2 - 1), y2, map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 1;
+		}
+	//+1y
+	distance = distnace_move(x1, y1, x2, (y2 + 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 2;
+		}
+	//-1y
+	distance = distnace_move(x1, y1, x2, (y2  - 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 3;
+		}
+	//LOG("Distance %f\n", distancesMin);
+	switch(index) {
+		case 0: {
+				if(distancesMin != INF) {
+					LOG("X++\n");
+					ent->pos.x = ent->pos.x + 1;
+					}
+				break;
+				}
+		case 1: {
+				if(distancesMin != INF) {
+					LOG("X--\n");
+					ent->pos.x--;
+					}
+				break;
+				}
+		case 2: {
+				if(distancesMin != INF) {
+					LOG("Y++\n");
+					ent->pos.y++;
+					}
+				break;
+				}
+		case 3: {
+				if(distancesMin != INF) {
+					LOG("Y--\n");
+					ent->pos.y--;
+					}
+				break;
+				}
+		default: {
+				ASSERT("Unreachable");
+				break;
+				}
+		}
+
+
+
+
+	//system("pause");
+	}
+
 //IF IN VISON FIELD MOVE TOWARDS PLAYER
 //IF NOT RAND MOV DEPENDING ON TYPE OR PROB
-SDL_bool check_colison_entitiy(Entitiy* ent1, Entitiy*  ent2) {
-			
-			return SDL_TRUE;
-	}
 void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
+	i32 co = 0;
 	for(u64 count = 0; count < entitys->count; count++) {
-		if(entitys->items[count].ch == 'M') {
-			if(check_colison_entitiy(player, &entitys->items[count])) {
-				i32 x = entitys->items[count].pos.x;
-				i32 y = entitys->items[count].pos.y;
-				MAP_ISW(map, x, y) = SDL_TRUE;
+		Entitiy entity = entitys->items[count];
+		if(entity.ch == 'M' && rand_f64() < 0.5f) {
+			if(check_colison_entitiy(player, &entity) == SDL_TRUE) {
+				co++;
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+				make_best_move(player, &entity, map);
+				entitys->items[count] = entity;
 				}
-
 			}
 		}
+	LOG("Colided entitys %d\n", co);
 	}
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	//IF IN VISON FIELD MOVE TOWARDS PLAYER
 	//IF NOT RAND MOVE
-
+	move_entity(player, entitys, map);
 	//BLOCK MOVMENT OF MONSTERS
 	block_movement(entitys, map);
 	}
@@ -625,7 +767,7 @@ int main() {
 	(void*)P_SDL_ERR(FONT);
 	(void*)P_SDL_ERR(RENDERER);
 	QUIT = 0;
-
+	MOVMENT = SDL_TRUE;
 	Entitiy* player = create_entity('@', 10, (Position) {
 		10, 10
 		});
@@ -637,6 +779,8 @@ int main() {
 	da_append(&monsters, *monster);
 	//*/
 	genereate_monsters(&monsters, map);
+	MOVMENT = 0;
+	main_renderer(player,  &monsters, map);
 	//MAP_STDOUT();
 	while(!QUIT) {
 		main_renderer(player,  &monsters, map);
