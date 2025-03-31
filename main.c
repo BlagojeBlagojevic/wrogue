@@ -459,7 +459,7 @@ Tile* init_map() {
 void render_map(Tile *map, Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10, 20, "ROUGE GAME", WHITE);
 	
-	/*
+	
 	const i32 radius = 10;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
@@ -472,7 +472,7 @@ void render_map(Tile *map, Entitiy *player) {
 	for(i32 y  = startY; y < stopY; y++) {
 		for(i32 x = startX; x < stopX; x++) {//*/
 
-	///*
+	/*
 	for(i32 y  = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			//*/
@@ -498,9 +498,23 @@ void render_map(Tile *map, Entitiy *player) {
 
 	}
 
-void render_monsters(Entitiy_DA *monsters) {
+void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
+	
+	const i32 radius = 10;
+	i32 startX = player->pos.x - radius;
+	i32 startY = player->pos.y - radius;
+	i32 stopX  = player->pos.x + radius;
+	i32 stopY  = player->pos.y + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);//*/
 	for(u64 count = 0; count < monsters->count; count++) {
-		render_player(&monsters->items[count]);
+		if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
+		&& monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY){
+			render_player(&monsters->items[count]);	
+		}
+		
 		}
 
 	}
@@ -511,7 +525,7 @@ void main_renderer(Entitiy* player, Entitiy_DA *monster, Tile *map) {
 	render_map(map, player);
 	render_player(player);
 	//render_player(&monster->items[0]);
-	render_monsters(monster);
+	render_monsters(monster, player);
 	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
 	SDL_RenderPresent(RENDERER);
 	}
