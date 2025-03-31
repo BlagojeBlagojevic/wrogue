@@ -51,15 +51,15 @@ typedef  double   f64;
 
 //DYNAMIC ARRAY
 #define DA_SIZE 256
-#define da_append(da, item)                                                              \
+#define da_append(da, item)                                                            \
 	do {                                                                                 \
-		if ((da)->count >= (da)->capacity) {                                             \
-			(da)->capacity = (da)->capacity == 0 ? DA_SIZE : (da)->capacity*2;           \
-			(da)->items = realloc((da)->items, (da)->capacity*sizeof(*(da)->items));     \
-			assert((da)->items != NULL && "Realloc fail !!!");                           \
+		if ((da)->count >= (da)->capacity) {                                               \
+			(da)->capacity = (da)->capacity == 0 ? DA_SIZE : (da)->capacity*2;               \
+			(da)->items = realloc((da)->items, (da)->capacity*sizeof(*(da)->items));         \
+			assert((da)->items != NULL && "Realloc fail !!!");                               \
 			}                                                                                \
 		\
-		(da)->items[(da)->count++] = (item);                                             \
+		(da)->items[(da)->count++] = (item);                                               \
 		} while (0)
 
 
@@ -152,6 +152,7 @@ typedef struct {
 typedef struct {
 	Position pos;
 	SDL_Color color;
+	i32 radius;
 	char ch;
 	} Entitiy;
 
@@ -168,21 +169,17 @@ typedef struct {
 	Position center;
 	} Room;
 
-Entitiy* create_player(Position startPos) {
-	Entitiy* player = calloc(1, sizeof(Entitiy));
-	player->pos.x = startPos.x;
-	player->pos.y = startPos.y;
-	player->ch = '@';
-	return player;
+Entitiy* create_entity(char ch, i32 radius,Position startPos) {
+	Entitiy* entity = calloc(1, sizeof(Entitiy));
+	entity->pos.x = startPos.x;
+	entity->pos.y = startPos.y;
+	entity->ch = ch;
+	entity->radius = radius;
+	return entity;
 	}
 
-Entitiy* create_monster(Position startPos) {
-	Entitiy* monster = calloc(1, sizeof(Entitiy));
-	monster->pos.x = startPos.x;
-	monster->pos.y = startPos.y;
-	monster->ch = 'M';
-	return monster;
-	}
+
+
 
 
 
@@ -385,6 +382,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	Room *rooms = calloc(nRooms, sizeof(Room));
 	rooms[0] = create_room(9, 9, 10, 10);
 	add_room_to_map(map, rooms[0]);
+
 	//add_room_wall_to_map(map, rooms[0]);
 	for(i32 i = 1; i < nRooms; i++) {
 		y = (rand() % (MAP_Y - 22));
@@ -394,7 +392,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		rooms[i] = create_room(x, y, height, width);
 
 		add_room_to_map(map, rooms[i]);
-		add_room_wall_to_map(map, rooms[i]);
+		//add_room_wall_to_map(map, rooms[i]);
 		connect_room_centers(rooms[i-1].center, rooms[i].center, map);
 		}
 	/*
@@ -440,6 +438,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 Tile* init_map() {
 	Tile *map;
 	map = calloc(MAP_Y*MAP_Y, sizeof(Tile));
+	//RAND_MAP();
 	for(i32 y = 0; y < MAP_Y*MAP_Y; y++) {
 		map[y].ch = '#';
 		}
@@ -458,9 +457,9 @@ Tile* init_map() {
 #define PLAYER_VISION
 void render_map(Tile *map, Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10, 20, "ROUGE GAME", WHITE);
-	
-	
-	const i32 radius = 10;
+
+
+	const i32 radius = 5;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
 	i32 stopX  = player->pos.x + radius;
@@ -469,10 +468,11 @@ void render_map(Tile *map, Entitiy *player) {
 	CLAMP(stopX,  0, MAP_X-1);
 	CLAMP(startY, 0, MAP_Y-1);
 	CLAMP(stopY,  0, MAP_Y-1);
+	/*
 	for(i32 y  = startY; y < stopY; y++) {
 		for(i32 x = startX; x < stopX; x++) {//*/
 
-	/*
+	///*
 	for(i32 y  = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			//*/
@@ -487,6 +487,7 @@ void render_map(Tile *map, Entitiy *player) {
 			else if(ch == ',') {
 				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 				SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+				DROP(textRect);
 				//SDL_RenderFillRect(RENDERER, &textRect);
 				}
 			else if(ch != '.') {
@@ -499,8 +500,8 @@ void render_map(Tile *map, Entitiy *player) {
 	}
 
 void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
-	
-	const i32 radius = 10;
+
+	const i32 radius = 5;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
 	i32 stopX  = player->pos.x + radius;
@@ -511,10 +512,10 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
 	CLAMP(stopY,  0, MAP_Y-1);//*/
 	for(u64 count = 0; count < monsters->count; count++) {
 		if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
-		&& monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY){
-			render_player(&monsters->items[count]);	
-		}
-		
+		    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
+			render_player(&monsters->items[count]);
+			}
+
 		}
 
 	}
@@ -557,8 +558,8 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			if(MAP_CH(map, x, y) != '#') {
-				if(rand_f64() < 0.01f) {
-					Entitiy *temp = create_monster((Position) {
+				if(rand_f64() < 0.02f) {
+					Entitiy *temp = create_entity('M', 5, (Position) {
 						.x = x, .y = y
 						});
 					da_append(monsters, *temp);
@@ -566,8 +567,45 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 				}
 			}
 		}
+	LOG("\nGenerated monsters %d\n", (i32)monsters->count);
 	}
 
+//BLOCK MOVMENT OF MONSTERS
+void block_movement(Entitiy_DA *entitys, Tile *map) {
+	for(u64 count = 0; count < entitys->count; count++) {
+		if(entitys->items[count].ch == 'M') {
+			i32 x = entitys->items[count].pos.x;
+			i32 y = entitys->items[count].pos.y;
+			MAP_ISW(map, x, y) = SDL_FALSE;
+			}
+		}
+	}
+//IF IN VISON FIELD MOVE TOWARDS PLAYER
+//IF NOT RAND MOV DEPENDING ON TYPE OR PROB
+SDL_bool check_colison_entitiy(Entitiy* ent1, Entitiy*  ent2) {
+			
+			return SDL_TRUE;
+	}
+void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
+	for(u64 count = 0; count < entitys->count; count++) {
+		if(entitys->items[count].ch == 'M') {
+			if(check_colison_entitiy(player, &entitys->items[count])) {
+				i32 x = entitys->items[count].pos.x;
+				i32 y = entitys->items[count].pos.y;
+				MAP_ISW(map, x, y) = SDL_TRUE;
+				}
+
+			}
+		}
+	}
+
+void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
+	//IF IN VISON FIELD MOVE TOWARDS PLAYER
+	//IF NOT RAND MOVE
+
+	//BLOCK MOVMENT OF MONSTERS
+	block_movement(entitys, map);
+	}
 
 
 #define SEED 12344
@@ -588,7 +626,7 @@ int main() {
 	(void*)P_SDL_ERR(RENDERER);
 	QUIT = 0;
 
-	Entitiy* player = create_player((Position) {
+	Entitiy* player = create_entity('@', 10, (Position) {
 		10, 10
 		});
 	Tile *map = init_map();
@@ -603,6 +641,7 @@ int main() {
 	while(!QUIT) {
 		main_renderer(player,  &monsters, map);
 		event_user(player, map);
+		update_entity(player, &monsters, map);
 		//SDL_Delay(10);
 		}
 
