@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +48,21 @@ typedef  float    f32;
 typedef  double   f64;
 
 #define rand_f64() (f64)rand()/(f64)RAND_MAX
+
+//DYNAMIC ARRAY
+#define DA_SIZE 256
+#define da_append(da, item)                                                              \
+	do {                                                                                 \
+		if ((da)->count >= (da)->capacity) {                                             \
+			(da)->capacity = (da)->capacity == 0 ? DA_SIZE : (da)->capacity*2;           \
+			(da)->items = realloc((da)->items, (da)->capacity*sizeof(*(da)->items));     \
+			assert((da)->items != NULL && "Realloc fail !!!");                           \
+			}                                                                                \
+		\
+		(da)->items[(da)->count++] = (item);                                             \
+		} while (0)
+
+
 
 
 //ERROR AND LOG HANDLING
@@ -140,6 +156,12 @@ typedef struct {
 	} Entitiy;
 
 typedef struct {
+	Entitiy *items;
+	u64 capacity;
+	u64 count;
+	} Entitiy_DA;
+
+typedef struct {
 	i32 width;
 	i32 height;
 	Position pos;
@@ -153,6 +175,15 @@ Entitiy* create_player(Position startPos) {
 	player->ch = '@';
 	return player;
 	}
+
+Entitiy* create_monster(Position startPos) {
+	Entitiy* monster = calloc(1, sizeof(Entitiy));
+	monster->pos.x = startPos.x;
+	monster->pos.y = startPos.y;
+	monster->ch = 'M';
+	return monster;
+	}
+
 
 
 void render_player(Entitiy *player) {
@@ -326,7 +357,7 @@ void caved_map(Tile *map, f64 percantage) {
 			if(rand_f64() < percantage) {
 				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x, y + 1) == '#') {
 					MAP_CH(map, x, y + 1) = '.';
-					MAP_ISW(map, x , y + 1) = SDL_TRUE;
+					MAP_ISW(map, x, y + 1) = SDL_TRUE;
 					caved_part(map, x, y);
 					}
 				}
@@ -341,7 +372,7 @@ void caved_map(Tile *map, f64 percantage) {
 		}
 	}
 
-	
+
 
 void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	i32 width, height, x, y, nRooms;
@@ -363,7 +394,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		rooms[i] = create_room(x, y, height, width);
 
 		add_room_to_map(map, rooms[i]);
-		//add_room_wall_to_map(map, rooms[i]);
+		add_room_wall_to_map(map, rooms[i]);
 		connect_room_centers(rooms[i-1].center, rooms[i].center, map);
 		}
 	/*
@@ -377,7 +408,9 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		}
 	//*/
 	//add_walls_around_roads(map);
-	caved_map(map, 0.40f);
+	f64 percantage = rand_f64() / 2.2f;
+	LOG("percantage of caved map %f", percantage);
+	caved_map(map, percantage);
 	free(rooms);
 	}
 
@@ -419,10 +452,30 @@ Tile* init_map() {
 	return map;
 	}
 
-void render_map(Tile *map) {
+
+
+
+#define PLAYER_VISION
+void render_map(Tile *map, Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10, 20, "ROUGE GAME", WHITE);
-	for(i32 y = 0; y < MAP_Y; y++) {
+	
+	/*
+	const i32 radius = 10;
+	i32 startX = player->pos.x - radius;
+	i32 startY = player->pos.y - radius;
+	i32 stopX  = player->pos.x + radius;
+	i32 stopY  = player->pos.y + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);
+	for(i32 y  = startY; y < stopY; y++) {
+		for(i32 x = startX; x < stopX; x++) {//*/
+
+	///*
+	for(i32 y  = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
+			//*/
 			i32 startX = x * FONT_W;
 			i32 startY = y * FONT_H;
 			char ch = MAP_CH(map, x, y);
@@ -435,80 +488,110 @@ void render_map(Tile *map) {
 				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 				SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
 				//SDL_RenderFillRect(RENDERER, &textRect);
-		}
-				else if(ch != '.') {
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
-					}
-
 				}
-			}
+			else if(ch != '.') {
+				Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
+				}
 
+			}
 		}
 
+	}
+
+void render_monsters(Entitiy_DA *monsters) {
+	for(u64 count = 0; count < monsters->count; count++) {
+		render_player(&monsters->items[count]);
+		}
+
+	}
 
 //static i32 asd = 0;
-	void main_renderer(Entitiy* player, Tile *map) {
-		SDL_ERR(SDL_RenderClear(RENDERER));
-		render_map(map);
-		render_player(player);
-		SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
-		SDL_RenderPresent(RENDERER);
-		}
+void main_renderer(Entitiy* player, Entitiy_DA *monster, Tile *map) {
+	SDL_ERR(SDL_RenderClear(RENDERER));
+	render_map(map, player);
+	render_player(player);
+	//render_player(&monster->items[0]);
+	render_monsters(monster);
+	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
+	SDL_RenderPresent(RENDERER);
+	}
 
-	void event_user(Entitiy *player, Tile* map) {
-		if(SDL_WaitEvent(&EVENT)) {
-			if(EVENT.type == SDL_QUIT) {
-				QUIT = 1;
+void event_user(Entitiy *player, Tile* map) {
+	if(SDL_WaitEvent(&EVENT)) {
+		if(EVENT.type == SDL_QUIT) {
+			QUIT = 1;
+			}
+		else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
+			SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
+			FONT_H = HEIGHT / MAP_Y + 1;
+			FONT_W = WIDTH  / MAP_X;
+			//FONT_H = 15;
+			//FONT_W = 10;
+			if(WIDTH > 4096 || HEIGHT > 2048) {
+				ASSERT("Oversized window\n");
 				}
-			else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
-				SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
-				FONT_H = HEIGHT / MAP_Y + 1;
-				FONT_W = WIDTH  / MAP_X;
-				//FONT_H = 15;
-				//FONT_W = 10;
-				if(WIDTH > 4096 || HEIGHT > 2048) {
-					ASSERT("Oversized window\n");
+			//LOG("width %d, height %d\n", WIDTH, HEIGHT);
+			}
+		else if(EVENT.type==SDL_KEYDOWN) {
+			player_input(&EVENT, player, map);
+			}
+		}
+	}
+
+
+void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
+	for(i32 y = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			if(MAP_CH(map, x, y) != '#') {
+				if(rand_f64() < 0.01f) {
+					Entitiy *temp = create_monster((Position) {
+						.x = x, .y = y
+						});
+					da_append(monsters, *temp);
 					}
-				//LOG("width %d, height %d\n", WIDTH, HEIGHT);
-				}
-			else if(EVENT.type==SDL_KEYDOWN) {
-				player_input(&EVENT, player, map);
 				}
 			}
 		}
-
+	}
 
 
 
 #define SEED 12344
 #include<time.h>
 
-	int main() {
+int main() {
 
 
-		SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
-		SDL_ERR(TTF_Init());
-		srand(time(0));
-		WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 800,  SDL_WINDOW_OPENGL);
-		(void*)P_SDL_ERR(WINDOW);
-		RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
-		SDL_SetWindowResizable(WINDOW, SDL_TRUE);
-		FONT = TTF_OpenFont(fontLoc, 64);
-		(void*)P_SDL_ERR(FONT);
-		(void*)P_SDL_ERR(RENDERER);
-		QUIT = 0;
+	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
+	SDL_ERR(TTF_Init());
+	srand(time(0));
+	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 800,  SDL_WINDOW_OPENGL);
+	(void*)P_SDL_ERR(WINDOW);
+	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
+	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
+	FONT = TTF_OpenFont(fontLoc, 64);
+	(void*)P_SDL_ERR(FONT);
+	(void*)P_SDL_ERR(RENDERER);
+	QUIT = 0;
 
-		Entitiy* player = create_player((Position) {
-			10, 10
-			});
-		Tile *map = init_map();
-		//MAP_STDOUT();
-		while(!QUIT) {
-			main_renderer(player, map);
-			event_user(player, map);
-			//SDL_Delay(10);
-			}
-
-		return 0;
-		ASSERT("UNREACHABLE");
+	Entitiy* player = create_player((Position) {
+		10, 10
+		});
+	Tile *map = init_map();
+	Entitiy_DA monsters = {0};
+	/*Entitiy *monster = create_player((Position) {
+		15, 15
+		});
+	da_append(&monsters, *monster);
+	//*/
+	genereate_monsters(&monsters, map);
+	//MAP_STDOUT();
+	while(!QUIT) {
+		main_renderer(player,  &monsters, map);
+		event_user(player, map);
+		//SDL_Delay(10);
 		}
+
+	return 0;
+	ASSERT("UNREACHABLE");
+	}
