@@ -32,7 +32,7 @@ const char* fontLoc = "assets/fonts/f.ttf";
 #define RIGHT_ARROW 1073741903
 #define UP_ARROW 1073741906
 #define DOWN_ARROW 1073741905
-
+#define SPACE 32
 //#include<pthread.h> TBD asychronus stuff
 
 //TYPES
@@ -89,8 +89,8 @@ void *P_SDL_ERR(void *ptr) {
 	return ptr;
 	}
 
-#define MAP_X 90
-#define MAP_Y 90
+#define MAP_X 100
+#define MAP_Y 100
 
 typedef struct Graphics_State {
 	SDL_Window   *window;
@@ -155,6 +155,7 @@ typedef struct {
 	Position pos;
 	SDL_Color color;
 	i32 radius;
+	i32 health;
 	char ch;
 	} Entitiy;
 
@@ -171,17 +172,41 @@ typedef struct {
 	Position center;
 	} Room;
 
-Entitiy* create_entity(char ch, i32 radius,Position startPos) {
+Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
 	Entitiy* entity = calloc(1, sizeof(Entitiy));
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
 	entity->ch = ch;
 	entity->radius = radius;
+	entity->health = health;
 	return entity;
 	}
 
 
+#define INF (f64)100000.0f
+#define ZERO 0.0f
+#define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
 
+
+void entity_attack(Entitiy *player, Entitiy* entity) {
+	entity->health--;
+	DROP(player);
+	//i32 x1 = player->pos.x;
+	//i32 y1 = player->pos.y;
+
+	//i32 x2 = entity->pos.x;
+	//i32 y2 = entity->pos.y;
+	//f64 distance = DISTANCE(x1, y1, x2, y2);
+	//if(distance == 0.0f) {
+	//	}
+	if(entity->health == 0) {
+		entity->ch = 'S';
+		}
+	}
+
+//void entity_death(Entitiy *entity){
+//
+//}
 
 
 
@@ -191,7 +216,23 @@ void render_player(Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, WHITE);
 	}
 
-void player_input(SDL_Event *event, Entitiy* player, Tile* map) {
+i32 is_monster_on_entity(i32 x, i32 y, Entitiy_DA* entities) {
+	CLAMP(x, 0, (MAP_X - 1));
+	CLAMP(y, 0, (MAP_Y - 1));
+	for(u64 count = 0; count < entities->count; count++) {
+		Entitiy entity = entities->items[count];
+		if(entity.ch == 'M' && entity.pos.x == x && entity.pos.y == y) {
+
+			entities->items[count] = entity;
+			//LOG("health %d, count %d", entity.health, count);
+			return count;
+			}
+		}
+	return -1;
+	}
+
+
+void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	MOVMENT = SDL_FALSE;  //NOT PROB
 	if(key == UP_ARROW) {
@@ -201,6 +242,13 @@ void player_input(SDL_Event *event, Entitiy* player, Tile* map) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_FALSE;
 			MOVMENT = SDL_TRUE;
 			}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y-1, entitis);
+			if(witchIsMonster != -1) {
+				entity_attack(player, &entitis->items[witchIsMonster]);
+				MOVMENT = SDL_TRUE;
+				}
+			}
 		}
 	else if(key == DOWN_ARROW) {
 		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_TRUE) {
@@ -209,6 +257,14 @@ void player_input(SDL_Event *event, Entitiy* player, Tile* map) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_FALSE;
 			MOVMENT = SDL_TRUE;
 			}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y + 1, entitis);
+			if(witchIsMonster != -1) {
+				entity_attack(player, &entitis->items[witchIsMonster]);
+				MOVMENT = SDL_TRUE;
+				}
+			}
+
 		}
 	else if(key == LEFT_ARROW) {
 		if(player->pos.x > 0 && MAP_ISW(map, player->pos.x-1, player->pos.y) == SDL_TRUE) {
@@ -217,14 +273,33 @@ void player_input(SDL_Event *event, Entitiy* player, Tile* map) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			MOVMENT = SDL_TRUE;
 			}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y, entitis);
+			if(witchIsMonster != -1) {
+				entity_attack(player, &entitis->items[witchIsMonster]);
+				MOVMENT = SDL_TRUE;
+				}
+			}
+
 		}
 	else if(key == RIGHT_ARROW) {
-		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x+1, player->pos.y) == SDL_TRUE) {
+		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x++;
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			MOVMENT = SDL_TRUE;
 			}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y, entitis);
+			if(witchIsMonster != -1) {
+				entity_attack(player, &entitis->items[witchIsMonster]);
+				MOVMENT = SDL_TRUE;
+				}
+			}
+		}
+	else if(key == SPACE) {
+		//DO NOTHING
+		MOVMENT = SDL_TRUE;
 		}
 	}
 
@@ -352,32 +427,38 @@ void caved_map(Tile *map, f64 percantage) {
 		for(i32 x = 1; x < MAP_X - 1; x++) {
 			if(rand_f64() < percantage) {
 
-				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x - 1, y) == '#') {
+				if(MAP_CH(map, x, y) == '.'  && MAP_CH(map, x - 1, y) == '#') {
 					MAP_CH(map, x - 1, y) = '.';
 					MAP_ISW(map, x - 1, y) = SDL_TRUE;
 					caved_part(map, x, y);
 					}
 				}
 			if(rand_f64() < percantage) {
-				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x + 1, y) == '#') {
+				if(MAP_CH(map, x, y) == '.'  && MAP_CH(map, x + 1, y) == '#') {
 					MAP_CH(map, x + 1, y) = '.';
 					MAP_ISW(map, x + 1, y) = SDL_TRUE;
 					caved_part(map, x, y);
 					}
 				}
 			if(rand_f64() < percantage) {
-				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x, y + 1) == '#') {
+				if(MAP_CH(map, x, y) == '.'  && MAP_CH(map, x, y + 1) == '#') {
 					MAP_CH(map, x, y + 1) = '.';
 					MAP_ISW(map, x, y + 1) = SDL_TRUE;
 					caved_part(map, x, y);
 					}
 				}
 			if(rand_f64() < percantage) {
-				if(MAP_CH(map, x, y) == '.' && MAP_CH(map, x, y - 1) == '#') {
+				if(MAP_CH(map, x, y) == '.'  && MAP_CH(map, x, y - 1) == '#') {
 					MAP_CH(map, x, y - 1) = '.';
 					MAP_ISW(map, x, y - 1) = SDL_TRUE;
 					caved_part(map, x, y);
 					}
+				}
+			//CAVED ROAD	
+			if(rand_f64() < percantage) {
+				if(MAP_CH(map, x, y) == ','){
+					caved_part(map, x, y);
+				}
 				}
 			}
 		}
@@ -545,7 +626,7 @@ void main_renderer(Entitiy* player, Entitiy_DA *monster, Tile *map) {
 	SDL_RenderPresent(RENDERER);
 	}
 
-void event_user(Entitiy *player, Tile* map) {
+void event_user(Entitiy *player, Entitiy_DA *entitis, Tile* map) {
 	MOVMENT = SDL_FALSE;
 	while(MOVMENT == SDL_FALSE) {
 		if(SDL_WaitEvent(&EVENT)) {
@@ -556,7 +637,7 @@ void event_user(Entitiy *player, Tile* map) {
 			else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
 				//MOVMENT = SDL_TRUE;
 				SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
-				FONT_H = HEIGHT / MAP_Y + 1;
+				FONT_H = HEIGHT / MAP_Y;
 				FONT_W = WIDTH  / MAP_X;
 				//FONT_H = 15;
 				//FONT_W = 10;
@@ -566,7 +647,7 @@ void event_user(Entitiy *player, Tile* map) {
 				//LOG("width %d, height %d\n", WIDTH, HEIGHT);
 				}
 			else if(EVENT.type==SDL_KEYDOWN) {
-				player_input(&EVENT, player, map);
+				player_input(&EVENT, player, entitis, map);
 				}
 			}
 		}
@@ -577,7 +658,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			if(MAP_CH(map, x, y) != '#') {
 				if(rand_f64() < 0.02f) {
-					Entitiy *temp = create_entity('M', 5, (Position) {
+					Entitiy *temp = create_entity('M', 5, 3, (Position) {
 						.x = x, .y = y
 						});
 					da_append(monsters, *temp);
@@ -588,13 +669,18 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	LOG("\nGenerated monsters %d\n", (i32)monsters->count);
 	}
 
-//BLOCK MOVMENT OF MONSTERS
+//BLOCK MOVMENT DEPENDING ON TYPE OF MONSTERS
 void block_movement(Entitiy_DA *entitys, Tile *map) {
 	for(u64 count = 0; count < entitys->count; count++) {
 		if(entitys->items[count].ch == 'M') {
 			i32 x = entitys->items[count].pos.x;
 			i32 y = entitys->items[count].pos.y;
 			MAP_ISW(map, x, y) = SDL_FALSE;
+			}
+		else if(entitys->items[count].ch == 'S') {
+			i32 x = entitys->items[count].pos.x;
+			i32 y = entitys->items[count].pos.y;
+			MAP_ISW(map, x, y) = SDL_TRUE;
 			}
 		}
 	}
@@ -637,9 +723,7 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy*  ent) {
 	return SDL_TRUE;
 	}
 
-#define INF (f64)100000.0f
-#define ZERO 0.0f
-#define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
+
 f64 distnace_move(i32 x1, i32 y1, i32 x2, i32 y2, Tile *map) {
 	CLAMP(x2, 0, MAP_X-1);
 	CLAMP(y2, 0, MAP_Y-1);
@@ -766,12 +850,12 @@ int main() {
 	(void*)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
 	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
-	FONT = TTF_OpenFont(fontLoc, 64);
+	FONT = TTF_OpenFont(fontLoc, 128);
 	(void*)P_SDL_ERR(FONT);
 	(void*)P_SDL_ERR(RENDERER);
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
-	Entitiy* player = create_entity('@', 10, (Position) {
+	Entitiy* player = create_entity('@', 10, 100, (Position) {
 		10, 10
 		});
 	Tile *map = init_map();
@@ -787,7 +871,7 @@ int main() {
 	//MAP_STDOUT();
 	while(!QUIT) {
 		main_renderer(player,  &monsters, map);
-		event_user(player, map);
+		event_user(player, &monsters, map);
 		update_entity(player, &monsters, map);
 		//SDL_Delay(10);
 		}
