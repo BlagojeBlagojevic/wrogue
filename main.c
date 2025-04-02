@@ -188,7 +188,7 @@ Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
 #define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
 
 
-void entity_attack(Entitiy *player, Entitiy* entity) {
+void player_attack(Entitiy *player, Entitiy* entity) {
 	entity->health--;
 	DROP(player);
 	//i32 x1 = player->pos.x;
@@ -204,16 +204,34 @@ void entity_attack(Entitiy *player, Entitiy* entity) {
 		}
 	}
 
-//void entity_death(Entitiy *entity){
-//
-//}
+void monster_attack(Entitiy *player, Entitiy* entity){
+	DROP(entity);
+	player->health--;
+	if(player->health == 0){
+		system("cls");
+		exit(-1);
+	}
+}
 
 
 
 void render_player(Entitiy *player) {
 	i32 startX = player->pos.x * FONT_W;
 	i32 startY = player->pos.y * FONT_H;
-	Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, WHITE);
+	SDL_Color color;
+	if(player->health >= 3){
+		color = (SDL_Color){255, 255, 255, 0};
+	}
+	else if(player->health == 2){
+		color = (SDL_Color){255, 125, 125, 0};
+	}
+	else if(player->health == 1){
+		color = (SDL_Color){255, 0, 0, 0};
+	}
+	else{
+		color = (SDL_Color){0, 255, 0, 0};
+	}
+	Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	}
 
 i32 is_monster_on_entity(i32 x, i32 y, Entitiy_DA* entities) {
@@ -245,7 +263,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y-1, entitis);
 			if(witchIsMonster != -1) {
-				entity_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster]);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -260,7 +278,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
-				entity_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster]);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -276,7 +294,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
-				entity_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster]);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -292,7 +310,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
-				entity_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster]);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -455,7 +473,7 @@ void caved_map(Tile *map, f64 percantage) {
 					}
 				}
 			//CAVED ROAD	
-			if(rand_f64() < percantage) {
+			if(rand_f64() < 0.1f) {
 				if(MAP_CH(map, x, y) == ','){
 					caved_part(map, x, y);
 				}
@@ -471,7 +489,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	if(minRooms >= maxRooms) {
 		ASSERT("We have a larger amount of minRooms >= maxRooms");
 		}
-	nRooms = (i32)(rand()%(u32)(maxRooms)) + minRooms;
+	nRooms = (i32)(rand()%(u32)(maxRooms - minRooms)) + minRooms;
 
 	//nRooms = 5;
 	Room *rooms = calloc(nRooms, sizeof(Room));
@@ -554,7 +572,7 @@ void render_map(Tile *map, Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10, 20, "ROUGE GAME", WHITE);
 
 
-	const i32 radius = 5;
+	i32 radius = player->radius;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
 	i32 stopX  = player->pos.x + radius;
@@ -563,13 +581,16 @@ void render_map(Tile *map, Entitiy *player) {
 	CLAMP(stopX,  0, MAP_X-1);
 	CLAMP(startY, 0, MAP_Y-1);
 	CLAMP(stopY,  0, MAP_Y-1);
-	/*
+	///*
+#ifdef PLAYER_VISION
 	for(i32 y  = startY; y < stopY; y++) {
 		for(i32 x = startX; x < stopX; x++) {//*/
-
+#endif
 	///*
+#ifndef PLAYER_VISION
 	for(i32 y  = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
+#endif
 			//*/
 			i32 startX = x * FONT_W;
 			i32 startY = y * FONT_H;
@@ -596,7 +617,7 @@ void render_map(Tile *map, Entitiy *player) {
 
 void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
 
-	const i32 radius = 5;
+	i32 radius = player->radius;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
 	i32 stopX  = player->pos.x + radius;
@@ -657,7 +678,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			if(MAP_CH(map, x, y) != '#') {
-				if(rand_f64() < 0.02f) {
+				if(rand_f64() < 0.03f) {
 					Entitiy *temp = create_entity('M', 5, 3, (Position) {
 						.x = x, .y = y
 						});
@@ -768,8 +789,11 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 	if(distance < distancesMin) {
 		distancesMin = distance;
 		index = 3;
-		}
-	//LOG("Distance %f\n", distancesMin);
+		}     
+	if(distancesMin == 0){
+		monster_attack(player, ent);
+		return;
+	}
 	switch(index) {
 		case 0: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
