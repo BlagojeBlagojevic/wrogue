@@ -163,12 +163,29 @@ typedef struct {
 #define MAP_ISW(map, x, y)  map[((x) % MAP_X) + ((y) % MAP_Y) * MAP_X].isWall
 
 
+typedef enum {
+	DAMAGE_BASIC,
+	DAMAGE_FIRE,
+	DAMAGE_POISON,
+	DAMAGE_NUM,
+
+	} Damage_Types;
+
+const char* damageStr[] = {
+	"BASIC",
+	"FIRE",
+	"POISON",
+	"NUM",
+	};
+
 typedef struct {
 	Position pos;
 	SDL_Color color;
 	i32 radius;
 	i32 health;
 	char ch;
+	i32 attack[DAMAGE_NUM];
+	i32 defence[DAMAGE_NUM];
 	} Entitiy;
 
 typedef struct {
@@ -191,6 +208,14 @@ Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
 	entity->ch = ch;
 	entity->radius = radius;
 	entity->health = health;
+	for(Damage_Types i = 0; i < DAMAGE_NUM; i++) {
+		//TBD other types; for now just rand
+		i32 random = rand()%5 + 1; //LIKE 6 DICES
+		//LOG("%d", random);
+		//system("pause");
+		entity->attack[i] = random; //DAMAGE MAX
+		entity->defence[i] = random + 1; //DAMAGE REDUCTION
+		}
 	return entity;
 	}
 
@@ -199,10 +224,78 @@ Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
 #define ZERO 0.0f
 #define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
 
+i32 roll_the_dice(i32 attack, i32 defence) {
+	f64 maxAttack = 0.0f, maxDefence = 0.0f, num;
+	//ATTACK
+	for(i32 i = 0; i < attack; i++) {
+		num = rand_f64();
+
+		if(num > maxAttack) {
+			maxAttack = num;
+			}
+		}
+	//DEFENCE
+	for(i32 i = 0; i < defence; i++) {
+		num = rand_f64();
+
+		if(num > maxDefence) {
+			maxDefence = num;
+			}
+		}
+
+	if(maxDefence > maxAttack) {
+		return 0;
+		}
+
+	i32 diff = (i32)((maxAttack - maxDefence) * attack);
+	CLAMP(diff, 1, INF);
+	return diff;
+	}
+
+///TBD reusable
+void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage) {
+	DROP(player);
+	u64 len = strlen("Player attacked by monster %c damage %d") + 10;
+	char* attackText = malloc(len*sizeof(char*));
+	memset(attackText, '\0', len);
+	if(attackText == NULL) {
+		ASSERT("CALLOC FAILED\n");
+		}
+	i32 err = snprintf(attackText, len, "Player attacked by monster %c damage %d", entity->ch, damage);
+	if(err < -1) {
+		ASSERT("snprintf failed");
+		}
+	//LOG("%s\n", attackText);
+	da_append(&MESSAGES, attackText);
+	//add_to_str(attackText, &MESSAGES);
+	//Text_Renderer_C(RENDERER, FONT, WIDTH - 100, HEIGHT - 100, 100, 20, "Da li ovo radi", WHITE);
+	}
+
+void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
+	DROP(player);
+	u64 len = strlen("Monster attacked by player %c damage %d") + 10;
+	char* attackText = malloc(len*sizeof(char*));
+	memset(attackText, '\0', len);
+	if(attackText == NULL) {
+		ASSERT("CALLOC FAILED\n");
+		}
+	i32 err = snprintf(attackText, len, "Monster attacked by player %c damage %d", entity->ch, damage);
+	if(err < -1) {
+		ASSERT("snprintf failed");
+		}
+	//LOG("%s\n", attackText);
+	da_append(&MESSAGES, attackText);
+	//add_to_str(attackText, &MESSAGES);
+	//Text_Renderer_C(RENDERER, FONT, WIDTH - 100, HEIGHT - 100, 100, 20, "Da li ovo radi", WHITE);
+	}
+
 
 void player_attack(Entitiy *player, Entitiy* entity) {
-	entity->health--;
-	DROP(player);
+	i32 damage = roll_the_dice(player->attack[0], entity->defence[0]);
+	entity->health-=damage;
+	CLAMP(entity->health, 0, 100);
+	message_attacked_by_player(player, entity, damage);
+	//DROP(player);
 	//i32 x1 = player->pos.x;
 	//i32 y1 = player->pos.y;
 
@@ -216,29 +309,16 @@ void player_attack(Entitiy *player, Entitiy* entity) {
 		}
 	}
 
-void message_attacked(Entitiy* player, Entitiy* entity) {
-	DROP(player);
-	u64 len = strlen("Player attacked by monster %c(%d, %d)") + 10;
-	char* attackText = malloc(len*sizeof(char*));
-	memset(attackText, '\0', len);
-	if(attackText == NULL) {
-		ASSERT("CALLOC FAILED\n");
-		}
-	i32 err = snprintf(attackText, len, "Player attacked by monster %c(%d, %d)", entity->ch, entity->pos.x, entity->pos.y);
-	if(err < -1) {
-		ASSERT("snprintf failed");
-		}
-	//LOG("%s\n", attackText);
-	da_append(&MESSAGES, attackText);
-	//add_to_str(attackText, &MESSAGES);
-	//Text_Renderer_C(RENDERER, FONT, WIDTH - 100, HEIGHT - 100, 100, 20, "Da li ovo radi", WHITE);
-	}
+
 
 void monster_attack(Entitiy *player, Entitiy* entity) {
-	DROP(entity);
-	player->health--;
+	//DROP(entity);
+	i32 damage = roll_the_dice(entity->attack[0], player->defence[0]);
+
+	player->health-=damage;
+	CLAMP(player->health, 0, INF);
 	//i32 startX =  player->pos.x;
-	message_attacked(player, entity);
+	message_attacked_by_monster(player, entity, damage);
 	//system("pause");
 	//Text_Renderer_C(RENDERER, FONT, )
 	if(player->health == 0) {
@@ -665,6 +745,15 @@ void render_map(Tile *map, Entitiy *player) {
 			char stats[1024];
 			snprintf(stats, 1024, "STATS: Health %d", player->health);
 			Text_Renderer_C(RENDERER, FONT, 15, HEIGHT - 100, strlen(stats) * FONT_W, 20, stats, WHITE);
+			snprintf(stats, 1024, "STATS: Health %d", player->health);
+			Text_Renderer_C(RENDERER, FONT, 15, HEIGHT - 100, strlen(stats) * FONT_W, FONT_W_MESSAGES, stats, WHITE);
+			for(Damage_Types i = 0; i < DAMAGE_NUM; i++) {
+				stats[0] = '\0';
+				snprintf(stats, 1024, "STATS: %s att: %d def: %d", damageStr[i], player->attack[i], player->defence[i]);
+				Text_Renderer_C(RENDERER, FONT, 15, HEIGHT - 100 + FONT_W_MESSAGES*(i+1), strlen(stats) * FONT_W,
+				                FONT_W_MESSAGES, stats, WHITE);
+				}
+
 			}
 
 		void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
@@ -706,9 +795,9 @@ void render_map(Tile *map, Entitiy *player) {
 			render_monsters(monster, player);
 			render_stats(player);
 			i32 count = 1;
-			for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - 5); i--){
-				render_messages((WIDTH - 600), (HEIGHT - 200 + FONT_W_MESSAGES*(count++)), MESSAGES.items[i]);
-			}
+			for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - 5); i--) {
+				render_messages((WIDTH - 600), (HEIGHT - 120 + FONT_W_MESSAGES*(count++)), MESSAGES.items[i]);
+				}
 
 			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
 			SDL_RenderPresent(RENDERER);
@@ -864,28 +953,28 @@ void render_map(Tile *map, Entitiy *player) {
 			switch(index) {
 				case 0: {
 						if(distancesMin < INF && distancesMin != 0.0f) {
-							LOG("X++\n");
+							//LOG("X++\n");
 							ent->pos.x = ent->pos.x + 1;
 							}
 						break;
 						}
 				case 1: {
 						if(distancesMin < INF && distancesMin != 0.0f) {
-							LOG("X--\n");
+							//LOG("X--\n");
 							ent->pos.x--;
 							}
 						break;
 						}
 				case 2: {
 						if(distancesMin < INF && distancesMin != 0.0f) {
-							LOG("Y++\n");
+							//LOG("Y++\n");
 							ent->pos.y++;
 							}
 						break;
 						}
 				case 3: {
 						if(distancesMin < INF && distancesMin != 0.0f) {
-							LOG("Y--\n");
+							//LOG("Y--\n");
 							ent->pos.y--;
 							}
 						break;
@@ -906,11 +995,12 @@ void render_map(Tile *map, Entitiy *player) {
 //IF NOT RAND MOV DEPENDING ON TYPE OR PROB
 		void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			i32 co = 0;
+			DROP(co);
 			for(u64 count = 0; count < entitys->count; count++) {
 				Entitiy entity = entitys->items[count];
 				if(entity.ch == 'M' && rand_f64() < 1.5f) {
 					if(check_colison_entitiy(player, &entity) == SDL_TRUE) {
-						co++;
+						//co++;
 						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 						make_best_move(player, &entity, map);
 						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
@@ -918,7 +1008,7 @@ void render_map(Tile *map, Entitiy *player) {
 						}
 					}
 				}
-			LOG("Colided entitys %d\n", co);
+			//LOG("Colided entitys %d\n", co);
 			}
 
 		void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
@@ -949,11 +1039,12 @@ void render_map(Tile *map, Entitiy *player) {
 			Entitiy* player = create_entity('@', 5, 100, (Position) {
 				10, 10
 				});
+				player->attack[0] = 9;
 			Tile *map = init_map();
 			Entitiy_DA monsters = {0};
-			for(i32 i = 0; i < 5; i++){
+			for(i32 i = 0; i < 5; i++) {
 				da_append(&MESSAGES, "   ");
-			}
+				}
 			/*Entitiy *monster = create_player((Position) {
 				15, 15
 				});
