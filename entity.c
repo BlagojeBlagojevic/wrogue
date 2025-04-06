@@ -2,19 +2,22 @@
 
 Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
 	Entitiy* entity = calloc(1, sizeof(Entitiy));
+
+	if(ch != '@') {
+		for(Monster_Types m = 0; m < NUM_MONSTER; m++) {
+			if(ch == monsterName[m]) {
+				memcpy(entity, &monsters[m], sizeof(Entitiy));
+				}
+			}
+		}
+	else {
+		entity->ch = ch;
+		entity->radius = radius;
+		}
+
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
-	entity->ch = ch;
-	entity->radius = radius;
 	entity->health = health;
-	for(Damage_Types i = 0; i < DAMAGE_NUM; i++) {
-		//TBD other types; for now just rand
-		i32 random = rand()%5 + 1; //LIKE 6 DICES
-		//LOG("%d", random);
-		//system("pause");
-		entity->attack[i] = random; //DAMAGE MAX
-		entity->defence[i] = random + 1; //DAMAGE REDUCTION
-		}
 	return entity;
 	}
 
@@ -49,15 +52,15 @@ i32 roll_the_dice(i32 attack, i32 defence) {
 	}
 
 ///TBD reusable
-void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage) {
+void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, Damage_Types type) {
 	DROP(player);
-	u64 len = strlen("Player attacked by x damage (xxxxx)") + 10;//LAGER
+	u64 len = 100;
 	char* attackText = malloc(len*sizeof(char*));
 	memset(attackText, '\0', len);
 	if(attackText == NULL) {
 		ASSERT("CALLOC FAILED\n");
 		}
-	i32 err = snprintf(attackText, len, "Player attacked by %c  damage (%d)", entity->ch, damage);
+	i32 err = snprintf(attackText, len, "You are attacked by %c %s (-%d)", entity->ch, damageStr[type], damage);
 	if(err < -1) {
 		ASSERT("snprintf failed");
 		}
@@ -70,13 +73,13 @@ void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage) {
 void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 	DROP(player);
 	DROP(damageStr);
-	u64 len = strlen("x attacked by player damage xxxx") + 10;
+	u64 len = strlen("x attacked by you damage (xxxx)") + 10;
 	char* attackText = malloc(len*sizeof(char*));
 	memset(attackText, '\0', len);
 	if(attackText == NULL) {
 		ASSERT("CALLOC FAILED\n");
 		}
-	i32 err = snprintf(attackText, len, "%c attacked by player damage %d", entity->ch, damage);
+	i32 err = snprintf(attackText, len, "%c attacked by you damage (%d)", entity->ch, damage);
 	if(err < -1) {
 		ASSERT("snprintf failed");
 		}
@@ -88,6 +91,7 @@ void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 
 //TBD attack type
 void player_attack(Entitiy *player, Entitiy* entity) {
+
 	i32 damage = roll_the_dice(player->attack[0], entity->defence[0]);
 	entity->health-=damage;
 	CLAMP(entity->health, 0, 100);
@@ -109,14 +113,47 @@ void player_attack(Entitiy *player, Entitiy* entity) {
 
 //TBD attack type(Monsters prob always use a higest stats for attack
 //TBD range attack type aka fire attack
-void monster_attack(Entitiy *player, Entitiy* entity) {
+void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//DROP(entity);
-	i32 damage = roll_the_dice(entity->attack[0], player->defence[0]);
+	i32 damage = 0;
+	if(distance != 0) {
+		if(distance >= DISTANCE_RANGE_ATTACK_MIN && distance <= DISTANCE_RANGE_ATTACK_MAX) {
+			if(entity->attack[DAMAGE_RANGE] > entity->attack[DAMAGE_SPELL]) {
+				damage = roll_the_dice(entity->attack[DAMAGE_RANGE], player->defence[DAMAGE_RANGE]);
+				if(entity->attack[DAMAGE_RANGE] != 0) {
+					message_attacked_by_monster(player, entity, damage, DAMAGE_RANGE);
+					}
+
+				}
+			else {
+				damage = roll_the_dice(entity->attack[DAMAGE_SPELL], player->defence[DAMAGE_SPELL]);
+				if(entity->attack[DAMAGE_SPELL] != 0) {
+					message_attacked_by_monster(player, entity, damage, DAMAGE_SPELL);
+					}
+
+				}
+			}
+		}
+	else {
+		if(entity->attack[DAMAGE_BASIC] > entity->attack[DAMAGE_POISON]) {
+			damage = roll_the_dice(entity->attack[DAMAGE_BASIC], player->defence[DAMAGE_BASIC]);
+			message_attacked_by_monster(player, entity, damage, DAMAGE_BASIC);
+			}
+		else {
+			damage = roll_the_dice(entity->attack[DAMAGE_POISON], player->defence[DAMAGE_POISON]);
+			if(damage != 0) {
+				message_attacked_by_monster(player, entity, damage, DAMAGE_POISON);
+				}
+
+			}
+		}
+
+
 
 	player->health-=damage;
 	CLAMP(player->health, 0, INF);
 	//i32 startX =  player->pos.x;
-	message_attacked_by_monster(player, entity, damage);
+
 	//system("pause");
 	//Text_Renderer_C(RENDERER, FONT, )
 	if(player->health == 0) {
@@ -127,12 +164,119 @@ void monster_attack(Entitiy *player, Entitiy* entity) {
 		}
 	}
 
+void monster_definitions_export() {
+
+
+	//PROB THRU FILE OR SOMTHING
+	//FOR NOW LET BE IN CODE
+	//BASIC MONSTER
+	//ATT
+	monsters[BASIC_MONSTER].radius = 10;
+	monsters[BASIC_MONSTER].ch = 'M';
+	monsters[BASIC_MONSTER].attack[DAMAGE_BASIC]  = 3;
+	monsters[BASIC_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[BASIC_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[BASIC_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[BASIC_MONSTER].defence[DAMAGE_BASIC]  = 3;
+	monsters[BASIC_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[BASIC_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[BASIC_MONSTER].defence[DAMAGE_SPELL]  = 1;
+
+	//ZOMBIE MONSTER
+	//ATT
+
+	monsters[ZOMBIE_MONSTER].radius = 50;
+	monsters[ZOMBIE_MONSTER].ch = 'Z';
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_POISON] = 4;
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_BASIC]  = 3;
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_POISON] = 3;
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_SPELL]  = 3;
+
+	//WIZARD MONSTER
+	//ATT
+	monsters[WIZARD_MONSTER].radius = 20;
+	monsters[WIZARD_MONSTER].ch = 'W';
+	monsters[WIZARD_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[WIZARD_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[WIZARD_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[WIZARD_MONSTER].attack[DAMAGE_SPELL]  = 4;
+	//DEF
+	monsters[WIZARD_MONSTER].defence[DAMAGE_BASIC]  = 1;
+	monsters[WIZARD_MONSTER].defence[DAMAGE_POISON] = 3;
+	monsters[WIZARD_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[WIZARD_MONSTER].defence[DAMAGE_SPELL]  = 5;
+
+	//BEAR MONSTER
+	//ATT
+
+	monsters[BEAR_MONSTER].radius = 20;
+	monsters[BEAR_MONSTER].ch = 'B';
+	monsters[BEAR_MONSTER].attack[DAMAGE_BASIC]  = 4;
+	monsters[BEAR_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[BEAR_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[BEAR_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[BEAR_MONSTER].defence[DAMAGE_BASIC]  = 4;
+	monsters[BEAR_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[BEAR_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[BEAR_MONSTER].defence[DAMAGE_SPELL]  = 1;
+
+	//CROW MONSTER
+	//ATT
+	monsters[CROW_MONSTER].radius = 20;
+	monsters[CROW_MONSTER].ch = 'C';
+	monsters[CROW_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[CROW_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[CROW_MONSTER].attack[DAMAGE_RANGE]  = 4;
+	monsters[CROW_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[CROW_MONSTER].defence[DAMAGE_BASIC]  = 6;
+	monsters[CROW_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[CROW_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[CROW_MONSTER].defence[DAMAGE_SPELL]  = 1;
+
+	//DEMON MONSTER
+	//ATT
+	monsters[DEMON_MONSTER].radius = 20;
+	monsters[DEMON_MONSTER].ch = 'D';
+	monsters[DEMON_MONSTER].attack[DAMAGE_BASIC]  = 3;
+	monsters[DEMON_MONSTER].attack[DAMAGE_POISON] = 3;
+	monsters[DEMON_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[DEMON_MONSTER].attack[DAMAGE_SPELL]  = 5;
+	//DEF
+	monsters[DEMON_MONSTER].defence[DAMAGE_BASIC]  = 4;
+	monsters[DEMON_MONSTER].defence[DAMAGE_POISON] = 6;
+	monsters[DEMON_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[DEMON_MONSTER].defence[DAMAGE_SPELL]  = 3;
+
+	//GHOST MONSTER
+	//ATT
+	monsters[GHOST_MONSTER].radius = 20;
+	monsters[GHOST_MONSTER].ch = 'G';
+	monsters[GHOST_MONSTER].attack[DAMAGE_BASIC]  = 3;
+	monsters[GHOST_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[GHOST_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[GHOST_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[GHOST_MONSTER].defence[DAMAGE_BASIC]  = 4;
+	monsters[GHOST_MONSTER].defence[DAMAGE_POISON] = 6;
+	monsters[GHOST_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[GHOST_MONSTER].defence[DAMAGE_SPELL]  = 3;
+	//return monsters;
+	}
+
 
 void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			if(MAP_CH(map, x, y) != '#') {
-				if(rand_f64() < 0.03f) {
+				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%NUM_MONSTER;
 					i32 vison = rand()%40+1;
 					Entitiy *temp = create_entity(monsterName[type], vison, 3, (Position) {
@@ -245,6 +389,79 @@ f64 distnace_move(i32 x1, i32 y1, i32 x2, i32 y2, Tile *map) {
 	//system("pause");
 	return INF;
 	}
+void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
+	i32 x1 = player->pos.x;
+	i32 y1 = player->pos.y;
+	i32 x2 = ent->pos.x;
+	i32 y2 = ent->pos.y;
+	f64 distance  = DISTANCE(x1, y1, x2, y2);
+
+	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
+
+	//+1x
+	f64 distancesMax = distnace_move(x1, y1, (x2 + 1), y2, map);
+	if(distancesMax == INF) {
+		distancesMax = 0.0f;
+		}
+	i32 index = 0;
+	//-1x
+	distance = distnace_move(x1, y1, (x2 - 1), y2, map);
+	if(distance > distancesMax  && distance != INF) {
+		distancesMax = distance;
+		index = 1;
+		}
+	//+1y
+	distance = distnace_move(x1, y1, x2, (y2 + 1), map);
+	if(distance > distancesMax && distance != INF) {
+		distancesMax = distance;
+		index = 2;
+		}
+	//-1y
+	distance = distnace_move(x1, y1, x2, (y2  - 1), map);
+	if(distance > distancesMax  && distance != INF) {
+		distancesMax = distance;
+		index = 3;
+		}
+
+	switch(index) {
+		case 0: {
+				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN && distancesMax != INF) {
+					//LOG("X++\n");
+					ent->pos.x = ent->pos.x + 1;
+					}
+				break;
+				}
+
+		case 1: {
+				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
+					//LOG("X--\n");
+					ent->pos.x--;
+					}
+				break;
+				}
+		case 2: {
+				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
+					//LOG("Y++\n");
+					ent->pos.y++;
+					}
+				break;
+				}
+		case 3: {
+				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
+					//LOG("Y--\n");
+					ent->pos.y--;
+					}
+				break;
+				}
+		default: {
+				ASSERT("Unreachable");
+				break;
+				}
+		}
+
+
+
+	}
 //WE WILL SEE IF A* or Diakstra or This CRAP
 void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 	i32 x1 = player->pos.x;
@@ -276,9 +493,32 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 		distancesMin = distance;
 		index = 3;
 		}
-	if(distancesMin == 0) {
-		monster_attack(player, ent);
-		return;
+	if(distancesMin >= 0 && distancesMin <= DISTANCE_RANGE_ATTACK_MAX) {
+		monster_attack(player, ent, distancesMin);
+		//return;
+		}
+	switch(ent->ch) {
+		case 'W': {
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					return;
+					break;
+					}
+				}
+		case 'C': {
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					return;
+					break;
+					}
+				}
+		case 'D': {
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					return;
+					break;
+					}
+			default: {
+					break;
+					}
+				}
 		}
 	switch(index) {
 		case 0: {
@@ -288,6 +528,7 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				break;
 				}
+
 		case 1: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
 					//LOG("X--\n");
@@ -315,10 +556,6 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 				}
 		}
 
-
-
-
-	//system("pause");
 	}
 
 //IF IN VISON FIELD MOVE TOWARDS PLAYER
@@ -328,13 +565,30 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	DROP(co);
 	for(u64 count = 0; count < entitys->count; count++) {
 		Entitiy entity = entitys->items[count];
-		if(Is_Monster(entity.ch) && rand_f64() < 1.5f) {
+		if(Is_Monster(entity.ch)) {
 			if(check_colison_entitiy(player, &entity) == SDL_TRUE) {
 				//co++;
-				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-				make_best_move(player, &entity, map);
-				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-				entitys->items[count] = entity;
+				if(entity.health == 1 && rand_f64() <= PERCANTAGE_RUN_CHANCE) {
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+					make_run_move(player, &entity, map);
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+					entitys->items[count] = entity;
+					}
+				else if(entity.ch == 'C' && rand_f64() <= PERCANTAGE_CROW_RUN_CHANCE) {
+					f64 distance = DISTANCE(player->pos.x, player->pos.y, entity.pos.x, entity.pos.y);
+					if(distance >= DISTANCE_RANGE_ATTACK_MIN && distance <= DISTANCE_RANGE_ATTACK_MAX) {
+						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+						make_run_move(player, &entity, map);
+						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+						entitys->items[count] = entity;
+						}
+					}
+				else {
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+					make_best_move(player, &entity, map);
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+					entitys->items[count] = entity;
+					}
 				}
 			}
 		}
