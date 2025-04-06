@@ -32,11 +32,6 @@ void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 sta
 	}
 
 
-
-
-
-
-
 void render_player(Entitiy *player) {
 	i32 startX = player->pos.x * FONT_W;
 	i32 startY = player->pos.y * FONT_H;
@@ -156,6 +151,7 @@ void render_stats(Entitiy *player) {
 void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
 	DROP(damageStr);
 	DROP(monsterName);
+	DROP(monsters[BASIC_MONSTER]);
 	i32 radius = player->radius;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
@@ -197,12 +193,12 @@ void render_map(Tile *map, Entitiy *player) {
 	CLAMP(stopX,  0, MAP_X-1);
 	CLAMP(startY, 0, MAP_Y-1);
 	CLAMP(stopY,  0, MAP_Y-1);
-	///*
+
 #ifdef PLAYER_VISION
 	for(i32 y  = startY; y < stopY; y++) {
 		for(i32 x = startX; x < stopX; x++) {//*/
 #endif
-			///*
+
 #ifndef PLAYER_VISION
 			for(i32 y  = 0; y < MAP_Y; y++) {
 				for(i32 x = 0; x < MAP_X; x++) {
@@ -225,6 +221,7 @@ void render_map(Tile *map, Entitiy *player) {
 					else if(ch != '.') {
 						Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
 						}
+
 
 					}
 				}
