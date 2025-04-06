@@ -128,8 +128,12 @@ typedef struct {
 #define INF (f64)100000.0f
 #define ZERO 0.0f
 #define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
+#define DISTANCE_RANGE_ATTACK_MAX 3.0f
+#define DISTANCE_RANGE_ATTACK_MIN 1.1f
 
-
+#define PERCANTAGE_RUN_CHANCE 0.3f
+#define PERCANTAGE_CROW_RUN_CHANCE 0.5f
+#define PERCENTAGE_MONSTER_GENERATED 0.02f
 
 
 #endif
