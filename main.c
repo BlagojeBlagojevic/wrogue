@@ -9,8 +9,10 @@ int main() {
 
 	DROP(damageStr);
 	DROP(monsterName);
+	DROP(monsters);
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
+	monster_definitions_export();
 	srand(time(0));
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1400, 800,  SDL_WINDOW_OPENGL);
 	(void*)P_SDL_ERR(WINDOW);
@@ -24,7 +26,14 @@ int main() {
 	Entitiy* player = create_entity('@', 5, 100, (Position) {
 		10, 10
 		});
-	player->attack[0] = 9;
+	player->attack[0]  = 5;
+  player->defence[0] = 5; 
+  player->attack[1]  = 9;
+  player->defence[1] = 5;
+  player->attack[2]  = 9;
+  player->defence[2] = 5;
+  player->attack[3]  = 9;
+  player->defence[3] = 5;
 	Tile *map = init_map();
 	Entitiy_DA monsters = {0};
 	for(i32 i = 0; i < 5; i++) {
