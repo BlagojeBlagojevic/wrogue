@@ -16,7 +16,7 @@ void *P_SDL_ERR(void *ptr) {
 
 
 
-void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 startY, i32 w_c, i32 h_c, char *c, SDL_Color textColor) {
+void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 startY, i32 w_c, i32 h_c, const char *c, SDL_Color textColor) {
 	if(renderer == NULL) {
 		ASSERT("renderer is null!!!");
 		}
@@ -61,7 +61,7 @@ void render_player(Entitiy *player) {
 
 
 
-void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* map) {
+void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	MOVMENT = SDL_FALSE;  //NOT PROB
 	if(key == UP_ARROW) {
@@ -74,7 +74,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y-1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -89,7 +89,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -105,7 +105,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -121,7 +121,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster]);
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -130,20 +130,40 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Tile* 
 		//DO NOTHING
 		MOVMENT = SDL_TRUE;
 		}
+	else if(key == KEY_I) {
+		//DO NOTHING
+		if(ITEMSREND == SDL_FALSE) {
+			char* msg = "You decided to look a items on flor.";
+			da_append(&MESSAGES, msg);
+			}
+		if(ITEMSREND == SDL_TRUE) {
+			char* msg = "Items nah!!!";
+			da_append(&MESSAGES, msg);
+			}
+		ITEMSREND = !ITEMSREND;
+		MOVMENT = SDL_TRUE;
+		}
+	else if(key == KEY_P) {
+		PICKITEM = SDL_TRUE;
+		MOVMENT = SDL_TRUE;
+		}
 	}
 
 
 void render_stats(Entitiy *player) {
 	char stats[1024];
+	i32 startX = MAP_X * FONT_W + 10;
+	i32 startY = HEIGHT - 100;
+	SDL_Rect temp = {startX-3, startY, 600, 150};
+	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
+	SDL_RenderFillRect(RENDERER, &temp);
 	snprintf(stats, 1024, "STATS: Health %d", player->health);
-	Text_Renderer_C(RENDERER, FONT, 15, HEIGHT - 100, strlen(stats) * FONT_W, 20, stats, WHITE);
-	snprintf(stats, 1024, "STATS: Health %d", player->health);
-	Text_Renderer_C(RENDERER, FONT, 15, HEIGHT - 100, strlen(stats) * FONT_W, FONT_W_MESSAGES, stats, WHITE);
+	Text_Renderer_C(RENDERER, FONT,startX, startY, strlen(stats) * FONT_W, 20, stats, WHITE);
 	for(Damage_Types i = 0; i < DAMAGE_NUM; i++) {
 		stats[0] = '\0';
 		snprintf(stats, 1024, "STATS: %s att: %d def: %d", damageStr[i], player->attack[i], player->defence[i]);
-		Text_Renderer_C(RENDERER, FONT, 15, HEIGHT - 100 + FONT_W_MESSAGES*(i+1), strlen(stats) * FONT_W,
-		                FONT_W_MESSAGES, stats, WHITE);
+		Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), strlen(stats) * FONT_W,
+		                FONT_H_MESSAGES, stats, WHITE);
 		}
 
 	}
@@ -179,9 +199,62 @@ void render_messages(i32 startX, i32 startY, char* message) {
 
 	}
 
+void render_item(Item* item, Tile* map) {
+	i32 x = item->pos.x;
+	i32 y = item->pos.y;
+	i32 startX = x * FONT_W;
+	i32 startY = y * FONT_H;
+	char ch = item->ch;
+	//LOG("\nCHAR %c\n", ch);
+	SDL_Rect temp = {startX, startY, FONT_W, FONT_H};
+	DROP(temp);
+	if(MAP_ISW(map, x, y) == SDL_TRUE) {
+		//SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+		//SDL_RenderFillRect(RENDERER, &temp);
+		Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W+10, FONT_H+10, &ch, item->color);
+		}
+	}
+
+void render_items(Item_DA *items, Tile* map, Entitiy* player) {
+	i32 radius = player->radius;
+	i32 startX = player->pos.x - radius;
+	i32 startY = player->pos.y - radius;
+	i32 stopX  = player->pos.x + radius;
+	i32 stopY  = player->pos.y + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);
+	for(u64 i = 0; i < items->count; i++) {
+		Item item = items->items[i];
+		i32 x = item.pos.x;
+		i32 y = item.pos.y;
+		if(x >= startX && y >= startY && x <= stopX && y <= stopY ) {
+			render_item(&items->items[i], map);
+			//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &item.ch, item.color);
+			}
+		}
+	}
+
+void render_inventory(Item_DA *inventory) {
+	i32 startX = 	MAP_X * FONT_H + 100;
+	i32 startY = 30 + FONT_H_MESSAGES * (NUM_RENDER_MSG+3); //THIS DEPENS CUZZ HOW MUTCH MESSAGES
+	i32 h = 580;
+	i32 w = 500;
+	SDL_Rect rec = {startX, startY, h, w};
+	SDL_SetRenderDrawColor(RENDERER, 0, 30, 10, 0);
+	SDL_RenderFillRect(RENDERER, &rec);
+	for(u64 i = 0; i < inventory->count; i++) {
+		;
+		//LOG("NAME:%s\n", inventory->items[i].name);
+		render_messages(startX, startY + (i*FONT_H_MESSAGES), inventory->items[i].name);
+		//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H_MESSAGES, inventory->items[i].name, WHITE);
+		}
+	}
+
 
 void render_map(Tile *map, Entitiy *player) {
-	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10, 20, "ROUGE GAME", WHITE);
+	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10+10, 20, "ROUGE GAME()", WHITE);
 
 
 	i32 radius = player->radius;
@@ -214,36 +287,50 @@ void render_map(Tile *map, Entitiy *player) {
 						}
 					else if(ch == ',') {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+						//DROP(textRect);
 						SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+						SDL_RenderDrawRect(RENDERER, &textRect);
+						} // if(ch != '.')
+					else if(ch == '1') {
+						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+						//DROP(textRect);
+						SDL_SetRenderDrawColor(RENDERER, 255, 10, 10, 100);
+						SDL_RenderDrawRect(RENDERER, &textRect);
+						}
+					else {
+						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+						SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+						SDL_RenderDrawRect(RENDERER, &textRect);
 						DROP(textRect);
-						//SDL_RenderFillRect(RENDERER, &textRect);
 						}
-					else if(ch != '.') {
-						Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
-						}
-
-
 					}
 				}
 
 			}
 
-		void main_renderer(Entitiy* player, Entitiy_DA *monster, Tile *map) {
+		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
 			render_map(map, player);
 			render_player(player);
 			//render_player(&monster->items[0]);
+			if(ITEMSREND == SDL_TRUE) {
+				render_items(items, map, player);
+				}
 			render_monsters(monster, player);
 			render_stats(player);
+			render_inventory(&player->inventory);
 			i32 count = 1;
-			for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - 5); i--) {
-				render_messages((WIDTH - 600), (HEIGHT - 120 + FONT_W_MESSAGES*(count++)), MESSAGES.items[i]);
+			SDL_Rect temp = {MAP_X*FONT_W + 10, 30, 600, 150};
+			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
+			SDL_RenderFillRect(RENDERER, &temp);
+			for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
+				render_messages((MAP_X*FONT_W + 10), (30 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
 				}
-			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X10, 0X10, 0X10, 0XFF));
+			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X20, 0X20, 0X20, 0XFF));
 			SDL_RenderPresent(RENDERER);
 			}
 
-		void event_user(Entitiy *player, Entitiy_DA *entitis, Tile* map) {
+		void event_user(Entitiy *player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 			MOVMENT = SDL_FALSE;
 			while(MOVMENT == SDL_FALSE) {
 				if(SDL_WaitEvent(&EVENT)) {
@@ -254,18 +341,23 @@ void render_map(Tile *map, Entitiy *player) {
 					else if(EVENT.type == SDL_WINDOWEVENT) {  //JUST FOR NOW
 						MOVMENT = SDL_TRUE;
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
-						FONT_H = HEIGHT / MAP_Y - 1;
-						FONT_W = WIDTH  / MAP_X;
-						//FONT_H = 15;
+						//FONT_H = HEIGHT / MAP_Y - 4;
+						//FONT_W = WIDTH  / MAP_X;
+						FONT_W = 11;
+						FONT_H = 10;
+						//FONT_H = 6;
 						//FONT_W = 10;
 						if(WIDTH > 4096 || HEIGHT > 2048) {
 							ASSERT("Oversized window\n");
 							}
 						//LOG("width %d, height %d\n", WIDTH, HEIGHT);
 						}
-					else if(EVENT.type==SDL_KEYDOWN) {
-						player_input(&EVENT, player, entitis, map);
+					else if(EVENT.type == SDL_KEYDOWN) {
+						player_input(&EVENT, player, entitis, items, map);
+
+						SDL_Delay(1);
 						}
 					}
+				EVENT.type = 0;
 				}
 			}
