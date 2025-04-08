@@ -23,35 +23,47 @@ int main() {
 	(void*)P_SDL_ERR(RENDERER);
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
-	Entitiy* player = create_entity('@', 5, 100, (Position) {
+	ITEMSREND = SDL_FALSE;
+	Entitiy* player = create_entity('@', "Some Name", 5, 100, (Position) {
 		10, 10
 		});
 	player->attack[0]  = 5;
-  player->defence[0] = 5; 
-  player->attack[1]  = 9;
-  player->defence[1] = 5;
-  player->attack[2]  = 9;
-  player->defence[2] = 5;
-  player->attack[3]  = 9;
-  player->defence[3] = 5;
+	player->defence[0] = 5;
+	player->attack[1]  = 9;
+	player->defence[1] = 5;
+	player->attack[2]  = 9;
+	player->defence[2] = 5;
+	player->attack[3]  = 9;
+	player->defence[3] = 5;
+
+	//player->invertory = {0};
 	Tile *map = init_map();
 	Entitiy_DA monsters = {0};
-	for(i32 i = 0; i < 5; i++) {
+	Item_DA items = {0};
+	Item* sword = create_item(12, 12, SWORD_CREATE());
+	da_append(&items, (*sword));
+	Item* dart = create_item(14, 14, DART_CREATE());
+	da_append(&items, (*dart));
+	Item* potion = create_item(16, 16, POTION_CREATE());
+	da_append(&items, (*potion));
+	//da_append(&items, (*item));
+	//da_append(&items, (*item));
+	//da_append(&items, (*item));
+	//da_append(&items, (*item));
+	//da_append(&items, (*item));
+	//LOG("char %c\n", items.items[0].ch);
+	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
 		da_append(&MESSAGES, "   ");
 		}
-	/*Entitiy *monster = create_player((Position) {
-		15, 15
-		});
-	da_append(&monsters, *monster);
-	//*/
 	genereate_monsters(&monsters, map);
 	MOVMENT = 0;
-	main_renderer(player,  &monsters, map);
+	main_renderer(player,  &monsters, &items, map);
 	//MAP_STDOUT();
 	while(!QUIT) {
-		main_renderer(player,  &monsters, map);
-		event_user(player, &monsters, map);
-		update_entity(player, &monsters, map);
+		update_entity(player, &monsters, map, &items);
+		main_renderer(player,  &monsters, &items, map);
+		event_user(player, &monsters, &items, map);
+		
 		//for(u64 count = 0; count < MESSAGES.count; count++) {
 		//	LOG("%s", MESSAGES.items[count]);
 		//	}
