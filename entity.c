@@ -1,11 +1,11 @@
 #include "entity.h"
 
-Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
+Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos) {
 	Entitiy* entity = calloc(1, sizeof(Entitiy));
 
 	if(ch != '@') {
 		for(Monster_Types m = 0; m < NUM_MONSTER; m++) {
-			if(ch == monsterName[m]) {
+			if(ch == monsterChar[m]) {
 				memcpy(entity, &monsters[m], sizeof(Entitiy));
 				}
 			}
@@ -18,6 +18,17 @@ Entitiy* create_entity(char ch, i32 radius, i32 health, Position startPos) {
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
 	entity->health = health;
+	memset(&entity->inventory, 0, sizeof(Item_DA));
+	//i32 len = strlen(name);
+	//entity->name = calloc(name, )
+	//strcpy(entity->name, name);
+	if(name != NULL) {
+		i32 len = strlen(name);
+		CLAMP(len, 1, (MAX_NAME-1));
+		entity->name = calloc(NUM_MONSTER, sizeof(char*));
+		memcpy(entity->name, name, len);
+		}
+
 	return entity;
 	}
 
@@ -60,7 +71,7 @@ void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, D
 	if(attackText == NULL) {
 		ASSERT("CALLOC FAILED\n");
 		}
-	i32 err = snprintf(attackText, len, "You are attacked by %c %s (-%d)", entity->ch, damageStr[type], damage);
+	i32 err = snprintf(attackText, len, "You are attacked by %s %s (-%d)", entity->name, damageStr[type], damage);
 	if(err < -1) {
 		ASSERT("snprintf failed");
 		}
@@ -90,8 +101,8 @@ void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 	}
 
 //TBD attack type
-void player_attack(Entitiy *player, Entitiy* entity) {
-
+void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
+	DROP(map);
 	i32 damage = roll_the_dice(player->attack[0], entity->defence[0]);
 	entity->health-=damage;
 	CLAMP(entity->health, 0, 100);
@@ -107,6 +118,39 @@ void player_attack(Entitiy *player, Entitiy* entity) {
 	//	}
 	if(entity->health == 0) {
 		entity->ch = 'S';
+		//DROP ITEMS
+		for(u64 i = 0; i < entity->inventory.count; i++) {
+			SDL_bool drop = SDL_FALSE;
+			i32 mod = 3;
+			i32 neg = -1;
+			while(drop == SDL_FALSE) {
+				
+				drop = SDL_TRUE;
+				i32 x = rand()%mod + neg;
+				i32 y = rand()%mod + neg;
+				//KINDA WE DO NOT SEE THEM IF IT DROP IN A WALL LIKE IF IT IS LOST
+				//ITS STUPID
+				Item item = entity->inventory.items[i];
+				x+=entity->pos.x;
+				y+=entity->pos.y;
+				for(u64 j = 0; j < items->count; j++) {
+					if(x == items->items[j].pos.x && y == items->items[j].pos.y) {
+	
+						drop = SDL_FALSE;
+						mod++;
+						neg--;
+						break;
+						}
+					}
+				if(drop == SDL_TRUE) {
+					item.pos.x = x;
+					item.pos.y = y;
+					//LOG("Droped(%d %d)\n\n", x, y);
+					da_append(items, item);
+					}
+				}
+
+			}
 		}
 	}
 
@@ -272,6 +316,7 @@ void monster_definitions_export() {
 	}
 
 
+
 void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
@@ -279,9 +324,16 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%NUM_MONSTER;
 					i32 vison = rand()%40+1;
-					Entitiy *temp = create_entity(monsterName[type], vison, 3, (Position) {
+					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
 						.x = x, .y = y
 						});
+					if(rand_f64() < 0.5f) {
+						u64 count = monsters->count;
+						if(count > 0) {
+							Item *item  = create_item(0, 0, SWORD_CREATE());
+							da_append(&monsters->items[count-1].inventory, (*item));
+							}
+						}
 					da_append(monsters, *temp);
 					}
 				}
@@ -292,7 +344,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 
 SDL_bool Is_Monster(char c) {
 	for(Monster_Types t = BASIC_MONSTER; t < NUM_MONSTER; t++) {
-		if(monsterName[t] == c) {
+		if(monsterChar[t] == c) {
 			//LOG("True\n\n");
 			return SDL_TRUE;
 			}
@@ -595,10 +647,46 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	//LOG("Colided entitys %d\n", co);
 	}
 
-void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
+void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
 
 	move_entity(player, entitys, map);
 	block_movement(entitys, map);
+	if(PICKITEM == SDL_TRUE) {
+		picking_item_from_list(player, items);
+		PICKITEM = SDL_FALSE;
+		}
+
+	}
+
+
+Entitiy* create_inventory(i32 size) {
+	if(size < 0) {
+		ASSERT("Size for inventory is zero");
+		}
+	Entitiy* inventory = calloc(size, sizeof(Entitiy*));
+	if(inventory == NULL) {
+		ASSERT("Calloc is null");
+		}
+	return inventory;
+	}
+
+SDL_bool check_if_item_and_player_colide(Entitiy* player, Item* item) {
+	if(player->pos.x == item->pos.x && player->pos.y == item->pos.y) {
+		return SDL_TRUE;
+		}
+	return SDL_FALSE;
+	}
+
+void picking_item_from_list(Entitiy* entity, Item_DA *items) {
+	for(u64 i = 0; i < items->count; i++) {
+		Item item = items->items[i];
+		if(check_if_item_and_player_colide(entity, &item) == SDL_TRUE) {
+			pick_item_from_ground(&items->items[i], &entity->inventory);
+			char* msg = calloc(MAX_NAME, sizeof(char*));
+			snprintf(msg, MAX_NAME, "You picked %s", item.name);
+			da_append(&MESSAGES, msg);
+			}
+		}
 	}
 
 
