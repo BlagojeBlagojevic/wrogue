@@ -24,18 +24,23 @@
 
 //COLORS
 #define WHITE (SDL_Color){255, 255, 255, 0}
-
+#define RED   (SDL_Color){255, 0, 0, 0}
+#define GREEN (SDL_Color){0, 255, 0, 0}
+#define BLUE  (SDL_Color){30, 0, 255, 0}
 //TTF
 #include<SDL2/SDL_ttf.h>
 //static const char* fontLoc = "assets/fonts/f.ttf";
-#define fontLoc "assets/fonts/f.ttf"
-
+//#define fontLoc "assets/fonts/f.ttf"
+#define fontLoc "assets/fonts/w.ttf"
 //ARROW KEYS
 #define LEFT_ARROW 1073741904
 #define RIGHT_ARROW 1073741903
 #define UP_ARROW 1073741906
 #define DOWN_ARROW 1073741905
 #define SPACE 32
+#define KEY_I 105
+#define KEY_P 112
+
 //#include<pthread.h> TBD asychronus stuff
 
 //TYPES
@@ -53,7 +58,7 @@ typedef  double   f64;
 #define rand_f64() (f64)rand()/(f64)RAND_MAX
 
 //DYNAMIC ARRAY
-#define DA_SIZE 256
+#define DA_SIZE 16
 #define da_append(da, item)                                                            \
 	do {                                                                                 \
 		if ((da)->count >= (da)->capacity) {                                               \
@@ -85,8 +90,8 @@ typedef struct {
 	char** items;
 	} Str;
 
-#define MAP_X 100
-#define MAP_Y 100
+#define MAP_X 80
+#define MAP_Y 80
 
 typedef struct Graphics_State {
 	SDL_Window   *window;
@@ -100,12 +105,16 @@ typedef struct Graphics_State {
 	u8            isQuit;
 	SDL_bool      isMovmentEvent;
 	Str           messages;
+	SDL_bool      isRenderItemsOnMap;
+	SDL_bool      isPickingItem;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
 #define title "Ime kakvo"
 
-#define FONT_W_MESSAGES 20
+#define FONT_H_MESSAGES 20
+#define MAX_NAME 30
+
 Graphics_State mainGraphics;
 #define WINDOW    mainGraphics.window
 #define RENDERER  mainGraphics.renderer
@@ -118,7 +127,8 @@ Graphics_State mainGraphics;
 #define HEIGHT    mainGraphics.height
 #define MOVMENT   mainGraphics.isMovmentEvent
 #define MESSAGES  mainGraphics.messages
-
+#define ITEMSREND mainGraphics.isRenderItemsOnMap
+#define PICKITEM  mainGraphics.isPickingItem
 typedef struct {
 	i32 x;
 	i32 y;
@@ -133,7 +143,11 @@ typedef struct {
 
 #define PERCANTAGE_RUN_CHANCE 0.3f
 #define PERCANTAGE_CROW_RUN_CHANCE 0.5f
-#define PERCENTAGE_MONSTER_GENERATED 0.02f
+#define PERCENTAGE_MONSTER_GENERATED 0.005f
+
+#define MAX_HEALTH_VALUE 255
+#define NUM_RENDER_MSG 5
+
 
 
 #endif
