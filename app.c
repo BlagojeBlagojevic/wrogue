@@ -168,7 +168,7 @@ void render_stats(Entitiy *player) {
 
 	}
 
-void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
+void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 	DROP(damageStr);
 	DROP(monsterName);
 	DROP(monsters[BASIC_MONSTER]);
@@ -182,8 +182,9 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player) {
 	CLAMP(startY, 0, MAP_Y-1);
 	CLAMP(stopY,  0, MAP_Y-1);//*/
 	for(u64 count = 0; count < monsters->count; count++) {
-		if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
-		    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
+		//if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
+		//    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
+			if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE){
 			render_player(&monsters->items[count]);
 			}
 
@@ -200,6 +201,7 @@ void render_messages(i32 startX, i32 startY, char* message) {
 	}
 
 void render_item(Item* item, Tile* map) {
+	
 	i32 x = item->pos.x;
 	i32 y = item->pos.y;
 	i32 startX = x * FONT_W;
@@ -208,7 +210,7 @@ void render_item(Item* item, Tile* map) {
 	//LOG("\nCHAR %c\n", ch);
 	SDL_Rect temp = {startX, startY, FONT_W, FONT_H};
 	DROP(temp);
-	if(MAP_ISW(map, x, y) == SDL_TRUE) {
+	if(MAP_ISW(map, x, y) == SDL_TRUE && MAP_ISV(map, x, y) == SDL_TRUE) {
 		//SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 		//SDL_RenderFillRect(RENDERER, &temp);
 		Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W+10, FONT_H+10, &ch, item->color);
@@ -249,6 +251,57 @@ void render_inventory(Item_DA *inventory) {
 		//LOG("NAME:%s\n", inventory->items[i].name);
 		render_messages(startX, startY + (i*FONT_H_MESSAGES), inventory->items[i].name);
 		//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H_MESSAGES, inventory->items[i].name, WHITE);
+		}
+	}
+
+
+void render_map_fov(Entitiy *player, Tile *map) {
+	//field_of_vison(player, map);
+	i32 radius = player->radius;
+	i32 startX = player->pos.x - radius;
+	i32 startY = player->pos.y - radius;
+	i32 stopX  = player->pos.x + radius;
+	i32 stopY  = player->pos.y + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);
+	for(i32 y  = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			if(MAP_ISV(map, x, y) == SDL_TRUE) {
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				char ch = MAP_CH(map, x, y);
+				if(ch == '#') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == ',') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					} // if(ch != '.')
+
+				else {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					DROP(textRect);
+					}
+
+				}
+			else {
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+				SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
+				//SDL_SetRenderDrawColor(RENDERER, 255, 0, 0, 0);
+				SDL_RenderFillRect(RENDERER, &textRect);
+				DROP(textRect);
+				}
+			}
 		}
 	}
 
@@ -310,13 +363,14 @@ void render_map(Tile *map, Entitiy *player) {
 
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
-			render_map(map, player);
+			//render_map(map, player);
+			render_map_fov(player, map);
 			render_player(player);
 			//render_player(&monster->items[0]);
 			if(ITEMSREND == SDL_TRUE) {
 				render_items(items, map, player);
 				}
-			render_monsters(monster, player);
+			render_monsters(monster, player, map);
 			render_stats(player);
 			render_inventory(&player->inventory);
 			i32 count = 1;
