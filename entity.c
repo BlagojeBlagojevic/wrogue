@@ -124,7 +124,7 @@ void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) 
 			i32 mod = 3;
 			i32 neg = -1;
 			while(drop == SDL_FALSE) {
-				
+
 				drop = SDL_TRUE;
 				i32 x = rand()%mod + neg;
 				i32 y = rand()%mod + neg;
@@ -135,7 +135,7 @@ void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) 
 				y+=entity->pos.y;
 				for(u64 j = 0; j < items->count; j++) {
 					if(x == items->items[j].pos.x && y == items->items[j].pos.y) {
-	
+
 						drop = SDL_FALSE;
 						mod++;
 						neg--;
@@ -160,24 +160,21 @@ void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) 
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//DROP(entity);
 	i32 damage = 0;
-	if(distance != 0) {
-		if(distance >= DISTANCE_RANGE_ATTACK_MIN && distance <= DISTANCE_RANGE_ATTACK_MAX) {
-			if(entity->attack[DAMAGE_RANGE] > entity->attack[DAMAGE_SPELL]) {
-				damage = roll_the_dice(entity->attack[DAMAGE_RANGE], player->defence[DAMAGE_RANGE]);
-				if(entity->attack[DAMAGE_RANGE] != 0) {
-					message_attacked_by_monster(player, entity, damage, DAMAGE_RANGE);
-					}
-
+	if(distance >= DISTANCE_RANGE_ATTACK_MIN && distance <= DISTANCE_RANGE_ATTACK_MAX) {
+		if(entity->attack[DAMAGE_RANGE] > entity->attack[DAMAGE_SPELL]) {
+			damage = roll_the_dice(entity->attack[DAMAGE_RANGE], player->defence[DAMAGE_RANGE]);
+			if(entity->attack[DAMAGE_RANGE] != 0) {
+				message_attacked_by_monster(player, entity, damage, DAMAGE_RANGE);
 				}
-			else {
-				damage = roll_the_dice(entity->attack[DAMAGE_SPELL], player->defence[DAMAGE_SPELL]);
-				if(entity->attack[DAMAGE_SPELL] != 0) {
-					message_attacked_by_monster(player, entity, damage, DAMAGE_SPELL);
-					}
-
+			}
+		else {
+			damage = roll_the_dice(entity->attack[DAMAGE_SPELL], player->defence[DAMAGE_SPELL]);
+			if(entity->attack[DAMAGE_SPELL] != 0) {
+				message_attacked_by_monster(player, entity, damage, DAMAGE_SPELL);
 				}
 			}
 		}
+
 	else {
 		if(entity->attack[DAMAGE_BASIC] > entity->attack[DAMAGE_POISON]) {
 			damage = roll_the_dice(entity->attack[DAMAGE_BASIC], player->defence[DAMAGE_BASIC]);
@@ -185,14 +182,9 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 			}
 		else {
 			damage = roll_the_dice(entity->attack[DAMAGE_POISON], player->defence[DAMAGE_POISON]);
-			if(damage != 0) {
-				message_attacked_by_monster(player, entity, damage, DAMAGE_POISON);
-				}
-
+			message_attacked_by_monster(player, entity, damage, DAMAGE_POISON);
 			}
 		}
-
-
 
 	player->health-=damage;
 	CLAMP(player->health, 0, INF);
@@ -227,6 +219,8 @@ void monster_definitions_export() {
 	monsters[BASIC_MONSTER].defence[DAMAGE_RANGE]  = 2;
 	monsters[BASIC_MONSTER].defence[DAMAGE_SPELL]  = 1;
 
+	monsters[BASIC_MONSTER].isRunning = SDL_FALSE;
+	monsters[BASIC_MONSTER].runWoundedPercent = 0.6f;
 	//ZOMBIE MONSTER
 	//ATT
 
@@ -242,6 +236,8 @@ void monster_definitions_export() {
 	monsters[ZOMBIE_MONSTER].defence[DAMAGE_RANGE]  = 3;
 	monsters[ZOMBIE_MONSTER].defence[DAMAGE_SPELL]  = 3;
 
+	monsters[ZOMBIE_MONSTER].isRunning = SDL_FALSE;
+	monsters[ZOMBIE_MONSTER].runWoundedPercent = 0.0f;
 	//WIZARD MONSTER
 	//ATT
 	monsters[WIZARD_MONSTER].radius = 20;
@@ -255,6 +251,9 @@ void monster_definitions_export() {
 	monsters[WIZARD_MONSTER].defence[DAMAGE_POISON] = 3;
 	monsters[WIZARD_MONSTER].defence[DAMAGE_RANGE]  = 3;
 	monsters[WIZARD_MONSTER].defence[DAMAGE_SPELL]  = 5;
+
+	monsters[WIZARD_MONSTER].isRunning = SDL_FALSE;
+	monsters[WIZARD_MONSTER].runWoundedPercent = 0.40f;
 
 	//BEAR MONSTER
 	//ATT
@@ -271,6 +270,8 @@ void monster_definitions_export() {
 	monsters[BEAR_MONSTER].defence[DAMAGE_RANGE]  = 3;
 	monsters[BEAR_MONSTER].defence[DAMAGE_SPELL]  = 1;
 
+	monsters[BEAR_MONSTER].isRunning = SDL_FALSE;
+	monsters[BEAR_MONSTER].runWoundedPercent = 0.20f;
 	//CROW MONSTER
 	//ATT
 	monsters[CROW_MONSTER].radius = 20;
@@ -285,6 +286,8 @@ void monster_definitions_export() {
 	monsters[CROW_MONSTER].defence[DAMAGE_RANGE]  = 3;
 	monsters[CROW_MONSTER].defence[DAMAGE_SPELL]  = 1;
 
+	monsters[CROW_MONSTER].isRunning = SDL_FALSE;
+	monsters[CROW_MONSTER].runWoundedPercent = 0.30f;
 	//DEMON MONSTER
 	//ATT
 	monsters[DEMON_MONSTER].radius = 20;
@@ -299,6 +302,9 @@ void monster_definitions_export() {
 	monsters[DEMON_MONSTER].defence[DAMAGE_RANGE]  = 3;
 	monsters[DEMON_MONSTER].defence[DAMAGE_SPELL]  = 3;
 
+	monsters[DEMON_MONSTER].isRunning = SDL_FALSE;
+	monsters[DEMON_MONSTER].runWoundedPercent = 0.0f;
+
 	//GHOST MONSTER
 	//ATT
 	monsters[GHOST_MONSTER].radius = 20;
@@ -312,6 +318,9 @@ void monster_definitions_export() {
 	monsters[GHOST_MONSTER].defence[DAMAGE_POISON] = 6;
 	monsters[GHOST_MONSTER].defence[DAMAGE_RANGE]  = 3;
 	monsters[GHOST_MONSTER].defence[DAMAGE_SPELL]  = 3;
+
+	monsters[GHOST_MONSTER].isRunning = SDL_FALSE;
+	monsters[GHOST_MONSTER].runWoundedPercent = 0.0f;
 	//return monsters;
 	}
 
@@ -387,8 +396,13 @@ void block_movement(Entitiy_DA *entitys, Tile *map) {
 			}
 		}
 	}
-//check if 2 fieled of vison colide
-SDL_bool check_colison_entitiy(Entitiy* player, Entitiy*  ent) {
+//check if 2 rec colide or if fieled of vison colide
+SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map) {
+
+	if(MAP_ISV(map, ent->pos.x, ent->pos.y) == SDL_FALSE) {
+		return SDL_FALSE;
+		}
+
 	SDL_Rect A = {.h = player->radius, .w = player->radius, .x = player->pos.x, .y = player->pos.y };
 	SDL_Rect B = {.h = ent->radius, .w = ent->radius, .x = ent->pos.x, .y = ent->pos.y };
 
@@ -407,6 +421,7 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy*  ent) {
 	topB = B.y;
 	bottomB = B.y + B.h;
 
+
 	if( bottomA <= topB ) {
 		return SDL_FALSE;
 		}
@@ -424,6 +439,44 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy*  ent) {
 		}
 
 	return SDL_TRUE;
+	}
+
+void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
+
+	f64 ox,oy;
+	ox = (f64)entity->pos.x+0.001f;
+	oy = (f64)entity->pos.y;
+
+	for(i32 i = 0; i < RADIUS; i++) {
+		CLAMP(ox, 0.0f, (f64)(MAP_X - 1));
+		CLAMP(ox, 0.0f, (f64)(MAP_Y - 1));
+		MAP_ISV(map, (i32)ox, (i32)oy) = SDL_TRUE;//MAP_ISW(map, (i32)ox, (i32)oy) == SDL_FALSE ||
+		if(MAP_ISW(map, (i32)ox, (i32)oy) == SDL_FALSE) {
+			return;
+			}
+		ox+=x;
+		oy+=y;
+		};
+	}
+void field_of_vison(Entitiy *entity, Tile* map) {
+	f64 x,y;
+	CLEAR_VISON_FIELD(map);
+	i32 xE = entity->pos.x;
+	i32 yE = entity->pos.y;
+	CLAMP(xE, 1, (MAP_X-2));
+	CLAMP(yE, 1, (MAP_X-2));
+	MAP_ISW(map, xE, yE) = SDL_TRUE;
+	for(u64 i=0; i < 360; i++) {
+		x = cos((f64)i*0.01745f); //to rad
+		y = sin((f64)i*0.01745f);
+		cast_ray(entity, map, x, y);
+		};
+	MAP_ISW(map, xE, yE)   = SDL_FALSE;
+
+	//MAP_ISW(map, xE+1, yE) = SDL_FALSE;
+	//MAP_ISW(map, xE-1, yE) = SDL_FALSE;
+	//MAP_ISW(map, xE, yE+1) = SDL_FALSE;
+	//MAP_ISW(map, xE, yE-1) = SDL_FALSE;
 	}
 
 
@@ -521,7 +574,10 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 	i32 x2 = ent->pos.x;
 	i32 y2 = ent->pos.y;
 	f64 distance  = DISTANCE(x1, y1, x2, y2);
-
+	if(distance <= DISTANCE_RANGE_ATTACK_MIN) {
+		monster_attack(player, ent, distance);
+		return;
+		}
 	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
 
 	//+1x
@@ -618,12 +674,29 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	for(u64 count = 0; count < entitys->count; count++) {
 		Entitiy entity = entitys->items[count];
 		if(Is_Monster(entity.ch)) {
-			if(check_colison_entitiy(player, &entity) == SDL_TRUE) {
+			if(check_colison_entitiy(player, &entity, map) == SDL_TRUE) {
 				//co++;
-				if(entity.health == 1 && rand_f64() <= PERCANTAGE_RUN_CHANCE) {
+				if(entity.health == 1 && rand_f64() <= entity.runWoundedPercent) {
 					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 					make_run_move(player, &entity, map);
 					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+					entity.isRunning = SDL_TRUE;
+					entitys->items[count] = entity;
+					}
+				else if(entity.isRunning == SDL_TRUE) {
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+					make_run_move(player, &entity, map);
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+					//PROB FOR STOP RUNING
+					f64 distance = DISTANCE(entity.pos.x, entity.pos.y, player->pos.x, player->pos.y);
+					if(distance >= MAX_STOP_RUN_DISTANCE){
+						entity.health++;
+						entity.isRunning = SDL_FALSE;
+					}
+					else if(distance <= 3 && rand_f64() <= MAX_CURAGE_CHANCE){
+						entity.health++;
+						entity.isRunning = SDL_FALSE;
+					}
 					entitys->items[count] = entity;
 					}
 				else if(entity.ch == 'C' && rand_f64() <= PERCANTAGE_CROW_RUN_CHANCE) {
@@ -649,8 +722,11 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
 
+
 	move_entity(player, entitys, map);
 	block_movement(entitys, map);
+	field_of_vison(player, map);
+
 	if(PICKITEM == SDL_TRUE) {
 		picking_item_from_list(player, items);
 		PICKITEM = SDL_FALSE;
