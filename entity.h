@@ -67,6 +67,8 @@ typedef struct Entity {
 	char ch;
 	i32 attack[DAMAGE_NUM];
 	i32 defence[DAMAGE_NUM];
+	f64 runWoundedPercent;
+	SDL_bool isRunning;
 	Item_DA inventory;
 	} Entitiy;
 
@@ -92,7 +94,9 @@ SDL_bool Is_Monster(char c);
 i32 is_monster_on_entity(i32 x, i32 y, Entitiy_DA* entities);
 void genereate_monsters(Entitiy_DA *monsters, Tile *map);
 void block_movement(Entitiy_DA *entitys, Tile *map);
-SDL_bool check_colison_entitiy(Entitiy* player, Entitiy*  ent);
+SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map);
+void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y);
+void field_of_vison(Entitiy *entity, Tile* map);
 void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map);
 void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map);
 void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map);
