@@ -206,6 +206,8 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	}
 
 
+
+
 #define RAND_MAP()\
 	for(i32 y = 0; y < MAP_Y; y++) {\
 		for(i32 x = 0; x < MAP_X; x++) {\
@@ -228,6 +230,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		printf("\n");\
 		}
 
+
 Tile* init_map() {
 	Tile *map;
 	map = calloc(MAP_Y*MAP_Y, sizeof(Tile));
@@ -240,7 +243,7 @@ Tile* init_map() {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	generete_dungons(map, 2, 30);
+	generete_dungons(map, 5, 10);
 	return map;
 	}
 
