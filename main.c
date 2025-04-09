@@ -24,7 +24,7 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
-	Entitiy* player = create_entity('@', "Some Name", 5, 100, (Position) {
+	Entitiy* player = create_entity('@', "Some Name", 10, 10, (Position) {
 		10, 10
 		});
 	player->attack[0]  = 5;
