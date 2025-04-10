@@ -5,6 +5,7 @@
 #define SEED 12344
 #include<time.h>
 
+Graphics_State mainGraphics;
 int main() {
 
 	DROP(damageStr);
@@ -14,7 +15,7 @@ int main() {
 	SDL_ERR(TTF_Init());
 	monster_definitions_export();
 	srand(time(0));
-	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1400, 800,  SDL_WINDOW_OPENGL);
+	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
 	(void*)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
 	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
