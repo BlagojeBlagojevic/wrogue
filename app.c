@@ -1,4 +1,6 @@
 #include "app.h"
+
+
 void SDL_ERR(int code) {
 
 	if((code) < 0) {
