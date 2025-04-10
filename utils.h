@@ -115,7 +115,7 @@ typedef struct Graphics_State {
 #define FONT_H_MESSAGES 20
 #define MAX_NAME 30
 
-Graphics_State mainGraphics;
+extern Graphics_State mainGraphics;
 #define WINDOW    mainGraphics.window
 #define RENDERER  mainGraphics.renderer
 #define FONT      mainGraphics.font
