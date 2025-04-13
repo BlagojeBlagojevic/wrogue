@@ -63,6 +63,7 @@ typedef struct Entity {
 	SDL_Color color;
 	i32 radius;
 	i32 health;
+	i32 maxHealth;
 	char* name;
 	char ch;
 	i32 attack[DAMAGE_NUM];
@@ -97,10 +98,13 @@ void block_movement(Entitiy_DA *entitys, Tile *map);
 SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map);
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y);
 void field_of_vison(Entitiy *entity, Tile* map);
+
 void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map);
 void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map);
 void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map);
+void increment_player_health(Entitiy* player);
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items);
+
 //ITEMS
 void picking_item_from_list(Entitiy* entity, Item_DA *items);
 SDL_bool check_if_item_and_player_colide(Entitiy* player, Item* item);
