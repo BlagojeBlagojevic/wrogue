@@ -180,8 +180,8 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	for(i32 i = 1; i < nRooms; i++) {
 		y = (rand() % (MAP_Y - 22));
 		x = (rand() % (MAP_X - 22));
-		height = (rand() % 15) + 7;
-		width  = (rand() % 15) + 7;
+		height = (rand() % 10) + 7;
+		width  = (rand() % 10) + 7;
 		rooms[i] = create_room(x, y, height, width);
 
 		add_room_to_map(map, rooms[i]);
@@ -243,7 +243,7 @@ Tile* init_map() {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	generete_dungons(map, 5, 10);
+	generete_dungons(map, 10, 20);
 	return map;
 	}
 
