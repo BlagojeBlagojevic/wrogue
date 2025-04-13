@@ -18,6 +18,7 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
 	entity->health = health;
+	entity->maxHealth = health;
 	memset(&entity->inventory, 0, sizeof(Item_DA));
 	//i32 len = strlen(name);
 	//entity->name = calloc(name, )
@@ -194,7 +195,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//Text_Renderer_C(RENDERER, FONT, )
 	if(player->health == 0) {
 
-		system("cls");
+		//(void)system("cls");
 		LOG("You loose");
 		exit(-1);
 		}
@@ -448,10 +449,11 @@ void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 	oy = (f64)entity->pos.y;
 
 	for(i32 i = 0; i < RADIUS; i++) {
-		CLAMP(ox, 0.0f, (f64)(MAP_X - 1));
-		CLAMP(ox, 0.0f, (f64)(MAP_Y - 1));
+		CLAMP(ox, 0.01f, (f64)(MAP_X - 1));
+		CLAMP(ox, 0.01f, (f64)(MAP_Y - 1));
+		//LOG("%d %d\n", (u32)ox, (u32)oy);
 		MAP_ISV(map, (i32)ox, (i32)oy) = SDL_TRUE;//MAP_ISW(map, (i32)ox, (i32)oy) == SDL_FALSE ||
-		if(MAP_ISW(map, (i32)ox, (i32)oy) == SDL_FALSE) {
+		if(MAP_ISW(map, (u32)ox, (u32)oy) == SDL_FALSE) {
 			return;
 			}
 		ox+=x;
@@ -717,8 +719,20 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				}
 			}
 		}
+		
 	//LOG("Colided entitys %d\n", co);
 	}
+
+void increment_player_health(Entitiy* player){
+	if(player->maxHealth != player->health){
+		//LOG("Difrent\n");
+		f64 chance = rand_f64();
+		if(chance < CHANCE_INCREMENT_HEALTH){
+			player->health++;
+			da_append(&MESSAGES, "Good luck strike you health +1\n");
+		}
+	}
+}
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
 
@@ -726,6 +740,7 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 	move_entity(player, entitys, map);
 	block_movement(entitys, map);
 	field_of_vison(player, map);
+	increment_player_health(player);
 
 	if(PICKITEM == SDL_TRUE) {
 		picking_item_from_list(player, items);
