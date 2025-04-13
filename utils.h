@@ -150,7 +150,7 @@ typedef struct {
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
 #define RADIUS 10
-
+#define CHANCE_INCREMENT_HEALTH 0.05f
 
 
 #endif
