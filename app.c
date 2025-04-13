@@ -155,7 +155,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 void render_stats(Entitiy *player) {
 	char stats[1024];
 	i32 startX = MAP_X * FONT_W + 10;
-	i32 startY = HEIGHT - 100;
+	i32 startY = HEIGHT - 300;
 	SDL_Rect temp = {startX-3, startY, 600, 150};
 	SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
 	SDL_RenderFillRect(RENDERER, &temp);
@@ -243,9 +243,10 @@ void render_items(Item_DA *items, Tile* map, Entitiy* player) {
 void render_inventory(Item_DA *inventory) {
 	i32 startX = 	MAP_X * FONT_H + 100;
 	i32 startY = 30 + FONT_H_MESSAGES * (NUM_RENDER_MSG+3); //THIS DEPENS CUZZ HOW MUTCH MESSAGES
-	i32 h = 580;
+	i32 h = 580/2;
 	i32 w = 500;
-	SDL_Rect rec = {startX, startY, h, w};
+	
+	SDL_Rect rec = {startX, startY, w, h};
 	SDL_SetRenderDrawColor(RENDERER, 0, 30, 10, 0);
 	SDL_RenderFillRect(RENDERER, &rec);
 	for(u64 i = 0; i < inventory->count; i++) {
@@ -373,8 +374,9 @@ void render_map(Tile *map, Entitiy *player) {
 				render_items(items, map, player);
 				}
 			render_monsters(monster, player, map);
-			render_stats(player);
+			
 			render_inventory(&player->inventory);
+			render_stats(player);
 			i32 count = 1;
 			SDL_Rect temp = {MAP_X*FONT_W + 10, 30, 600, 150};
 			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
