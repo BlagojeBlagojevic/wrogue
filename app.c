@@ -149,6 +149,13 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		PICKITEM = SDL_TRUE;
 		MOVMENT = SDL_TRUE;
 		}
+	else if(key == KEY_O){
+		char* msg = "Casted spell of moving rock!!!";
+		da_append(&MESSAGES, msg);
+		OPENDOOR = SDL_TRUE;
+		MOVMENT = SDL_TRUE;
+		//LOG("O\n");
+	}
 	}
 
 
@@ -280,13 +287,29 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					}
+				else if(ch == '/' ){
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 80, 80, 80, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+				}
 				else if(ch == ',') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					//DROP(textRect);
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					} // if(ch != '.')
-
+				else if(ch == '+'){
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+				}
+				else if(ch == '-'){
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+				}
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
@@ -344,15 +367,29 @@ void render_map(Tile *map, Entitiy *player) {
 					else if(ch == ',') {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						//DROP(textRect);
-						SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
-						SDL_RenderDrawRect(RENDERER, &textRect);
+						SDL_SetRenderDrawColor(RENDERER, 100, 10, 10, 100);
+						SDL_RenderFillRect(RENDERER, &textRect);
 						} // if(ch != '.')
-					else if(ch == '1') {
+					else if(ch == '+') {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						//DROP(textRect);
-						SDL_SetRenderDrawColor(RENDERER, 255, 10, 10, 100);
-						SDL_RenderDrawRect(RENDERER, &textRect);
+						SDL_SetRenderDrawColor(RENDERER, 0, 10, 255, 100);
+						SDL_RenderFillRect(RENDERER, &textRect);
+						Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W + 3, FONT_H, &ch, WHITE);
 						}
+					else if(ch == '-') {
+						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+						//DROP(textRect);
+						
+						SDL_SetRenderDrawColor(RENDERER, 0, 10, 255, 100);
+						SDL_RenderFillRect(RENDERER, &textRect);
+						Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
+							}
+					else if(ch == '/'){
+						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+						SDL_SetRenderDrawColor(RENDERER, 10, 255, 10, 100);
+						SDL_RenderFillRect(RENDERER, &textRect);
+					}
 					else {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
