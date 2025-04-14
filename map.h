@@ -3,7 +3,11 @@
 
 #include "utils.h"
 
-
+typedef enum{
+	ROOM_BLANC,
+	ROOM_SOME,
+	NUM_TYPE_ROOM
+}Room_Type;
 
 typedef struct {
 	char ch;
@@ -17,6 +21,8 @@ typedef struct {
 	i32 height;
 	Position pos;
 	Position center;
+	Position door;
+
 	} Room;
 	
 #define MAP(map, x, y)      map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
@@ -28,11 +34,13 @@ typedef struct {
 
 
 
-
+SDL_bool checkCollision(i32 x1, i32 y1, i32 w1, i32 h1, i32 x2, i32 y2, i32 w2, i32 h2);
 Room create_room(i32 x, i32 y, i32 height, i32 width);
 void add_room_to_map(Tile *map, Room room);
 void add_room_wall_to_map(Tile *map, Room room);
-void connect_room_centers(Position centerOne, Position centerTwo, Tile* map);
+SDL_bool isDoor(Tile *map, Position pos);
+void add_doors(Tile *map);
+void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL_bool isDoorDis);
 void add_walls_around_roads(Tile* map);
 void caved_part(Tile *map, i32 x, i32 y);
 void caved_map(Tile *map, f64 percantage);
