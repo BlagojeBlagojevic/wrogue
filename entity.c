@@ -733,6 +733,35 @@ void increment_player_health(Entitiy* player){
 		}
 	}
 }
+void player_open_door(Entitiy* player, Tile* map){
+	//SDL_bool isDoor = SDL_FALSE;
+	i32 startX = player->pos.x - 1;
+	i32 stopX  = player->pos.x + 1;
+	i32 startY = player->pos.y - 1;
+	i32 stopY  = player->pos.y + 1;
+	CLAMP(startX, 0 , MAP_X-1);
+	CLAMP(stopX, 0  , MAP_X-1);
+	CLAMP(startY, 0 , MAP_Y-1);
+	CLAMP(stopY, 0  , MAP_Y-1);
+	for (i32 y = startY; y <= stopY; y++){
+		for (i32 x = startX; x <= stopX; x++){
+			if(MAP_CH(map, x, y) == '+'){
+				char* msg = "You move the bolder";
+				da_append(&MESSAGES, msg);
+				MAP_CH(map, x, y) = '-';
+				MAP_ISW(map, x, y) = SDL_TRUE;
+			}
+			else if(MAP_CH(map, x, y) == '-'){
+				char* msg = "You pull the bolder";
+				da_append(&MESSAGES, msg);
+				MAP_CH(map, x, y) = '+';
+				MAP_ISW(map, x, y) = SDL_FALSE;
+			}
+		}	
+	}
+	OPENDOOR = SDL_FALSE;
+	
+}
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
 
@@ -741,6 +770,10 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 	block_movement(entitys, map);
 	field_of_vison(player, map);
 	increment_player_health(player);
+	if(OPENDOOR == SDL_TRUE){
+		player_open_door(player, map);
+	}
+	
 
 	if(PICKITEM == SDL_TRUE) {
 		picking_item_from_list(player, items);
