@@ -40,6 +40,7 @@
 #define SPACE 32
 #define KEY_I 105
 #define KEY_P 112
+#define KEY_O 111
 
 //#include<pthread.h> TBD asychronus stuff
 
@@ -107,6 +108,7 @@ typedef struct Graphics_State {
 	Str           messages;
 	SDL_bool      isRenderItemsOnMap;
 	SDL_bool      isPickingItem;
+	SDL_bool      isOpeningDoor;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -129,6 +131,7 @@ extern Graphics_State mainGraphics;
 #define MESSAGES  mainGraphics.messages
 #define ITEMSREND mainGraphics.isRenderItemsOnMap
 #define PICKITEM  mainGraphics.isPickingItem
+#define OPENDOOR  mainGraphics.isOpeningDoor
 typedef struct {
 	i32 x;
 	i32 y;
@@ -151,6 +154,8 @@ typedef struct {
 #define NUM_RENDER_MSG 5
 #define RADIUS 10
 #define CHANCE_INCREMENT_HEALTH 0.05f
-
+#define CHANCE_SPAWN_DOOR 0.1f
+#define CHANCE_NON_IN_ROOM 0.1f
+#define PERCANTAGE_DISABLE_DOOR 0.15f
 
 #endif
