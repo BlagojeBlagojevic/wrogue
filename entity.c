@@ -733,7 +733,7 @@ void increment_player_health(Entitiy* player){
 		}
 	}
 }
-void player_open_door(Entitiy* player, Tile* map){
+void player_destroy_boolder(Entitiy* player, Tile* map){
 	//SDL_bool isDoor = SDL_FALSE;
 	i32 startX = player->pos.x - 1;
 	i32 stopX  = player->pos.x + 1;
@@ -746,17 +746,28 @@ void player_open_door(Entitiy* player, Tile* map){
 	for (i32 y = startY; y <= stopY; y++){
 		for (i32 x = startX; x <= stopX; x++){
 			if(MAP_CH(map, x, y) == '+'){
-				char* msg = "You move the bolder";
-				da_append(&MESSAGES, msg);
-				MAP_CH(map, x, y) = '-';
-				MAP_ISW(map, x, y) = SDL_TRUE;
+				if(rand_f64() < CHANCE_NON_CLEAR_RUINS){
+					char* msg = "This ruins are tuff";
+					da_append(&MESSAGES, msg);
+
+				}
+				else{
+					char* msg = "You clear the ruins";
+					da_append(&MESSAGES, msg);
+					MAP_CH(map, x, y) = '.';
+					MAP_ISW(map, x, y) = SDL_TRUE;
+					if(rand_f64() < CHANCE_DMG_CLEAR_RUINS){
+						i32 ran = rand()%4;
+						player->health-=ran;
+						char* msg = "This ruin is tuff";
+						da_append(&MESSAGES, msg);
+						char* msg1 = "Your health decresed";
+						da_append(&MESSAGES, msg1);
+				}
+				}
+				
 			}
-			else if(MAP_CH(map, x, y) == '-'){
-				char* msg = "You pull the bolder";
-				da_append(&MESSAGES, msg);
-				MAP_CH(map, x, y) = '+';
-				MAP_ISW(map, x, y) = SDL_FALSE;
-			}
+			
 		}	
 	}
 	OPENDOOR = SDL_FALSE;
@@ -771,7 +782,8 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 	field_of_vison(player, map);
 	increment_player_health(player);
 	if(OPENDOOR == SDL_TRUE){
-		player_open_door(player, map);
+		//player_open_door(player, map);
+		player_destroy_boolder(player, map);
 	}
 	
 
