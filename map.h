@@ -21,8 +21,6 @@ typedef struct {
 	i32 height;
 	Position pos;
 	Position center;
-	Position door;
-
 	} Room;
 	
 #define MAP(map, x, y)      map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
