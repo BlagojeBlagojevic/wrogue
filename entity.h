@@ -103,7 +103,7 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map);
 void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map);
 void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map);
 void increment_player_health(Entitiy* player);
-void player_open_door(Entitiy *player, Tile* map);
+void player_destroy_boolder(Entitiy* player, Tile* map);
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items);
 
 //ITEMS
