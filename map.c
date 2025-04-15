@@ -67,8 +67,12 @@ Room create_room(i32 x, i32 y, i32 height, i32 width) {
 	}
 
 void add_room_to_map(Tile *map, Room room) {
-	for(i32 y = room.pos.y; y < room.pos.y + room.height; y++) {
-		for(i32 x = room.pos.x; x < room.pos.x + room.width; x++) {
+	i32 stopY = room.pos.y + room.height;
+	CLAMP(stopY, 2, MAP_Y - 3);
+	i32 stopX = room.pos.x + room.width;
+	CLAMP(stopX, 2, MAP_X - 3);
+	for(i32 y = room.pos.y; y < stopY; y++) {
+		for(i32 x = room.pos.x; x < stopX; x++) {
 			MAP_CH(map, x, y)  = '.';
 			MAP_ISW(map, x, y) = SDL_TRUE;
 			}
@@ -76,9 +80,14 @@ void add_room_to_map(Tile *map, Room room) {
 	}
 
 void add_room_wall_to_map(Tile *map, Room room) {
-	for(i32 y = room.pos.y; y < room.pos.y + room.height; y++) {
-		for(i32 x = room.pos.x; x < room.pos.x + room.width; x++) {
-			if(y == room.pos.y && MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y-1) != ',')  {
+	i32 stopY = room.pos.y + room.height;
+	CLAMP(stopY, 1, MAP_Y - 7);
+	i32 stopX = room.pos.x + room.width;
+	CLAMP(stopX, 1, MAP_X - 7);
+	//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
+	for(i32 y = room.pos.y; y < stopY; y++) {
+		for(i32 x = room.pos.x; x < stopX; x++) {
+			if(y == room.pos.y && MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
 				MAP_CH(map, x, y)  = '/';
 				MAP_ISW(map, x, y) = SDL_FALSE;
 				}
@@ -158,7 +167,9 @@ void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL
 		else{
 			break;
 		}
-			
+		if(temp.x == 1 || temp.x == MAP_X || temp.y == 1 || temp.y == MAP_Y ){
+			break;
+		}	
 		if(MAP_CH(map, temp.x, temp.y) == '/' && isDoorDis == SDL_FALSE){
 			MAP_CH(map, temp.x, temp.y) = '+';
 			MAP_ISW(map, temp.x, temp.y) = SDL_FALSE;
@@ -219,8 +230,8 @@ void caved_part(Tile *map, i32 x, i32 y) {
 	}
 void caved_map(Tile *map, f64 percantage) {
 
-	for(i32 y = 1; y < MAP_Y - 1; y++) {
-		for(i32 x = 1; x < MAP_X - 1; x++) {
+	for(i32 y = 2; y < MAP_Y - 2; y++) {
+		for(i32 x = 2; x < MAP_X - 2; x++) {
 			if(rand_f64() < percantage) {
 				if((MAP_CH(map, x, y) == '.'|| (MAP_CH(map, x, y) == '/'))  && MAP_CH(map, x - 1, y) == '#') {
 					MAP_CH(map, x - 1, y) = '.';
@@ -267,19 +278,20 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	if(minRooms >= maxRooms) {
 		ASSERT("We have a larger amount of minRooms >= maxRooms");
 		}
-	nRooms = (i32)(rand()%(u32)(maxRooms - minRooms)) + minRooms;
-
+	//nRooms = (i32)(rand()%(u32)(maxRooms - minRooms)) + minRooms;
+	 nRooms = 100;
 	//nRooms = 5;
 	Room *rooms = calloc(nRooms, sizeof(Room));
 	rooms[0] = create_room(9, 9, 10, 10);
 	add_room_to_map(map, rooms[0]);
 
 	add_room_wall_to_map(map, rooms[0]);
+	i32 count = 0;
 	for(i32 i = 1; i < nRooms; i++) {
 		while(1){
 			isColided = SDL_FALSE;
-			y = (rand() % (MAP_Y - 23));
-			x = (rand() % (MAP_X - 23));
+			y = (rand() % (MAP_Y - 13));
+			x = (rand() % (MAP_X - 13));
 			height = (rand() % 5) + 7;
 			width  = (rand() % 5) + 7;
 			for(i32 j = 0; j < i; j++){
@@ -292,19 +304,26 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 			if(isColided == SDL_FALSE){
 				break;
 			}
+			if(count == 10){
+				break;
+			}
+			count++;
 		}
-		
+		if(count == 10){
+			break;
+		}
 		rooms[i] = create_room(x, y, height, width);
 		
 		add_room_to_map(map, rooms[i]);
 		add_room_wall_to_map(map, rooms[i]);
+		count = 0;
 		//connect_room_centers(rooms[i-1].center, rooms[i].center, map);
 		}
 	///*
 	
 	//*/
 	//add_walls_around_roads(map);
-	f64 percantage = rand_f64() / 5.2f;
+	f64 percantage = rand_f64() / 2.2f;
 	LOG("percantage of caved map %f", percantage);
 	
 	for(i32 i = 1; i < nRooms; i++){
@@ -317,7 +336,6 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		
 	}
 	caved_map(map, percantage);
-
 	//add_doors(map);
 	free(rooms);
 	}
