@@ -295,12 +295,12 @@ void render_map_fov(Entitiy *player, Tile *map) {
 				else if(ch == ',') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					//DROP(textRect);
-					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					} // if(ch != '.')
 				else if(ch == '+'){
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
-					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
 				}
