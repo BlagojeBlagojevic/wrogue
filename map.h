@@ -14,6 +14,7 @@ typedef struct {
 	SDL_Color color;
 	u8   isW;
 	u8   isV;
+	u8   visited;
 	} Tile;
 	
 typedef struct {
@@ -23,10 +24,12 @@ typedef struct {
 	Position center;
 	} Room;
 	
-#define MAP(map, x, y)      map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
-#define MAP_CH(map, x, y)   map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
-#define MAP_ISW(map, x, y)  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
-#define MAP_ISV(map, x, y)  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isV
+#define MAP(map, x, y)      	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
+#define MAP_CH(map, x, y)   	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
+#define MAP_ISW(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
+#define MAP_ISV(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isV
+#define MAP_VISITED(map, x, y)  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].visited
+
 
 #define CLEAR_VISON_FIELD(map){for(u64 i = 0; i < MAP_X * MAP_Y; i++){map[i].isV = SDL_FALSE;}};
 
