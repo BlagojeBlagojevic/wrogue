@@ -318,6 +318,39 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					}
 
 				}
+			else if (MAP_VISITED(map, x, y) == SDL_TRUE){
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				char ch = MAP_CH(map, x, y);
+				if(ch == '#') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 60, 60, 60, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == '/' ){
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+				}
+				else if(ch == '+'){
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+				}
+				else if(ch == '-'){
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+				}
+				else {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					DROP(textRect);
+					}
+			}	
 			else {
 				i32 startX = x * FONT_W;
 				i32 startY = y * FONT_H;
