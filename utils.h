@@ -159,5 +159,7 @@ typedef struct {
 #define PERCANTAGE_DISABLE_DOOR 0.50f
 #define CHANCE_NON_CLEAR_RUINS 0.5f
 #define CHANCE_DMG_CLEAR_RUINS 0.1f
+#define CHANCE_CHANGE_DIRECTION 0.05f
+#define CHANCE_CAVE_ROAD 0.05f
 
 #endif
