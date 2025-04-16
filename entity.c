@@ -222,6 +222,10 @@ void monster_definitions_export() {
 
 	monsters[BASIC_MONSTER].isRunning = SDL_FALSE;
 	monsters[BASIC_MONSTER].runWoundedPercent = 0.6f;
+	monsters[BASIC_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[BASIC_MONSTER].stateChance[i] = rand_f64();
+	}
 	//ZOMBIE MONSTER
 	//ATT
 
@@ -239,6 +243,10 @@ void monster_definitions_export() {
 
 	monsters[ZOMBIE_MONSTER].isRunning = SDL_FALSE;
 	monsters[ZOMBIE_MONSTER].runWoundedPercent = 0.0f;
+	monsters[ZOMBIE_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[ZOMBIE_MONSTER].stateChance[i] = rand_f64();
+	}
 	//WIZARD MONSTER
 	//ATT
 	monsters[WIZARD_MONSTER].radius = 20;
@@ -255,7 +263,10 @@ void monster_definitions_export() {
 
 	monsters[WIZARD_MONSTER].isRunning = SDL_FALSE;
 	monsters[WIZARD_MONSTER].runWoundedPercent = 0.40f;
-
+	monsters[WIZARD_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[WIZARD_MONSTER].stateChance[i] = rand_f64();
+	}
 	//BEAR MONSTER
 	//ATT
 
@@ -273,6 +284,10 @@ void monster_definitions_export() {
 
 	monsters[BEAR_MONSTER].isRunning = SDL_FALSE;
 	monsters[BEAR_MONSTER].runWoundedPercent = 0.20f;
+	monsters[BEAR_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[BEAR_MONSTER].stateChance[i] = rand_f64();
+	}
 	//CROW MONSTER
 	//ATT
 	monsters[CROW_MONSTER].radius = 20;
@@ -289,6 +304,10 @@ void monster_definitions_export() {
 
 	monsters[CROW_MONSTER].isRunning = SDL_FALSE;
 	monsters[CROW_MONSTER].runWoundedPercent = 0.30f;
+	monsters[CROW_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[CROW_MONSTER].stateChance[i] = rand_f64();
+	}
 	//DEMON MONSTER
 	//ATT
 	monsters[DEMON_MONSTER].radius = 20;
@@ -305,7 +324,10 @@ void monster_definitions_export() {
 
 	monsters[DEMON_MONSTER].isRunning = SDL_FALSE;
 	monsters[DEMON_MONSTER].runWoundedPercent = 0.0f;
-
+	monsters[DEMON_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[DEMON_MONSTER].stateChance[i] = rand_f64();
+	}
 	//GHOST MONSTER
 	//ATT
 	monsters[GHOST_MONSTER].radius = 20;
@@ -322,6 +344,10 @@ void monster_definitions_export() {
 
 	monsters[GHOST_MONSTER].isRunning = SDL_FALSE;
 	monsters[GHOST_MONSTER].runWoundedPercent = 0.0f;
+	monsters[GHOST_MONSTER].state = STATE_WANDERING;
+	for(i32 i = 0; i < (i32)STATE_NUM; i++){
+		monsters[GHOST_MONSTER].stateChance[i] = rand_f64();
+	}
 	//return monsters;
 	}
 
@@ -445,13 +471,14 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map) {
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 
 	f64 ox,oy;
-	ox = (f64)entity->pos.x+0.001f;
+	ox = (f64)entity->pos.x;
 	oy = (f64)entity->pos.y;
 
 	for(i32 i = 0; i < RADIUS; i++) {
 		CLAMP(ox, 0.01f, (f64)(MAP_X - 1));
 		CLAMP(ox, 0.01f, (f64)(MAP_Y - 1));
 		//LOG("%d %d\n", (u32)ox, (u32)oy);
+		MAP_VISITED(map, (i32)ox, (i32)oy) = SDL_TRUE;
 		MAP_ISV(map, (i32)ox, (i32)oy) = SDL_TRUE;//MAP_ISW(map, (i32)ox, (i32)oy) == SDL_FALSE ||
 		if(MAP_ISW(map, (u32)ox, (u32)oy) == SDL_FALSE) {
 			return;
@@ -607,22 +634,23 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 		monster_attack(player, ent, distancesMin);
 		//return;
 		}
+	u8 isRangeAttack = SDL_FALSE;
 	switch(ent->ch) {
 		case 'W': {
 				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-					return;
+					isRangeAttack = SDL_TRUE;
 					break;
 					}
 				}
 		case 'C': {
 				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-					return;
+					isRangeAttack = SDL_TRUE;
 					break;
 					}
 				}
 		case 'D': {
 				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-					return;
+					isRangeAttack = SDL_TRUE;
 					break;
 					}
 			default: {
@@ -630,6 +658,10 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				}
 		}
+	if (isRangeAttack == SDL_TRUE){
+		return;
+	}
+	
 	switch(index) {
 		case 0: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
@@ -668,6 +700,84 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 
 	}
 
+SDL_bool isMonsterVisible(Tile* map, Entitiy* ent){
+	if(MAP_ISV(map, ent->pos.x, ent->pos.y) == SDL_FALSE) {
+		return SDL_FALSE;
+		}
+	return SDL_TRUE;
+}	
+
+void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map){
+	DROP(player);
+	for(u64 i = 0; i < entitys->count; i++){
+		Entitiy entity = entitys->items[i];
+		
+		//IF HEALTH IS A LOW RUNING MONSTER
+		//ELSE GO BESERK
+		if(Is_Monster(entity.ch)){
+
+		
+		if(entity.health == 1){
+			if(rand_f64() < entity.stateChance[STATE_RUNING]){
+				entity.state = STATE_RUNING;
+				LOG("Entity(%s):  ", entity.name);
+				LOG("Channged to a running state\n");
+				
+			}
+			else{
+				LOG("Entity(%s):  ", entity.name);
+				LOG("Channged to a beserk state\n");
+				entity.state = STATE_BESERK;
+			}			
+		}
+		else if(isMonsterVisible(map, &entity) == SDL_TRUE){
+			if(rand_f64() < entity.stateChance[STATE_HUNTING]){
+				entity.state = STATE_HUNTING;
+			    LOG("Entity(%s):  ", entity.name);
+			    LOG("Channged to a hunting state\n");
+			}
+			
+		}
+		else if(entity.state == STATE_WANDERING){
+			if(isMonsterVisible(map, &entity) == SDL_TRUE){
+				if(rand_f64() < entity.stateChance[STATE_HUNTING]){
+					entity.state  = STATE_HUNTING;
+					LOG("Entity(%s):  ", entity.name);
+					LOG("Channged to a hunting state from wandering\n");
+				}
+			}
+		else if(rand_f64() < entity.stateChance[STATE_RESTING]){
+				entity.state  = STATE_RESTING;
+				LOG("Entity(%s):  ", entity.name);
+				LOG("Channged to a resting state\n");
+			}
+		}
+		else if(entity.state == STATE_HUNTING){
+			if(isMonsterVisible(map, &entity) == SDL_FALSE){
+				if(rand_f64() > entity.stateChance[STATE_WANDERING]){
+					entity.state  = STATE_WANDERING;
+					LOG("Entity(%s):  ", entity.name);
+					LOG("Channged to a wandering state\n");
+				}
+			}
+		}
+		
+		else if(entity.state == STATE_RESTING){
+			if(rand_f64() < entity.stateChance[STATE_WANDERING]){
+				entity.state  = STATE_WANDERING;
+				LOG("Entity(%s):  ", entity.name); 
+				LOG("Channged to a wandering state\n");
+			}
+		}
+	}
+	else if(entity.ch == 'S'){
+		entity.state = STATE_WANDERING;
+	}	
+	entitys->items[i] = entity;
+	}
+}
+
+
 //IF IN VISON FIELD MOVE TOWARDS PLAYER
 //IF NOT RAND MOV DEPENDING ON TYPE OR PROB
 void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
@@ -676,53 +786,38 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	for(u64 count = 0; count < entitys->count; count++) {
 		Entitiy entity = entitys->items[count];
 		if(Is_Monster(entity.ch)) {
-			if(check_colison_entitiy(player, &entity, map) == SDL_TRUE) {
-				//co++;
-				if(entity.health == 1 && rand_f64() <= entity.runWoundedPercent) {
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-					make_run_move(player, &entity, map);
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-					entity.isRunning = SDL_TRUE;
-					entitys->items[count] = entity;
-					}
-				else if(entity.isRunning == SDL_TRUE) {
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-					make_run_move(player, &entity, map);
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-					//PROB FOR STOP RUNING
-					f64 distance = DISTANCE(entity.pos.x, entity.pos.y, player->pos.x, player->pos.y);
-					if(distance >= MAX_STOP_RUN_DISTANCE){
-						entity.health++;
-						entity.isRunning = SDL_FALSE;
-					}
-					else if(distance <= 3 && rand_f64() <= MAX_CURAGE_CHANCE){
-						entity.health++;
-						entity.isRunning = SDL_FALSE;
-					}
-					entitys->items[count] = entity;
-					}
-				else if(entity.ch == 'C' && rand_f64() <= PERCANTAGE_CROW_RUN_CHANCE) {
-					f64 distance = DISTANCE(player->pos.x, player->pos.y, entity.pos.x, entity.pos.y);
-					if(distance >= DISTANCE_RANGE_ATTACK_MIN && distance <= DISTANCE_RANGE_ATTACK_MAX) {
-						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-						make_run_move(player, &entity, map);
-						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-						entitys->items[count] = entity;
-						}
-					}
-				else {
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-					make_best_move(player, &entity, map);
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-					entitys->items[count] = entity;
-					}
-				}
+			if(entity.state == STATE_RESTING){
+				//NOTHING 
+				LOG("Resting");
 			}
+			else if(entity.state == STATE_WANDERING){
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+				//make_run_move(player, &entity, map);
+				make_best_move(player, &entity, map);
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+			}
+			else if(entity.state == STATE_HUNTING){
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+				//make_run_move(player, &entity, map);
+				make_best_move(player, &entity, map);
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+			}
+			else if(entity.state == STATE_BESERK){
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+				make_best_move(player, &entity, map);
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+			}
+			else if(entity.state == STATE_RUNING){
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+				make_run_move(player, &entity, map);
+				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+			}
+		entitys->items[count] = entity;			
 		}
 		
 	//LOG("Colided entitys %d\n", co);
 	}
-
+}
 void increment_player_health(Entitiy* player){
 	if(player->maxHealth != player->health){
 		//LOG("Difrent\n");
@@ -776,11 +871,12 @@ void player_destroy_boolder(Entitiy* player, Tile* map){
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
 
-
+	state_entity(player, entitys, map);
 	move_entity(player, entitys, map);
 	block_movement(entitys, map);
 	field_of_vison(player, map);
 	increment_player_health(player);
+	
 	if(OPENDOOR == SDL_TRUE){
 		//player_open_door(player, map);
 		player_destroy_boolder(player, map);
