@@ -54,6 +54,14 @@ static const char* monsterName[] = {
 	"Ghost",
 	};
 
+typedef enum{
+	STATE_RUNING,
+	STATE_HUNTING,
+	STATE_WANDERING,
+	STATE_RESTING,
+	STATE_BESERK,
+	STATE_NUM
+}State_Entity; 	
 
 
 typedef struct Entity Entitiy;
@@ -71,6 +79,8 @@ typedef struct Entity {
 	f64 runWoundedPercent;
 	SDL_bool isRunning;
 	Item_DA inventory;
+	u8 state;
+	f64 stateChance[STATE_NUM];
 	} Entitiy;
 
 typedef struct {
@@ -95,6 +105,7 @@ SDL_bool Is_Monster(char c);
 i32 is_monster_on_entity(i32 x, i32 y, Entitiy_DA* entities);
 void genereate_monsters(Entitiy_DA *monsters, Tile *map);
 void block_movement(Entitiy_DA *entitys, Tile *map);
+SDL_bool isMonsterVisible(Tile* map, Entitiy* ent);
 SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map);
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y);
 void field_of_vison(Entitiy *entity, Tile* map);
