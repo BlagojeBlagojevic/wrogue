@@ -6,4 +6,4 @@ build:
 	$(CC) -o app main.c app.c entity.c item.c map.c $(CFLAGS) 
 
 mem: 
-	$(CC) -o app main.c app.c entity.c item.c map.c $(CFLAGS) -O3 -fsanitize=address -static-libasan
+	$(CC) -o app main.c app.c entity.c item.c map.c $(CFLAGS) -O2 -fsanitize=address -static-libasan
