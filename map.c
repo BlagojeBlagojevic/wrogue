@@ -88,20 +88,40 @@ void add_room_wall_to_map(Tile *map, Room room) {
 	for(i32 y = room.pos.y; y < stopY; y++) {
 		for(i32 x = room.pos.x; x < stopX; x++) {
 			if(y == room.pos.y && MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
-				MAP_CH(map, x, y)  = '/';
-				MAP_ISW(map, x, y) = SDL_FALSE;
+				if(MAP_CH(map, x, y) != ','){
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+				else{
+					break;
+				}
 				}
 			else if(x == room.pos.x && MAP_CH(map, x, y) != ',' && MAP_CH(map, x-1, y) != ',') {
-				MAP_CH(map, x, y)  = '/';
-				MAP_ISW(map, x, y) = SDL_FALSE;
+				if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+'){
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
 				}
-			else if(x == room.pos.x + room.width - 1 && MAP_CH(map, x-1, y) != ',') {
-				MAP_CH(map, x, y)  = '/';
-				MAP_ISW(map, x, y) = SDL_FALSE;
+				else{
+					break;
 				}
-			else if(y == room.pos.y + room.height - 1 && MAP_CH(map, x, y-1) != ',') {
-				MAP_CH(map, x, y)  = '/';
-				MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+			else if(x == room.pos.x + room.width - 1 && MAP_CH(map, x+1, y) != ',') {
+				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+				else{
+					break;
+				}
+				}
+			else if(y == room.pos.y + room.height - 1 && MAP_CH(map, x, y+1) != ',') {
+				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+				else{
+					break;
+				}
 				}
 			}
 		}
@@ -167,7 +187,7 @@ void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL
 		else{
 			break;
 		}
-		if(temp.x == 1 || temp.x == MAP_X || temp.y == 1 || temp.y == MAP_Y ){
+		if(temp.x == 1 || temp.x == MAP_X-1 || temp.y == 1 || temp.y == MAP_Y - 1 ){
 			break;
 		}	
 		if(MAP_CH(map, temp.x, temp.y) == '/' && isDoorDis == SDL_FALSE){
@@ -176,7 +196,7 @@ void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL
 			//temp.x--;
 			//temp.y--;
 			countDoors++;
-			if(countDoors == 5){
+			if(countDoors == 10){
 				break;
 			}	
 		}
@@ -221,11 +241,14 @@ void add_walls_around_roads(Tile* map) {
 	}
 
 void caved_part(Tile *map, i32 x, i32 y) {
+	
 	for(i32 carved = 0; carved < rand()%10 + 3; carved++) {
-		i32 xr = rand()%3 - 1;
-		i32 yr = rand()%3 - 1;
-		MAP_CH(map, x + xr, y + yr) = '.';
-		MAP_ISW(map, x + xr, y + yr) = SDL_TRUE;
+		i32 xr = rand()%3 - 1 + x;
+		i32 yr = rand()%3 - 1 + y;
+		CLAMP(xr, 1, MAP_X - 1);
+		CLAMP(yr, 1, MAP_Y - 1);
+		MAP_CH(map, xr, yr) = '.';
+		MAP_ISW(map, xr, yr) = SDL_TRUE;
 		}
 	}
 void caved_map(Tile *map, f64 percantage) {
@@ -261,7 +284,7 @@ void caved_map(Tile *map, f64 percantage) {
 					}
 				}
 			//CAVED ROAD
-			if(rand_f64() < 0.1f) {
+			if(rand_f64() < CHANCE_CAVE_ROAD) {
 				if(MAP_CH(map, x, y) == ',') {
 					caved_part(map, x, y);
 					}
@@ -304,12 +327,13 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 			if(isColided == SDL_FALSE){
 				break;
 			}
-			if(count == 10){
+			if(count == 100){
 				break;
 			}
 			count++;
 		}
-		if(count == 10){
+		if(count == 100){
+			nRooms = i;
 			break;
 		}
 		rooms[i] = create_room(x, y, height, width);
@@ -317,24 +341,33 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		add_room_to_map(map, rooms[i]);
 		add_room_wall_to_map(map, rooms[i]);
 		count = 0;
-		//connect_room_centers(rooms[i-1].center, rooms[i].center, map);
+		//connect_room_centers(rooms[i-1].center, rooms[i].center, map, SDL_FALSE);
 		}
 	///*
 	
 	//*/
 	//add_walls_around_roads(map);
-	f64 percantage = rand_f64() / 2.2f;
+	f64 percantage = 0.01f + rand_f64()/2.0f;
 	LOG("percantage of caved map %f", percantage);
 	
-	for(i32 i = 1; i < nRooms; i++){
-		if(percantage < PERCANTAGE_DISABLE_DOOR){
-			connect_room_centers(rooms[i-1].center, rooms[i].center, map, SDL_FALSE);
-		}
-		else{
-			connect_room_centers(rooms[i].center, rooms[i-1].center, map, SDL_TRUE);
-		}
-		
+	for(i32 i = 0; i < nRooms; i++){
+		i32 minDistance = INF;
+		i32 minIndex = i + 1;
+		for(i32 j = i + 1; j < nRooms; j++){
+		i32 distance = DISTANCE(rooms[j].center.x, rooms[j].center.y, rooms[i].center.x, rooms[i].center.y);
+		if(distance < minDistance){
+			minDistance = distance;
+			minIndex = j;
+		}	
 	}
+	if(rand_f64() < 0.05f){
+		connect_room_centers(rooms[i].center, rooms[0].center, map, SDL_FALSE);
+	}
+	else{
+		connect_room_centers(rooms[i].center, rooms[minIndex].center, map, SDL_FALSE);
+	}
+	
+}
 	caved_map(map, percantage);
 	//add_doors(map);
 	free(rooms);
