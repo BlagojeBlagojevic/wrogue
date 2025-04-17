@@ -56,6 +56,7 @@ static const char* monsterName[] = {
 
 typedef enum{
 	STATE_RUNING,
+	STATE_MOVING_AWAY_RANGE,
 	STATE_HUNTING,
 	STATE_WANDERING,
 	STATE_RESTING,
@@ -105,7 +106,7 @@ SDL_bool Is_Monster(char c);
 i32 is_monster_on_entity(i32 x, i32 y, Entitiy_DA* entities);
 void genereate_monsters(Entitiy_DA *monsters, Tile *map);
 void block_movement(Entitiy_DA *entitys, Tile *map);
-SDL_bool isMonsterVisible(Tile* map, Entitiy* ent);
+SDL_bool is_monster_visible(Tile* map, Entitiy* ent);
 SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map);
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y);
 void field_of_vison(Entitiy *entity, Tile* map);
