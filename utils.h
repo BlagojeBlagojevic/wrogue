@@ -33,6 +33,19 @@
 //#define fontLoc "assets/fonts/f.ttf"
 #define fontLoc "assets/fonts/w.ttf"
 //ARROW KEYS
+#define KEY_Q 113
+#define KEY_W 119
+#define KEY_E 101
+
+#define KEY_A 97
+#define KEY_S 115
+#define KEY_D 100
+
+#define KEY_Z 122
+#define KEY_Y 121
+#define KEY_X 120
+#define KEY_C 99
+
 #define LEFT_ARROW 1073741904
 #define RIGHT_ARROW 1073741903
 #define UP_ARROW 1073741906
@@ -41,6 +54,7 @@
 #define KEY_I 105
 #define KEY_P 112
 #define KEY_O 111
+
 
 //#include<pthread.h> TBD asychronus stuff
 
@@ -109,6 +123,7 @@ typedef struct Graphics_State {
 	SDL_bool      isRenderItemsOnMap;
 	SDL_bool      isPickingItem;
 	SDL_bool      isOpeningDoor;
+	u64           countMoves;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -118,20 +133,21 @@ typedef struct Graphics_State {
 #define MAX_NAME 30
 
 extern Graphics_State mainGraphics;
-#define WINDOW    mainGraphics.window
-#define RENDERER  mainGraphics.renderer
-#define FONT      mainGraphics.font
-#define FONT_W    mainGraphics.fontW
-#define FONT_H    mainGraphics.fontH
-#define QUIT      mainGraphics.isQuit
-#define EVENT     mainGraphics.event
-#define WIDTH     mainGraphics.width
-#define HEIGHT    mainGraphics.height
-#define MOVMENT   mainGraphics.isMovmentEvent
-#define MESSAGES  mainGraphics.messages
-#define ITEMSREND mainGraphics.isRenderItemsOnMap
-#define PICKITEM  mainGraphics.isPickingItem
-#define OPENDOOR  mainGraphics.isOpeningDoor
+#define WINDOW     mainGraphics.window
+#define RENDERER   mainGraphics.renderer
+#define FONT       mainGraphics.font
+#define FONT_W     mainGraphics.fontW
+#define FONT_H     mainGraphics.fontH
+#define QUIT       mainGraphics.isQuit
+#define EVENT      mainGraphics.event
+#define WIDTH      mainGraphics.width
+#define HEIGHT     mainGraphics.height
+#define MOVMENT    mainGraphics.isMovmentEvent
+#define MESSAGES   mainGraphics.messages
+#define ITEMSREND  mainGraphics.isRenderItemsOnMap
+#define PICKITEM   mainGraphics.isPickingItem
+#define OPENDOOR   mainGraphics.isOpeningDoor
+#define COUNTMOVES mainGraphics.countMoves
 typedef struct {
 	i32 x;
 	i32 y;
@@ -142,11 +158,11 @@ typedef struct {
 #define ZERO 0.0f
 #define DISTANCE(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
 #define DISTANCE_RANGE_ATTACK_MAX 3.0f
-#define DISTANCE_RANGE_ATTACK_MIN 1.1f
+#define DISTANCE_RANGE_ATTACK_MIN 1.45f
 
 #define PERCANTAGE_RUN_CHANCE 0.3f
 #define PERCANTAGE_CROW_RUN_CHANCE 0.5f
-#define PERCENTAGE_MONSTER_GENERATED 0.005f
+#define PERCENTAGE_MONSTER_GENERATED 0.015f
 #define MAX_STOP_RUN_DISTANCE 10.0f
 #define MAX_CURAGE_CHANCE 0.2f
 
@@ -161,5 +177,6 @@ typedef struct {
 #define CHANCE_DMG_CLEAR_RUINS 0.1f
 #define CHANCE_CHANGE_DIRECTION 0.05f
 #define CHANCE_CAVE_ROAD 0.05f
+#define CHANCE_SPIRIT_ATTACK 0.01f
 
 #endif
