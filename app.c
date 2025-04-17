@@ -66,7 +66,7 @@ void render_player(Entitiy *player) {
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	MOVMENT = SDL_FALSE;  //NOT PROB
-	if(key == UP_ARROW) {
+	if(key == UP_ARROW || key == KEY_W) {
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y--;
@@ -81,7 +81,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				}
 			}
 		}
-	else if(key == DOWN_ARROW) {
+	else if(key == DOWN_ARROW || key == KEY_S) {
 		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y++;
@@ -97,7 +97,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			}
 
 		}
-	else if(key == LEFT_ARROW) {
+	else if(key == LEFT_ARROW || key == KEY_A) {
 		if(player->pos.x > 0 && MAP_ISW(map, player->pos.x-1, player->pos.y) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x--;
@@ -113,7 +113,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			}
 
 		}
-	else if(key == RIGHT_ARROW) {
+	else if(key == RIGHT_ARROW || key == KEY_D) {
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x++;
@@ -128,6 +128,71 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				}
 			}
 		}
+	else if(key == KEY_Q) {
+			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y - 1) == SDL_TRUE) {
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				player->pos.x--;
+				player->pos.y--;
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				MOVMENT = SDL_TRUE;
+				}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y - 1, entitis);
+			if(witchIsMonster != -1) {
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				MOVMENT = SDL_TRUE;
+					}
+			}
+		}
+	else if(key == KEY_E) {
+			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y - 1) == SDL_TRUE) {
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				player->pos.x++;
+				player->pos.y--;
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				MOVMENT = SDL_TRUE;
+				}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y - 1, entitis);
+			if(witchIsMonster != -1) {
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				MOVMENT = SDL_TRUE;
+					}
+			}
+		}
+	else if(key == KEY_Z || key == KEY_Y) {
+			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y + 1) == SDL_TRUE) {
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				player->pos.x--;
+				player->pos.y++;
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				MOVMENT = SDL_TRUE;
+				}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y + 1, entitis);
+			if(witchIsMonster != -1) {
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				MOVMENT = SDL_TRUE;
+					}
+			}
+		}
+	else if(key == KEY_C) {
+			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y + 1) == SDL_TRUE) {
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				player->pos.x++;
+				player->pos.y++;
+				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+				MOVMENT = SDL_TRUE;
+				}
+		else {
+			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y + 1, entitis);
+			if(witchIsMonster != -1) {
+				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				MOVMENT = SDL_TRUE;
+					}
+			}
+		}		
+		
 	else if(key == SPACE) {
 		//DO NOTHING
 		MOVMENT = SDL_TRUE;
