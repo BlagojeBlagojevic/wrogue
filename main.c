@@ -14,7 +14,9 @@ int main() {
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
 	monster_definitions_export();
-	srand(time(0));
+	u64 seed = (u64)time(0);  
+	srand(seed);
+	
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
 	(void*)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
@@ -56,8 +58,12 @@ int main() {
 	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
 		da_append(&MESSAGES, "   ");
 		}
+	char* msg = calloc(30, sizeof(char));
+	snprintf(msg, 30, "Your seed is %ld", seed);
+	da_append(&MESSAGES, msg);	
 	genereate_monsters(&monsters, map);
 	MOVMENT = 0;
+	COUNTMOVES = 0;
 	main_renderer(player,  &monsters, &items, map);
 	//MAP_STDOUT();
 	while(!QUIT) {
