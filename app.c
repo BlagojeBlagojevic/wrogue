@@ -37,6 +37,7 @@ void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 sta
 void render_player(Entitiy *player) {
 	i32 startX = player->pos.x * FONT_W;
 	i32 startY = player->pos.y * FONT_H;
+	
 	SDL_Color color;
 	if(player->health >= 3) {
 		color = (SDL_Color) {
@@ -54,9 +55,7 @@ void render_player(Entitiy *player) {
 			};
 		}
 	else {
-		color = (SDL_Color) {
-			0, 255, 0, 0
-			};
+		color = player->color;
 		}
 	Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	}
