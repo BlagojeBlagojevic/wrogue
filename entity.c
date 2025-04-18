@@ -2,7 +2,8 @@
 
 Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos) {
 	Entitiy* entity = calloc(1, sizeof(Entitiy));
-
+	entity->health = health;
+	entity->maxHealth = health;
 	if(ch != '@') {
 		for(Monster_Types m = 0; m < NUM_MONSTER; m++) {
 			if(ch == monsterChar[m]) {
@@ -17,9 +18,9 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
-	entity->health = health;
-	entity->maxHealth = health;
+	entity->isAlive = SDL_TRUE;
 	memset(&entity->inventory, 0, sizeof(Item_DA));
+	//DROP(health);
 	//i32 len = strlen(name);
 	//entity->name = calloc(name, )
 	//strcpy(entity->name, name);
@@ -118,7 +119,8 @@ void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) 
 	//if(distance == 0.0f) {
 	//	}
 	if(entity->health == 0) {
-		entity->ch = 'S';
+		entity->isAlive = SDL_FALSE;
+		//entity->ch = 'S';
 		//DROP ITEMS
 		for(u64 i = 0; i < entity->inventory.count; i++) {
 			SDL_bool drop = SDL_FALSE;
@@ -189,6 +191,14 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 
 	player->health-=damage;
 	CLAMP(player->health, 0, INF);
+	//APPLAY LIFE STEAL TO ENEMY
+	if(rand_f64() < entity->lifeStealChance && entity->lifeStealValue != 0 && entity->health < entity->maxHealth){
+		entity->health+=(i32)entity->lifeStealValue;
+		CLAMP(entity->health, 0, entity->maxHealth);
+		char* msg = calloc(50, sizeof(char));
+		snprintf(msg, 50, "%s lifestealed %u", entity->name, entity->lifeStealValue);
+		da_append(&MESSAGES, msg);
+	}
 	//i32 startX =  player->pos.x;
 
 	//system("pause");
@@ -200,8 +210,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 		exit(-1);
 		}
 	}
-
-void monster_definitions_export() {
+/*
 
 
 	//PROB THRU FILE OR SOMTHING
@@ -370,6 +379,97 @@ void monster_definitions_export() {
 	for(i32 i = 0; i < (i32)STATE_NUM; i++){
 		monsters[GHOST_MONSTER].stateChance[i] = rand_f64();
 	}
+*/
+void monster_definitions_export() {
+
+
+	//PROB THRU FILE OR SOMTHING
+	//FOR NOW LET BE IN CODE
+	//BASIC MONSTER
+	//ATT
+	monsters[BASIC_MONSTER].radius = 10;
+	monsters[BASIC_MONSTER].ch = 'M';
+	monsters[BASIC_MONSTER].attack[DAMAGE_BASIC]  = 3;
+	monsters[BASIC_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[BASIC_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[BASIC_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[BASIC_MONSTER].defence[DAMAGE_BASIC]  = 3;
+	monsters[BASIC_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[BASIC_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[BASIC_MONSTER].defence[DAMAGE_SPELL]  = 1;
+	monsters[BASIC_MONSTER].health = 3;
+
+	monsters[BASIC_MONSTER].isRunning = SDL_FALSE;
+	monsters[BASIC_MONSTER].runWoundedPercent = 0.6f;
+	monsters[BASIC_MONSTER].state = STATE_WANDERING;
+
+	monsters[BASIC_MONSTER].stateChance[STATE_RUNING] = 0.6f;
+	monsters[BASIC_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[BASIC_MONSTER].stateChance[STATE_HUNTING] = 0.05f;
+	monsters[BASIC_MONSTER].stateChance[STATE_WANDERING] = 0.5f;
+	monsters[BASIC_MONSTER].stateChance[STATE_RESTING] = 0.3f;
+	monsters[BASIC_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+
+	//ACOLAYT 
+	monsters[ACOLAYT_MONSTER].radius = 20;
+	monsters[ACOLAYT_MONSTER].ch = 'A';
+	monsters[ACOLAYT_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[ACOLAYT_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[ACOLAYT_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[ACOLAYT_MONSTER].attack[DAMAGE_SPELL]  = 1;
+	//DEF  unarmord
+	monsters[ACOLAYT_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[ACOLAYT_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[ACOLAYT_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[ACOLAYT_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[ACOLAYT_MONSTER].health = 5;
+	monsters[ACOLAYT_MONSTER].maxHealth = 5;
+
+	monsters[ACOLAYT_MONSTER].isRunning = SDL_FALSE;
+	monsters[ACOLAYT_MONSTER].runWoundedPercent = 0.6f;
+	monsters[ACOLAYT_MONSTER].state = STATE_WANDERING;
+
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_RUNING] = 0.05f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_WANDERING] = 0.5f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESURECT] = 0.30f;
+	
+	monsters[ACOLAYT_MONSTER].lifeStealChance = 0.0f;
+	monsters[ACOLAYT_MONSTER].lifeStealValue = 0.0f;
+	//ACOLAYT 
+	monsters[GHOUL_MONSTER].radius = 30;
+	monsters[GHOUL_MONSTER].ch = 'G';
+	monsters[GHOUL_MONSTER].attack[DAMAGE_BASIC]  = 2;
+	monsters[GHOUL_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[GHOUL_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[GHOUL_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  unarmord
+	monsters[GHOUL_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[GHOUL_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[GHOUL_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[GHOUL_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[GHOUL_MONSTER].health = 7;
+	monsters[GHOUL_MONSTER].maxHealth = 7;
+
+	monsters[GHOUL_MONSTER].isRunning = SDL_FALSE;
+	monsters[GHOUL_MONSTER].runWoundedPercent = 0.6f;
+	monsters[GHOUL_MONSTER].state = STATE_WANDERING;
+
+	monsters[GHOUL_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_HUNTING] = 0.7f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_BESERK] = 0.2f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+
+	monsters[GHOUL_MONSTER].lifeStealChance = 0.1f;
+	monsters[GHOUL_MONSTER].lifeStealValue  = 1.0f;
+	
 	//return monsters;
 	}
 
@@ -380,9 +480,10 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 		for(i32 x = 0; x < MAP_X; x++) {
 			if(MAP_CH(map, x, y) != '#') {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
-					i32 type = rand()%NUM_MONSTER;
-					//i32 type = DEMON_MONSTER;
+					i32 type = rand()%(NUM_MONSTER - 1) + 1;
+					//i32 type = GHOUL_MONSTER;
 					i32 vison = rand()%40+1;
+					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
 						.x = x, .y = y
 						});
@@ -743,7 +844,7 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 		}
 	u8 isRangeAttack = SDL_FALSE;
 	switch(ent->ch) {
-		case 'W': {
+		case 'A': {
 				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
 					isRangeAttack = SDL_TRUE;
 					break;
@@ -856,7 +957,27 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map){
 		//IF HEALTH IS A LOW RUNING MONSTER
 		//ELSE GO BESERK
 		if(Is_Monster(entity.ch)){
-		if(entity.health == 1){
+		if(entity.health == 0){
+			if(rand_f64() < entity.stateChance[STATE_RESURECT]){
+				i32 health = rand()%2 + 1;
+				entity.attack[DAMAGE_BASIC]++;
+				entity.color = RED;
+				char* msg = calloc(50, sizeof(char));
+				snprintf(msg, 50, "%s is resurected", entity.name);
+				da_append(&MESSAGES, msg);
+				
+			}
+			else{
+				char* msg = calloc(50, sizeof(char));
+				snprintf(msg, 50, "You slay the %s", entity.name);
+				da_append(&MESSAGES, msg);
+				char* msg1 = "His spirit is wandering in this world";
+				da_append(&MESSAGES, msg1);
+				entity.ch = 'S';
+				entity.color = GREEN;
+			}
+		}	
+		else if(entity.health == 1){
 			if(rand_f64() < entity.stateChance[STATE_RUNING]){
 				entity.state = STATE_RUNING;
 #ifdef LOG_AL
