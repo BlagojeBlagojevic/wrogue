@@ -30,14 +30,14 @@ int main() {
 	Entitiy* player = create_entity('@', "Some Name", 10, 10, (Position) {
 		10, 10
 		});
-	player->attack[0]  = 5;
-	player->defence[0] = 5;
-	player->attack[1]  = 9;
-	player->defence[1] = 5;
-	player->attack[2]  = 9;
-	player->defence[2] = 5;
-	player->attack[3]  = 9;
-	player->defence[3] = 5;
+	player->attack[0]  = 2;
+	player->defence[0] = 2;
+	player->attack[1]  = 2;
+	player->defence[1] = 2;
+	player->attack[2]  = 2;
+	player->defence[2] = 2;
+	player->attack[3]  = 2;
+	player->defence[3] = 2;
 
 	//player->invertory = {0};
 	Tile *map = init_map();
