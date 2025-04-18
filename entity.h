@@ -27,12 +27,9 @@ static const char* damageStr[] = {
 typedef enum {
 
 	BASIC_MONSTER,
-	ZOMBIE_MONSTER,
-	WIZARD_MONSTER,
-	BEAR_MONSTER,
-	CROW_MONSTER,
-	DEMON_MONSTER,
-	GHOST_MONSTER,
+	//UNDEAD
+	ACOLAYT_MONSTER,
+	GHOUL_MONSTER,
 	NUM_MONSTER
 	//UPDATE ARR
 	} Monster_Types;
@@ -42,12 +39,12 @@ typedef enum {
 
 
 
-static const char* monsterChar = "MZWBCDG ";
+static const char* monsterChar = "MAG   ";
 
 static const char* monsterName[] = {
 	"Monster",
-	"Zombie",
-	"Wizard",
+	"Acolayt",
+	"Ghoul",
 	"Bear",
 	"Crow",
 	"Demon",
@@ -61,6 +58,7 @@ typedef enum{
 	STATE_WANDERING,
 	STATE_RESTING,
 	STATE_BESERK,
+	STATE_RESURECT,
 	STATE_NUM
 }State_Entity; 	
 
@@ -81,7 +79,10 @@ typedef struct Entity {
 	SDL_bool isRunning;
 	Item_DA inventory;
 	u8 state;
+	u8 isAlive;
 	f64 stateChance[STATE_NUM];
+	f64 lifeStealChance;
+	u8 lifeStealValue;
 	} Entitiy;
 
 typedef struct {
