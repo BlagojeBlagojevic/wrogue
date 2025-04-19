@@ -18,12 +18,12 @@ int main() {
 	srand(seed);
 	
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
-	(void*)P_SDL_ERR(WINDOW);
+	(void)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
 	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
 	FONT = TTF_OpenFont(fontLoc, 128);
-	(void*)P_SDL_ERR(FONT);
-	(void*)P_SDL_ERR(RENDERER);
+	(void)P_SDL_ERR(FONT);
+	(void)P_SDL_ERR(RENDERER);
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
