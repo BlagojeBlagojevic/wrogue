@@ -30,6 +30,7 @@ typedef enum {
 	//UNDEAD
 	ACOLAYT_MONSTER,
 	GHOUL_MONSTER,
+	NECROMANCER_MONSTER,
 	NUM_MONSTER
 	//UPDATE ARR
 	} Monster_Types;
@@ -39,13 +40,13 @@ typedef enum {
 
 
 
-static const char* monsterChar = "MAG   ";
+static const char* monsterChar = "MAGN   ";
 
 static const char* monsterName[] = {
 	"Monster",
 	"Acolayt",
 	"Ghoul",
-	"Bear",
+	"Necromancer",
 	"Crow",
 	"Demon",
 	"Ghost",
@@ -59,6 +60,7 @@ typedef enum{
 	STATE_RESTING,
 	STATE_BESERK,
 	STATE_RESURECT,
+	STATE_SUMMON, 
 	STATE_NUM
 }State_Entity; 	
 
@@ -83,6 +85,12 @@ typedef struct Entity {
 	f64 stateChance[STATE_NUM];
 	f64 lifeStealChance;
 	u8 lifeStealValue;
+	
+	Monster_Types typesToSummon;
+	u8 summondMonsters;
+	u8 turnsToSummon;
+	u8 cooldown;
+
 	} Entitiy;
 
 typedef struct {
@@ -123,5 +131,7 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 void picking_item_from_list(Entitiy* entity, Item_DA *items);
 SDL_bool check_if_item_and_player_colide(Entitiy* player, Item* item);
 void picking_item_from_list(Entitiy* entity, Item_DA *items);
+
+void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys);
 
 #endif
