@@ -68,9 +68,9 @@ Room create_room(i32 x, i32 y, i32 height, i32 width) {
 
 void add_room_to_map(Tile *map, Room room) {
 	i32 stopY = room.pos.y + room.height;
-	CLAMP(stopY, 2, MAP_Y - 7);
+	CLAMP(stopY, 2, MAP_Y - 2);
 	i32 stopX = room.pos.x + room.width;
-	CLAMP(stopX, 2, MAP_X - 7);
+	CLAMP(stopX, 2, MAP_X - 2);
 	for(i32 y = room.pos.y; y < stopY; y++) {
 		for(i32 x = room.pos.x; x < stopX; x++) {
 			MAP_CH(map, x, y)  = '.';
@@ -82,9 +82,9 @@ void add_room_to_map(Tile *map, Room room) {
 
 void add_room_wall_rectangle(Tile *map, Room room) {
 		i32 stopY = room.pos.y + room.height;
-		CLAMP(stopY, 1, MAP_Y - 7);
+		CLAMP(stopY, 1, MAP_Y - 2);
 		i32 stopX = room.pos.x + room.width;
-		CLAMP(stopX, 1, MAP_X - 7);
+		CLAMP(stopX, 1, MAP_X - 2);
 		//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
 		for(i32 y = room.pos.y; y < stopY; y++) {
 			for(i32 x = room.pos.x; x < stopX; x++) {
@@ -129,9 +129,9 @@ void add_room_wall_rectangle(Tile *map, Room room) {
 		}
 void add_room_wall_circle(Tile *map, Room room) {
 			i32 stopY = room.pos.y + room.height;
-			CLAMP(stopY, 1, MAP_Y - 7);
+			CLAMP(stopY, 1, MAP_Y - 2);
 			i32 stopX = room.pos.x + room.width;
-			CLAMP(stopX, 1, MAP_X - 7);
+			CLAMP(stopX, 1, MAP_X - 2);
 			f64 radius = DISTANCE(room.pos.x, room.pos.y, room.center.x, room.center.y)-3;
 			CLAMP(radius, 6.0f, INF);
 			//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
@@ -185,10 +185,10 @@ void add_room_wall_circle(Tile *map, Room room) {
 	
 void add_room_wall_blob(Tile *map, Room room){
 	i32 stopY = room.pos.y + room.height;
-	CLAMP(stopY, 1, MAP_Y - 7);
+	CLAMP(stopY, 1, MAP_Y - 2);
 	i32 stopX = room.pos.x + room.width;
-	CLAMP(stopX, 1, MAP_X - 7);
-	for(i32 y = room.pos.y; y < stopY; y++) {
+	CLAMP(stopX, 1, MAP_X - 2);
+	for(i32 y = room.pos.y - 1; y < stopY; y++) {
 		for(i32 x = room.pos.x; x < stopX; x++) {
 			if(MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
 				if(MAP_CH(map, x, y) != ','){
@@ -425,7 +425,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	nRooms = (i32)(rand()%(u32)(maxRooms - minRooms)) + minRooms;
 	//nRooms = 100;
 	//nRooms = 5;
-	Room *rooms = calloc(nRooms+1, sizeof(Room));
+	Room *rooms = calloc(nRooms+200, sizeof(Room));
 	rooms[0] = create_room(9, 9, 10, 10);
 	add_room_to_map(map, rooms[0]);
 
@@ -434,8 +434,8 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	for(i32 i = 1; i < nRooms; i++) {
 		while(1){
 			isColided = SDL_FALSE;
-			y = (rand() % (MAP_Y - 15));
-			x = (rand() % (MAP_X - 20));
+			y = (rand() % (MAP_Y - 13));
+			x = (rand() % (MAP_X - 13));
 			height = (rand() % 5) + 7;
 			width  = (rand() % 5) + 7;
 			for(i32 j = 0; j < i; j++){
@@ -457,12 +457,11 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 			nRooms = i;
 			break;
 		}
-		rooms[i].center.x  = 0;
+		//rooms[i].center.x  = 0;
 		rooms[i] = create_room(x, y, height, width);
 		
 		add_room_to_map(map, rooms[i]);
-		if(rooms[i].center.x != 0)
-			add_room_wall_to_map(map, rooms[i]);
+		add_room_wall_to_map(map, rooms[i]);
 		count = 0;
 		//connect_room_centers(rooms[i-1].center, rooms[i].center, map, SDL_FALSE);
 		}
@@ -488,6 +487,14 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	connect_room_centers(rooms[nRooms-1].center, rooms[0].center, map, SDL_FALSE);
 	//caved_map(map, percantage);
 	//add_doors(map);
+
+	for(i32 y = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			if(y == 0 || x == 0 || y == MAP_Y-1 || x == MAP_X-1 ){
+				MAP_CH(map, x, y) = '/';
+				MAP_ISW(map, x, y) = SDL_FALSE; 
+
+			}}}
 	free(rooms);
 	}
 
@@ -519,9 +526,9 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 
 Tile* init_map() {
 	Tile *map;
-	map = calloc(MAP_Y*MAP_Y, sizeof(Tile));
+	map = calloc(MAP_Y*MAP_Y + 1, sizeof(Tile));
 	//RAND_MAP();
-	for(i32 y = 0; y < MAP_Y*MAP_Y; y++) {
+	for(i32 y = 0; y < MAP_Y * MAP_Y; y++) {
 		map[y].ch = '#';
 		}
 	//memset(map. , '.', sizeof(Tile) * MAP_Y * MAP_Y);
@@ -529,7 +536,7 @@ Tile* init_map() {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	generete_dungons(map, 30, 100);
+	generete_dungons(map, 5, 20);
 	return map;
 	}
 
