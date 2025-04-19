@@ -437,10 +437,11 @@ void monster_definitions_export() {
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESURECT] = 0.30f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
 	
 	monsters[ACOLAYT_MONSTER].lifeStealChance = 0.0f;
 	monsters[ACOLAYT_MONSTER].lifeStealValue = 0.0f;
-	//ACOLAYT 
+	//GHOUL 
 	monsters[GHOUL_MONSTER].radius = 30;
 	monsters[GHOUL_MONSTER].ch = 'G';
 	monsters[GHOUL_MONSTER].attack[DAMAGE_BASIC]  = 2;
@@ -466,10 +467,48 @@ void monster_definitions_export() {
 	monsters[GHOUL_MONSTER].stateChance[STATE_RESTING] = 0.2f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_BESERK] = 0.2f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
 
 	monsters[GHOUL_MONSTER].lifeStealChance = 0.1f;
 	monsters[GHOUL_MONSTER].lifeStealValue  = 1.0f;
 	
+	
+	//GHOUL 
+	monsters[NECROMANCER_MONSTER].radius = 5;
+	monsters[NECROMANCER_MONSTER].ch = 'N';
+	monsters[NECROMANCER_MONSTER].attack[DAMAGE_BASIC]  = 0;
+	monsters[NECROMANCER_MONSTER].attack[DAMAGE_POISON] = 1;
+	monsters[NECROMANCER_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[NECROMANCER_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  light
+	monsters[NECROMANCER_MONSTER].defence[DAMAGE_BASIC]  = 3;
+	monsters[NECROMANCER_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[NECROMANCER_MONSTER].defence[DAMAGE_RANGE]  = 1;
+	monsters[NECROMANCER_MONSTER].defence[DAMAGE_SPELL]  = 3;
+	monsters[NECROMANCER_MONSTER].health = 2;
+	monsters[NECROMANCER_MONSTER].maxHealth = 2;
+
+	monsters[NECROMANCER_MONSTER].isRunning = SDL_FALSE;
+	monsters[NECROMANCER_MONSTER].runWoundedPercent = 0.9f;
+	monsters[NECROMANCER_MONSTER].state = STATE_WANDERING;
+
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_RUNING] = 0.3f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.001f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_HUNTING] = 0.01f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_BESERK] = 0.00f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_SUMMON] = 0.6f;
+
+	monsters[NECROMANCER_MONSTER].lifeStealChance = 0.0f;
+	monsters[NECROMANCER_MONSTER].lifeStealValue  = 0.0f;
+
+	monsters[NECROMANCER_MONSTER].typesToSummon = GHOUL_MONSTER;
+	monsters[NECROMANCER_MONSTER].turnsToSummon = 0;
+	monsters[NECROMANCER_MONSTER].cooldown = 20;
+	
+
 	//return monsters;
 	}
 
@@ -481,7 +520,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 			if(MAP_CH(map, x, y) != '#') {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%(NUM_MONSTER - 1) + 1;
-					//i32 type = GHOUL_MONSTER;
+					//type = NECROMANCER_MONSTER;
 					i32 vison = rand()%40+1;
 					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
@@ -592,6 +631,9 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map) {
 	return SDL_TRUE;
 	}
 
+
+
+	
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 
 	f64 ox,oy;
@@ -775,11 +817,163 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 				}
 		}
 
-
-
 	}
+	void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
+		SDL_bool isMonsterVisible = is_monster_visible(map, ent);
+		i32 x1 = player->pos.x;
+		i32 y1 = player->pos.y;
+		i32 x2 = ent->pos.x;
+		i32 y2 = ent->pos.y;
+		f64 distance  = DISTANCE(x1, y1, x2, y2);
+		
+		//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
+	
+		//+1x
+		f64 distancesMin = distnace_move(x1, y1, (x2 + 1), y2, map);
+		i32 index = 0;
+		//-1x
+		distance = distnace_move(x1, y1, (x2 - 1), y2, map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 1;
+			}
+		//+1y
+		distance = distnace_move(x1, y1, x2, (y2 + 1), map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 2;
+			}
+		//-1y
+		distance = distnace_move(x1, y1, x2, (y2  - 1), map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 3;
+			}
+		//-1y -1x KEY_Q
+		distance = distnace_move(x1, y1, (x2 - 1), (y2  - 1), map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 4;
+			}
+		//-1y +1x KEY_E_
+		distance = distnace_move(x1, y1, (x2 + 1), (y2  - 1), map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 5;
+			}
+		//1y -1x KEY_Y
+		distance = distnace_move(x1, y1, (x2 - 1), (y2  + 1), map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 6;
+			}
+			//1y 1x KEY_C
+		distance = distnace_move(x1, y1, (x2 + 1), (y2  + 1), map);
+		if(distance < distancesMin) {
+			distancesMin = distance;
+			index = 7;
+			}	
+		u8 isRangeAttack = SDL_FALSE;
+		switch(ent->ch) {
+			case 'A': {
+					if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+						isRangeAttack = SDL_TRUE;
+						break;
+						}
+					}
+			case 'C': {
+					if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+						isRangeAttack = SDL_TRUE;
+						break;
+						}
+					}
+			case 'D': {
+					if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+						isRangeAttack = SDL_TRUE;
+						break;
+						}
+				default: {
+						break;
+						}
+					}
+			}
+		if (isRangeAttack == SDL_TRUE){
+			return;
+		}
+		
+		switch(index) {
+			case 0: {
+					if(distancesMin < INF && distancesMin != 0.0f) {
+						//LOG("X++\n");
+						ent->pos.x = ent->pos.x + 1;
+						}
+					break;
+					}
+	
+			case 1: {
+					if(distancesMin < INF && distancesMin != 0.0f) {
+						//LOG("X--\n");
+						ent->pos.x--;
+						}
+					break;
+					}
+			case 2: {
+					if(distancesMin < INF && distancesMin != 0.0f) {
+						//LOG("Y++\n");
+						ent->pos.y++;
+						}
+					break;
+					}
+			case 3: {
+					if(distancesMin < INF && distancesMin != 0.0f) {
+						//LOG("Y--\n");
+						ent->pos.y--;
+						}
+					break;
+					}
+			case 4:{
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("Y--\n");
+					ent->pos.x--;
+					ent->pos.y--;
+					}
+				break;
+				}
+			
+			case 5:{
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("Y--\n");
+					ent->pos.x++;
+					ent->pos.y--;
+					}
+				break;
+					}
+			case 6:{
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("Y--\n");
+					ent->pos.x--;
+					ent->pos.y++;
+					}
+				break;
+			}
+			case 7:{
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("Y--\n");
+					ent->pos.x++;
+					ent->pos.y++;
+					}
+				break;
+			}		
+			default: {
+					ASSERT("Unreachable");
+					break;
+					}
+			}
+			CLAMP(ent->pos.x, 1 , MAP_X - 1);
+			CLAMP(ent->pos.y, 1 , MAP_Y - 1);
+		}	
 //WE WILL SEE IF A* or Diakstra or This CRAP
-void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
+void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 	SDL_bool isMonsterVisible = is_monster_visible(map, ent);
 	i32 x1 = player->pos.x;
 	i32 y1 = player->pos.y;
@@ -788,148 +982,155 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 	f64 distance  = DISTANCE(x1, y1, x2, y2);
 	if(distance <= DISTANCE_RANGE_ATTACK_MIN) {
 		monster_attack(player, ent, distance);
+		//LOG("Range\n");
+		da_append(&MESSAGES, "Mele");
 		return;
 		}
 	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
 
 	//+1x
-	f64 distancesMin = distnace_move(x1, y1, (x2 + 1), y2, map);
+	f64 distancesMin = INF;
+	f64 trueDistance = INF;
 	i32 index = 0;
 	//-1x
-	distance = distnace_move(x1, y1, (x2 - 1), y2, map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), y2) ;
+	
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2 - 1), y2, map);
 		index = 1;
 		}
+
 	//+1y
-	distance = distnace_move(x1, y1, x2, (y2 + 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 + 1), y2) ;
+
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2 + 1), y2, map);
 		index = 2;
 		}
 	//-1y
-	distance = distnace_move(x1, y1, x2, (y2  - 1), map);
+	distance = MAP_DIJKSTRA(map, (x2), (y2 - 1));
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2), (y2-1), map);
 		index = 3;
 		}
 	//-1y -1x KEY_Q
-	distance = distnace_move(x1, y1, (x2 - 1), (y2  - 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), (y2 - 1));
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2 - 1), (y2 - 1), map);
 		index = 4;
 		}
 	//-1y +1x KEY_E_
-	distance = distnace_move(x1, y1, (x2 + 1), (y2  - 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 + 1), (y2 - 1));
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2 + 1), (y2 - 1), map);
 		index = 5;
 		}
 	//1y -1x KEY_Y
-	distance = distnace_move(x1, y1, (x2 - 1), (y2  + 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), (y2 + 1));
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2 - 1), (y2 + 1), map);
 		index = 6;
 		}
 		//1y 1x KEY_C
-	distance = distnace_move(x1, y1, (x2 + 1), (y2  + 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), (y2 - 1));
 	if(distance < distancesMin) {
 		distancesMin = distance;
+		trueDistance = distnace_move(x1, y1, (x2 - 1), (y2 - 1), map);
 		index = 7;
-		}	
-	//RANGE ATTACK
-	if(distancesMin >= 0 && distancesMin <= DISTANCE_RANGE_ATTACK_MAX && isMonsterVisible == SDL_TRUE) {
-		monster_attack(player, ent, distancesMin);
-		//return;
 		}
+		
+	//RANGE ATTACK
 	u8 isRangeAttack = SDL_FALSE;
 	switch(ent->ch) {
 		case 'A': {
-				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
 					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, trueDistance);
 					break;
 					}
 				}
-		case 'C': {
-				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-					isRangeAttack = SDL_TRUE;
-					break;
-					}
-				}
-		case 'D': {
-				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-					isRangeAttack = SDL_TRUE;
-					break;
-					}
-			default: {
-					break;
-					}
-				}
+
 		}
 	if (isRangeAttack == SDL_TRUE){
 		return;
 	}
-	
+	u8 isMoved = 0;
 	switch(index) {
 		case 0: {
-				if(distancesMin < INF && distancesMin != 0.0f) {
+				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y)) {
 					//LOG("X++\n");
 					ent->pos.x = ent->pos.x + 1;
+					isMoved = 1;
 					}
+
 				break;
 				}
+				
 
 		case 1: {
-				if(distancesMin < INF && distancesMin != 0.0f) {
+				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y)) {
 					//LOG("X--\n");
 					ent->pos.x--;
+					isMoved = 1;
 					}
 				break;
 				}
 		case 2: {
-				if(distancesMin < INF && distancesMin != 0.0f) {
+				if(MAP_ISW(map, ent->pos.x, ent->pos.y + 1)) {
 					//LOG("Y++\n");
 					ent->pos.y++;
+					isMoved = 1;
 					}
 				break;
 				}
 		case 3: {
-				if(distancesMin < INF && distancesMin != 0.0f) {
+				if(MAP_ISW(map, ent->pos.x, ent->pos.y - 1)) {
 					//LOG("Y--\n");
 					ent->pos.y--;
+					isMoved = 1;
 					}
 				break;
 				}
 		case 4:{
-			if(distancesMin < INF && distancesMin != 0.0f) {
+			if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y - 1)) {
 				//LOG("Y--\n");
 				ent->pos.x--;
 				ent->pos.y--;
+				isMoved = 1;
 				}
 			break;
 			}
 		
 		case 5:{
-			if(distancesMin < INF && distancesMin != 0.0f) {
+			if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y - 1)) {
 				//LOG("Y--\n");
 				ent->pos.x++;
 				ent->pos.y--;
+				isMoved = 1;
 				}
 			break;
 				}
 		case 6:{
-			if(distancesMin < INF && distancesMin != 0.0f) {
+			if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y + 1)) {
 				//LOG("Y--\n");
 				ent->pos.x--;
 				ent->pos.y++;
+				isMoved = 1;
 				}
 			break;
 		}
 		case 7:{
-			if(distancesMin < INF && distancesMin != 0.0f) {
+			if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y + 1)) {
 				//LOG("Y--\n");
 				ent->pos.x++;
 				ent->pos.y++;
+				isMoved = 1;
 				}
 			break;
 		}		
@@ -938,6 +1139,11 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 				break;
 				}
 		}
+		if(isMoved == 0){
+			make_best_move(player,ent, map);
+		}
+		CLAMP(ent->pos.x, 1 , MAP_X - 1);
+		CLAMP(ent->pos.y, 1 , MAP_Y - 1);
 
 	}
 
@@ -957,7 +1163,8 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map){
 		//IF HEALTH IS A LOW RUNING MONSTER
 		//ELSE GO BESERK
 		if(Is_Monster(entity.ch)){
-		if(entity.health == 0){
+			entity.turnsToSummon++;
+			if(entity.health == 0){
 			if(rand_f64() < entity.stateChance[STATE_RESURECT]){
 				i32 health = rand()%2 + 1;
 				entity.attack[DAMAGE_BASIC]++;
@@ -997,6 +1204,16 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map){
 				entity.state = STATE_BESERK;
 			}			
 		}
+	else if(rand_f64() < entity.stateChance[STATE_SUMMON]  && entity.cooldown < entity.turnsToSummon){
+			entity.state = STATE_SUMMON;
+			entity.turnsToSummon = 0; //RESET
+#ifdef LOG_AL
+				LOG("Entity(%s):  ", entity.name);
+				LOG("Channged to a summon state\n");
+				da_append(&MESSAGES, "Summon Ghoul");
+#endif
+		}
+
 		else if(is_monster_visible(map, &entity) == SDL_TRUE){
 			if(rand_f64() < entity.stateChance[STATE_HUNTING]){
 				entity.state = STATE_HUNTING;
@@ -1080,19 +1297,20 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			else if(entity.state == STATE_WANDERING){
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				i32 chance = rand()%2;
-				if(chance)  {make_run_move(player, &entity, map);}
-				else        {make_best_move(player, &entity, map);}
+				if(chance)  //{make_move_diakstra(player, &entity, map);}
+					{make_run_move(player, &entity, map);}
+				else {make_move_diakstra(player, &entity, map);}
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 			}
 			else if(entity.state == STATE_HUNTING){
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				//make_run_move(player, &entity, map);
-				make_best_move(player, &entity, map);
+				make_move_diakstra(player, &entity, map);
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 			}
 			else if(entity.state == STATE_BESERK){
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-				make_best_move(player, &entity, map);
+				make_move_diakstra(player, &entity, map);
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 			}
 			else if(entity.state == STATE_RUNING){
@@ -1106,9 +1324,21 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 				entity.state = STATE_HUNTING;
 			}
+			else if(entity.state == STATE_SUMMON){
+				Entitiy* summon = create_entity(monsterChar[GHOUL_MONSTER], monsterName[GHOUL_MONSTER], 30, 3, (Position) {
+						.x = entity.pos.x, .y = entity.pos.y
+						});
+				summon->health = 2;
+				make_run_move(player, &entity, map);
+				entity.state = STATE_RUNING;		
+				entity.cooldown *=3; 	
+				da_append(entitys, *summon);			
+			}
+
+
 					
 		}
-		else{
+		/*else{
 			MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 			f64 chance = CHANCE_SPIRIT_ATTACK * (f64)COUNTMOVES;
 			CLAMP(chance, 0.0f, 0.10f);
@@ -1120,7 +1350,8 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			}
 			
 			MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-		}
+		}  */
+		
 		entitys->items[count] = entity;
 	//LOG("Colided entitys %d\n", co);
 	}
@@ -1177,12 +1408,14 @@ void player_destroy_boolder(Entitiy* player, Tile* map){
 }
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
-
+	
+	
 	state_entity(player, entitys, map);
 	move_entity(player, entitys, map);
 	block_movement(entitys, map);
 	field_of_vison(player, map);
 	increment_player_health(player);
+	
 	COUNTMOVES++;
 	if(OPENDOOR == SDL_TRUE){
 		//player_open_door(player, map);
@@ -1194,7 +1427,7 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 		picking_item_from_list(player, items);
 		PICKITEM = SDL_FALSE;
 		}
-
+	calculate_diakstra_map(player, map, entitys);	
 	}
 
 
@@ -1228,5 +1461,42 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items) {
 		}
 	}
 
-
-
+	void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys) {
+		DROP(entitys);
+	
+		for (i32 i = 0; i < MAP_X * MAP_Y; i++) {
+			map[i].distance = INF;
+		}
+	
+		MAP_DIJKSTRA(map, player->pos.x, player->pos.y) = 0.0f;
+		Position* queue = calloc(MAP_X * MAP_Y, sizeof(Position));
+		int front = 0, back = 0;
+	
+		queue[back++] = (Position){player->pos.x, player->pos.y};
+	
+		// 8 directions: N, NE, E, SE, S, SW, W, NW
+		const int dx[8] = {  0,  1, 1,  1,  0, -1, -1, -1 };
+		const int dy[8] = { -1, -1, 0,  1,  1,  1,  0, -1 };
+	
+		while (front < back) {
+			Position p = queue[front++];
+			float current_dist = MAP_DIJKSTRA(map, p.x, p.y);
+	
+			for (int dir = 0; dir < 8; dir++) {
+				int nx = p.x + dx[dir];
+				int ny = p.y + dy[dir];
+	
+				if (nx < 0 || ny < 0 || nx >= MAP_X || ny >= MAP_Y) continue;
+				if (MAP_ISW(map, nx, ny) == SDL_FALSE) continue;
+	
+				if (MAP_DIJKSTRA(map, nx, ny) > current_dist + 1.0f) {
+					MAP_DIJKSTRA(map, nx, ny) = current_dist + 1.0f;
+					queue[back++] = (Position){nx, ny};
+				}
+			}
+		}
+	
+		free(queue);
+	}
+	
+	
