@@ -15,6 +15,7 @@ typedef struct {
 	u8   isW;
 	u8   isV;
 	u8   visited;
+	f64  distance;
 	} Tile;
 	
 typedef struct {
@@ -29,7 +30,7 @@ typedef struct {
 #define MAP_ISW(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
 #define MAP_ISV(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isV
 #define MAP_VISITED(map, x, y)  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].visited
-
+#define MAP_DIJKSTRA(map, x, y) map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].distance
 
 #define CLEAR_VISON_FIELD(map){for(u64 i = 0; i < MAP_X * MAP_Y; i++){map[i].isV = SDL_FALSE;}};
 
@@ -52,6 +53,8 @@ void caved_map(Tile *map, f64 percantage);
 void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms);
 
 Tile* init_map();
+
+
 
 
 #endif
