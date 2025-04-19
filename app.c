@@ -428,6 +428,34 @@ void render_map_fov(Entitiy *player, Tile *map) {
 		}
 	}
 
+void render_map_dikstra(Entitiy *player, Tile *map) {
+	i32 radius = player->radius;
+	i32 startX = player->pos.x - radius;
+	i32 startY = player->pos.y - radius;
+	i32 stopX  = player->pos.x + radius;
+	i32 stopY  = player->pos.y + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);
+	for(i32 y  = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+				//DROP(textRect);
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+				u64 c = 0xFFFFFFF - 0xFFFFFFF * MAP_DIJKSTRA(map, x, y);
+				u8 r = (c & 0xFF000000) >> 24; 
+				u8 g = (c & 0x00FF0000) >> 16; 
+				u8 b = (c & 0x0000FF00) >> 8;
+				u8 a = (c & 0x000000FF) >> 0;
+				LOG("Color %lu\n", c);
+				SDL_SetRenderDrawColor(RENDERER, r, g, b, a);
+				SDL_RenderFillRect(RENDERER, &textRect);
+
+		}
+	}	
+}	
 
 void render_map(Tile *map, Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10+10, 20, "ROUGE GAME()", WHITE);
@@ -502,6 +530,7 @@ void render_map(Tile *map, Entitiy *player) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
 			//render_map(map, player);
 			render_map_fov(player, map);
+			//render_map_dikstra(player, map);
 			render_player(player);
 			//render_player(&monster->items[0]);
 			if(ITEMSREND == SDL_TRUE) {
