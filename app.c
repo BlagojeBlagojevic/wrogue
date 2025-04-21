@@ -444,13 +444,13 @@ void render_map_dikstra(Entitiy *player, Tile *map) {
 				i32 startX = x * FONT_W;
 				i32 startY = y * FONT_H;
 				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
-				u64 c = 0xFFFFFFF - 0xFFFFFFF * MAP_DIJKSTRA(map, x, y);
+				u64 c = 0xFFFFFFF * MAP_DIJKSTRA(map, x, y);
 				u8 r = (c & 0xFF000000) >> 24; 
 				u8 g = (c & 0x00FF0000) >> 16; 
 				u8 b = (c & 0x0000FF00) >> 8;
 				u8 a = (c & 0x000000FF) >> 0;
 				LOG("Color %lu\n", c);
-				SDL_SetRenderDrawColor(RENDERER, r, g, b, a);
+				SDL_SetRenderDrawColor(RENDERER, r, r, r, a);
 				SDL_RenderFillRect(RENDERER, &textRect);
 
 		}
