@@ -81,13 +81,16 @@ void add_room_to_map(Tile *map, Room room) {
 
 
 void add_room_wall_rectangle(Tile *map, Room room) {
-		i32 stopY = room.pos.y + room.height;
-		CLAMP(stopY, 1, MAP_Y - 2);
-		i32 stopX = room.pos.x + room.width;
-		CLAMP(stopX, 1, MAP_X - 2);
-		//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
-		for(i32 y = room.pos.y; y < stopY; y++) {
-			for(i32 x = room.pos.x; x < stopX; x++) {
+	i32 stopY = room.pos.y + room.height;
+	CLAMP(stopY, 3, MAP_Y - 2);
+	i32 stopX = room.pos.x + room.width;
+	CLAMP(stopX, 3, MAP_X - 2);
+	i32 startX = room.pos.x;
+	CLAMP(startX, 3, MAP_Y - 2);
+	i32 startY = room.pos.y - 1;
+	CLAMP(startY, 3, MAP_Y - 2);
+	for(i32 y = startY; y < stopY; y++) {
+		for(i32 x = startX; x < stopX; x++) {
 				if(y == room.pos.y && MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
 					if(MAP_CH(map, x, y) != ','){
 						MAP_CH(map, x, y)  = '/';
@@ -129,19 +132,23 @@ void add_room_wall_rectangle(Tile *map, Room room) {
 		}
 void add_room_wall_circle(Tile *map, Room room) {
 			i32 stopY = room.pos.y + room.height;
-			CLAMP(stopY, 1, MAP_Y - 2);
+			CLAMP(stopY, 3, MAP_Y - 2);
 			i32 stopX = room.pos.x + room.width;
-			CLAMP(stopX, 1, MAP_X - 2);
+			CLAMP(stopX, 3, MAP_X - 2);
+			i32 startX = room.pos.x;
+			CLAMP(startX, 3, MAP_Y - 2);
+			i32 startY = room.pos.y - 1;
+			CLAMP(startY, 3, MAP_Y - 2);
 			f64 radius = DISTANCE(room.pos.x, room.pos.y, room.center.x, room.center.y)-3;
 			CLAMP(radius, 6.0f, INF);
 			//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
-			for(i32 y = room.pos.y; y < stopY; y++) {
-				for(i32 x = room.pos.x; x < stopX; x++) {
+			for(i32 y = startY; y < stopY; y++) {
+				for(i32 x = startX; x < stopX; x++) {
 					f64 distance = (x - room.center.x)*(x - room.center.x) + (y - room.center.y)*(y - room.center.y);
 
 					//LOG("Distance %f Radius %f\n", distance, radius);
 					if(distance > (radius*radius)){
-						if(MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
+						if(MAP_CH(map, x, y) != ','  && ((y-1) != 0) &&  MAP_CH(map, x, y-1) != ',')  {
 							if(MAP_CH(map, x, y) != ','){
 								MAP_CH(map, x, y)  = '/';
 								MAP_ISW(map, x, y) = SDL_FALSE;
@@ -185,12 +192,16 @@ void add_room_wall_circle(Tile *map, Room room) {
 	
 void add_room_wall_blob(Tile *map, Room room){
 	i32 stopY = room.pos.y + room.height;
-	CLAMP(stopY, 1, MAP_Y - 2);
+	CLAMP(stopY, 3, MAP_Y - 2);
 	i32 stopX = room.pos.x + room.width;
-	CLAMP(stopX, 1, MAP_X - 2);
-	for(i32 y = room.pos.y - 1; y < stopY; y++) {
-		for(i32 x = room.pos.x; x < stopX; x++) {
-			if(MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
+	CLAMP(stopX, 3, MAP_X - 2);
+	i32 startX = room.pos.x;
+	CLAMP(startX, 3, MAP_Y - 2);
+	i32 startY = room.pos.y - 1;
+	CLAMP(startY, 3, MAP_Y - 2);
+	for(i32 y = startY; y < stopY; y++) {
+		for(i32 x = startX; x < stopX; x++) {
+			if(MAP_CH(map, x, y) != ','  && ((y-1) != 0) &&   MAP_CH(map, x, y-1) != ',')  {
 				if(MAP_CH(map, x, y) != ','){
 					MAP_CH(map, x, y)  = '/';
 					MAP_ISW(map, x, y) = SDL_FALSE;
@@ -536,7 +547,7 @@ Tile* init_map() {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	generete_dungons(map, 5, 20);
+	generete_dungons(map, 20, 200);
 	return map;
 	}
 
