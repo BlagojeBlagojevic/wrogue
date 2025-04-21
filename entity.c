@@ -1406,8 +1406,9 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			}
 			else if(entity.state == STATE_SPELL){
 				switch (entity.spell.type){
-					entity.spell.passedTurns = 0;
+					
 					case SPELL_DECRESE_MAX_HEALTH:{
+					entity.spell.passedTurns = 0;
 					char* msg = "You are cursed -1 max health";
 					da_append(&MESSAGES, msg);
 					player->maxHealth--;
