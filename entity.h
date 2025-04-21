@@ -31,6 +31,7 @@ typedef enum {
 	ACOLAYT_MONSTER,
 	GHOUL_MONSTER,
 	NECROMANCER_MONSTER,
+	BANSHIE_MONSTER,
 	NUM_MONSTER
 	//UPDATE ARR
 	} Monster_Types;
@@ -40,13 +41,14 @@ typedef enum {
 
 
 
-static const char* monsterChar = "MAGN   ";
+static const char* monsterChar = "MAGNB   ";
 
 static const char* monsterName[] = {
 	"Monster",
 	"Acolayt",
 	"Ghoul",
 	"Necromancer",
+	"Banshie",
 	"Crow",
 	"Demon",
 	"Ghost",
@@ -61,8 +63,27 @@ typedef enum{
 	STATE_BESERK,
 	STATE_RESURECT,
 	STATE_SUMMON, 
+	STATE_SPELL,
 	STATE_NUM
 }State_Entity; 	
+
+typedef enum{
+	SPELL_SUMONM_GHOUL,
+	SPELL_DECRESE_MAX_HEALTH,
+	SPELL_NUM
+}Spell_Type;
+
+typedef struct spell{
+	Spell_Type type;
+	i32 value;
+	u8 passedTurns;
+	u8 cooldown;
+	
+}Spell;
+
+#define SPELL_SUMONM_GHOUL_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = GHOUL_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 20;};
+#define SPELL_DECRESE_MAX_HEALTH_EXPORT(entitiy){entitiy.spell.type = SPELL_DECRESE_MAX_HEALTH;entitiy.spell.value  = -1; entitiy.spell.passedTurns = 30; entitiy.spell.cooldown = 30;};
+
 
 
 typedef struct Entity Entitiy;
@@ -86,10 +107,7 @@ typedef struct Entity {
 	f64 lifeStealChance;
 	u8 lifeStealValue;
 	
-	Monster_Types typesToSummon;
-	u8 summondMonsters;
-	u8 turnsToSummon;
-	u8 cooldown;
+	Spell spell;
 
 	} Entitiy;
 
@@ -132,6 +150,7 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items);
 SDL_bool check_if_item_and_player_colide(Entitiy* player, Item* item);
 void picking_item_from_list(Entitiy* entity, Item_DA *items);
 
-void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys);
+void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32 goalX, i32 goalY);
+
 
 #endif
