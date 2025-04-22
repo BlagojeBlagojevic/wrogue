@@ -32,6 +32,15 @@ typedef enum {
 	GHOUL_MONSTER,
 	NECROMANCER_MONSTER,
 	BANSHIE_MONSTER,
+	SPIDER_MONSTER,
+	DRAGON_MONSTER,
+
+	//ORCS
+	GRUNT_MONSTER,
+	BERSERKER_MONSTER,
+	ARCHER_MONSTER,
+
+
 	NUM_MONSTER
 	//UPDATE ARR
 	} Monster_Types;
@@ -41,7 +50,7 @@ typedef enum {
 
 
 
-static const char* monsterChar = "MAGNB   ";
+static const char* monsterChar = "MAGNBFDOVA   ";
 
 static const char* monsterName[] = {
 	"Monster",
@@ -49,6 +58,11 @@ static const char* monsterName[] = {
 	"Ghoul",
 	"Necromancer",
 	"Banshie",
+	"Spider",
+	"Dragon",
+	"Grunt",
+	"Berserker",
+	"Ork Archer",
 	"Crow",
 	"Demon",
 	"Ghost",
@@ -70,6 +84,8 @@ typedef enum{
 typedef enum{
 	SPELL_SUMONM_GHOUL,
 	SPELL_DECRESE_MAX_HEALTH,
+	SPELL_STUN,
+	SPELL_DOUBLE_MOVE,
 	SPELL_NUM
 }Spell_Type;
 
@@ -83,8 +99,10 @@ typedef struct spell{
 
 #define SPELL_SUMONM_GHOUL_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = GHOUL_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 20;};
 #define SPELL_DECRESE_MAX_HEALTH_EXPORT(entitiy){entitiy.spell.type = SPELL_DECRESE_MAX_HEALTH;entitiy.spell.value  = -1; entitiy.spell.passedTurns = 30; entitiy.spell.cooldown = 30;};
+#define SPELL_SPIDER_EXPORT(entitiy){entitiy.spell.type = SPELL_STUN;entitiy.spell.value  = 2; entitiy.spell.passedTurns = 10; entitiy.spell.cooldown = 10;}
+#define SPELL_DRAGON_EXPORT(entitiy){entitiy.spell.type = SPELL_STUN;entitiy.spell.value  = 4; entitiy.spell.passedTurns = 10; entitiy.spell.cooldown = 10;}
 
-
+#define SPELL_BESERKER_EXPORT(entitiy){entitiy.spell.type = SPELL_DOUBLE_MOVE; entitiy.spell.value  = 2; entitiy.spell.passedTurns = 5; entitiy.spell.cooldown = 5;}
 
 typedef struct Entity Entitiy;
 
@@ -106,7 +124,7 @@ typedef struct Entity {
 	f64 stateChance[STATE_NUM];
 	f64 lifeStealChance;
 	u8 lifeStealValue;
-	
+	u8 isStunded;
 	Spell spell;
 
 	} Entitiy;
@@ -121,7 +139,7 @@ typedef struct {
 //later it will be load from file for now  monster_definitions_export()
 static Entitiy monsters[NUM_MONSTER];
 
-Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos);
+Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos, SDL_Color color);
 i32 roll_the_dice(i32 attack, i32 defence);
 void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, Damage_Types type);
 void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage);
