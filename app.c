@@ -40,9 +40,7 @@ void render_player(Entitiy *player) {
 	
 	SDL_Color color;
 	if(player->health >= 3) {
-		color = (SDL_Color) {
-			255, 255, 255, 0
-			};
+		color = player->color;
 		}
 	else if(player->health == 2) {
 		color = (SDL_Color) {
@@ -65,7 +63,12 @@ void render_player(Entitiy *player) {
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	MOVMENT = SDL_FALSE;  //NOT PROB
-	if(key == UP_ARROW || key == KEY_W) {
+	if(player->isStunded != 0){
+		MOVMENT = SDL_TRUE;
+		player->isStunded--;
+		CLAMP(player->isStunded, 0, INF);
+	}
+	else if(key == UP_ARROW || key == KEY_W) {
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y--;
