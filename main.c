@@ -29,7 +29,7 @@ int main() {
 	ITEMSREND = SDL_FALSE;
 	Entitiy* player = create_entity('@', "Some Name", 10, 10, (Position) {
 		10, 10
-		});
+		}, WHITE);
 	player->attack[0]  = 2;
 	player->defence[0] = 2;
 	player->attack[1]  = 2;
