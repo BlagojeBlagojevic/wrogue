@@ -1,10 +1,11 @@
 #include "entity.h"
 
 
-Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos) {
+Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos, SDL_Color color) {
 	Entitiy* entity = calloc(1, sizeof(Entitiy));
 	entity->health = health;
 	entity->maxHealth = health;
+	
 	if(ch != '@') {
 		for(Monster_Types m = 0; m < NUM_MONSTER; m++) {
 			if(ch == monsterChar[m]) {
@@ -16,7 +17,9 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 		entity->ch = ch;
 		entity->radius = radius;
 		}
-
+	if(entity->color.r == 0 && entity->color.g == 0 && entity->color.b == 0){
+		entity->color = color;
+	}
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
 	entity->isAlive = SDL_TRUE;
@@ -458,14 +461,14 @@ void monster_definitions_export() {
 	monsters[GHOUL_MONSTER].maxHealth = 7;
 
 	monsters[GHOUL_MONSTER].isRunning = SDL_FALSE;
-	monsters[GHOUL_MONSTER].runWoundedPercent = 0.6f;
+	monsters[GHOUL_MONSTER].runWoundedPercent = 0.9f;
 	monsters[GHOUL_MONSTER].state = STATE_WANDERING;
 
 	monsters[GHOUL_MONSTER].stateChance[STATE_RUNING] = 0.01f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_HUNTING] = 0.7f;
-	monsters[GHOUL_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
-	monsters[GHOUL_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_WANDERING] = 0.03f;
+	monsters[GHOUL_MONSTER].stateChance[STATE_RESTING] = 0.01f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_BESERK] = 0.2f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
@@ -508,7 +511,7 @@ void monster_definitions_export() {
 	SPELL_SUMONM_GHOUL_EXPORT(monsters[NECROMANCER_MONSTER]);	
 
 	
-	//NECROMANCER_MONSTER 
+	//BANSHIE_MONSTER 
 	monsters[BANSHIE_MONSTER].radius = 5;
 	monsters[BANSHIE_MONSTER].ch = 'B';
 	monsters[BANSHIE_MONSTER].attack[DAMAGE_BASIC]  = 0;
@@ -531,7 +534,7 @@ void monster_definitions_export() {
 	monsters[BANSHIE_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.5f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_HUNTING] = 0.4f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
-	monsters[BANSHIE_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[BANSHIE_MONSTER].stateChance[STATE_RESTING] = 0.05f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
@@ -545,6 +548,216 @@ void monster_definitions_export() {
 
 	SPELL_DECRESE_MAX_HEALTH_EXPORT(monsters[BANSHIE_MONSTER]);
 	
+	//SPIDER_MONSTER 
+	monsters[SPIDER_MONSTER].radius = 5;
+	monsters[SPIDER_MONSTER].ch = 'F';
+	monsters[SPIDER_MONSTER].attack[DAMAGE_BASIC]  = 0;
+	monsters[SPIDER_MONSTER].attack[DAMAGE_POISON] = 3;
+	monsters[SPIDER_MONSTER].attack[DAMAGE_RANGE]  = 3;
+	monsters[BANSHIE_MONSTER].attack[DAMAGE_SPELL] = 0;
+	//DEF  light
+	monsters[SPIDER_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[SPIDER_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[SPIDER_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[SPIDER_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[SPIDER_MONSTER].health = 5;
+	monsters[SPIDER_MONSTER].maxHealth = 5;
+
+	monsters[SPIDER_MONSTER].isRunning = SDL_FALSE;
+	monsters[SPIDER_MONSTER].runWoundedPercent = 0.9f;
+	monsters[SPIDER_MONSTER].state = STATE_WANDERING;
+
+	monsters[SPIDER_MONSTER].stateChance[STATE_RUNING] = 0.05f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.1f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
+
+	
+	
+
+	monsters[SPIDER_MONSTER].lifeStealChance = 0.01f;
+	monsters[SPIDER_MONSTER].lifeStealValue  = 1.0f;
+
+	SPELL_SPIDER_EXPORT(monsters[SPIDER_MONSTER]);
+	
+		//SPIDER_MONSTER 
+	monsters[SPIDER_MONSTER].radius = 20;
+	monsters[SPIDER_MONSTER].ch = 'F';
+	monsters[SPIDER_MONSTER].attack[DAMAGE_BASIC]  = 0;
+	monsters[SPIDER_MONSTER].attack[DAMAGE_POISON] = 3;
+	monsters[SPIDER_MONSTER].attack[DAMAGE_RANGE]  = 3;
+	monsters[SPIDER_MONSTER].attack[DAMAGE_SPELL] = 0;
+	//DEF  light
+	monsters[SPIDER_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[SPIDER_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[SPIDER_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[SPIDER_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[SPIDER_MONSTER].health = 5;
+	monsters[SPIDER_MONSTER].maxHealth = 5;
+
+	monsters[SPIDER_MONSTER].isRunning = SDL_FALSE;
+	monsters[SPIDER_MONSTER].runWoundedPercent = 0.9f;
+	monsters[SPIDER_MONSTER].state = STATE_WANDERING;
+
+	monsters[SPIDER_MONSTER].stateChance[STATE_RUNING] = 0.05f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.1f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
+
+	
+	
+
+	monsters[SPIDER_MONSTER].lifeStealChance = 0.01f;
+	monsters[SPIDER_MONSTER].lifeStealValue  = 1.0f;
+
+	SPELL_SPIDER_EXPORT(monsters[SPIDER_MONSTER]);
+	//DRAGON_MONSTER 
+	monsters[DRAGON_MONSTER].radius = 30;
+	monsters[DRAGON_MONSTER].ch = 'D';
+	monsters[DRAGON_MONSTER].attack[DAMAGE_BASIC]  = 5;
+	monsters[DRAGON_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[DRAGON_MONSTER].attack[DAMAGE_RANGE]  = 5;
+	monsters[DRAGON_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  light
+	monsters[DRAGON_MONSTER].defence[DAMAGE_BASIC]  = 3;
+	monsters[DRAGON_MONSTER].defence[DAMAGE_POISON] = 3;
+	monsters[DRAGON_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[DRAGON_MONSTER].defence[DAMAGE_SPELL]  = 3;
+	monsters[DRAGON_MONSTER].health = 20;
+	monsters[DRAGON_MONSTER].maxHealth = 20;
+
+	monsters[DRAGON_MONSTER].isRunning = SDL_FALSE;
+	monsters[DRAGON_MONSTER].runWoundedPercent = 0.99f;
+	monsters[DRAGON_MONSTER].state = STATE_WANDERING;
+
+	monsters[DRAGON_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_WANDERING] = 0.05f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_RESTING] = 0.05f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_BESERK] = 0.1f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
+	monsters[DRAGON_MONSTER].color = BLUE;
+	
+	monsters[DRAGON_MONSTER].lifeStealChance = 0.1f;
+	monsters[DRAGON_MONSTER].lifeStealValue  = 1.0f;
+
+	SPELL_DRAGON_EXPORT(monsters[DRAGON_MONSTER]);
+
+//ORCS
+	//GRUNT 
+	monsters[GRUNT_MONSTER].radius = 30;
+	monsters[GRUNT_MONSTER].ch = 'O';
+	monsters[GRUNT_MONSTER].attack[DAMAGE_BASIC]  = 3;
+	monsters[GRUNT_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[GRUNT_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[GRUNT_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  unarmord
+	monsters[GRUNT_MONSTER].defence[DAMAGE_BASIC]  = 3;
+	monsters[GRUNT_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[GRUNT_MONSTER].defence[DAMAGE_RANGE]  = 3;
+	monsters[GRUNT_MONSTER].defence[DAMAGE_SPELL]  = 1;
+	monsters[GRUNT_MONSTER].health = 10;
+	monsters[GRUNT_MONSTER].maxHealth = 10;
+
+	monsters[GRUNT_MONSTER].isRunning = SDL_FALSE;
+	monsters[GRUNT_MONSTER].runWoundedPercent = 0.6f;
+	monsters[GRUNT_MONSTER].state = STATE_WANDERING;
+
+	monsters[GRUNT_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_HUNTING] = 0.8f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_WANDERING] = 0.3f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_RESTING] = 0.1f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_BESERK] = 0.2f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[GRUNT_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+
+	monsters[GRUNT_MONSTER].lifeStealChance = 0.3f;
+	monsters[GRUNT_MONSTER].lifeStealValue  = 1.0f;	
+	monsters[GRUNT_MONSTER].color = GREEN;
+
+//BERSERKER
+	monsters[BERSERKER_MONSTER].radius = 30;
+	monsters[BERSERKER_MONSTER].ch = 'V';
+	monsters[BERSERKER_MONSTER].attack[DAMAGE_BASIC]  = 4;
+	monsters[BERSERKER_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[BERSERKER_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[BERSERKER_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  unarmord
+	monsters[BERSERKER_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[BERSERKER_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[BERSERKER_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[BERSERKER_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[BERSERKER_MONSTER].health = 4;
+	monsters[BERSERKER_MONSTER].maxHealth = 4;
+
+	monsters[BERSERKER_MONSTER].isRunning = SDL_FALSE;
+	monsters[BERSERKER_MONSTER].runWoundedPercent = 0.6f;
+	monsters[BERSERKER_MONSTER].state = STATE_WANDERING;
+
+	monsters[BERSERKER_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_WANDERING] = 0.2f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_RESTING] = 0.05f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_BESERK] = 0.99f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[BERSERKER_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+	
+
+	monsters[BERSERKER_MONSTER].lifeStealChance = 0.01f;
+	monsters[BERSERKER_MONSTER].lifeStealValue  = 1.0f;	
+	monsters[BERSERKER_MONSTER].color = GREEN;
+
+	monsters[BERSERKER_MONSTER].stateChance[STATE_SPELL] = 0.8f;
+	SPELL_BESERKER_EXPORT(monsters[BERSERKER_MONSTER]);
+
+//ARCHER
+	monsters[ARCHER_MONSTER].radius = 20;
+	monsters[ARCHER_MONSTER].ch = 'A';
+	monsters[ARCHER_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[ARCHER_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[ARCHER_MONSTER].attack[DAMAGE_RANGE]  = 3;
+	monsters[ARCHER_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  light
+	monsters[ARCHER_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[ARCHER_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[ARCHER_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[ARCHER_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[ARCHER_MONSTER].health = 4;
+	monsters[ARCHER_MONSTER].maxHealth = 4;
+
+	monsters[ARCHER_MONSTER].isRunning = SDL_FALSE;
+	monsters[ARCHER_MONSTER].runWoundedPercent = 0.9f;
+	monsters[ARCHER_MONSTER].state = STATE_WANDERING;
+
+	monsters[ARCHER_MONSTER].stateChance[STATE_RUNING] = 0.5f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.8f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_HUNTING] = 0.1f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
+	monsters[ARCHER_MONSTER].stateChance[STATE_SPELL]  = 0.0f;
+
+	monsters[ARCHER_MONSTER].lifeStealChance = 0.01f;
+	monsters[ARCHER_MONSTER].lifeStealValue  = 1.0f;
+
+	monsters[ARCHER_MONSTER].color = GREEN;
 
 	//return monsters;
 	}
@@ -557,12 +770,12 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 			if(MAP_CH(map, x, y) != '#') {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%(NUM_MONSTER - 1) + 1;
-					//type = BANSHIE_MONSTER;
+					//type = ARCHER_MONSTER;
 					i32 vison = rand()%40+1;
 					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
 						.x = x, .y = y
-						});
+						}, WHITE);
 					if(rand_f64() < 0.5f) {
 						u64 count = monsters->count;
 						if(count > 0) {
@@ -731,130 +944,144 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 	i32 y1 = player->pos.y;
 	i32 x2 = ent->pos.x;
 	i32 y2 = ent->pos.y;
-	f64 distance  = DISTANCE(x1, y1, x2, y2);
-
+	CLAMP(x2, 1 , MAP_X - 2);
+	CLAMP(y2, 1 , MAP_Y - 2);
+	f64 distance  =  MAP_DIJKSTRA(map,x2, y2);
+	
 	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
 
 	//+1x
-	f64 distancesMax = distnace_move(x1, y1, (x2 + 1), y2, map);
+	f64 distancesMax = MAP_DIJKSTRA(map, (x2 + 1), y2);
 	if(distancesMax == INF) {
 		distancesMax = 0.0f;
 		}
 	i32 index = 0;
 	//-1x
-	distance = distnace_move(x1, y1, (x2 - 1), y2, map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), y2);
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 1;
 		}
 	//+1y
-	distance = distnace_move(x1, y1, x2, (y2 + 1), map);
+	distance = MAP_DIJKSTRA(map, x2, (y2 + 1));
 	if(distance > distancesMax && distance != INF) {
 		distancesMax = distance;
 		index = 2;
 		}
 	//-1y
-	distance = distnace_move(x1, y1, x2, (y2  - 1), map);
+	distance = MAP_DIJKSTRA(map, x2, (y2  - 1));
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 3;
 		}
 	//-1y -1x KEY_Q
-	distance = distnace_move(x1, y1, (x2 - 1), (y2  - 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), (y2  - 1));
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 4;
 		}
 	//-1y +1x KEY_E_
-	distance = distnace_move(x1, y1, (x2 + 1), (y2  - 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 + 1), (y2  - 1));
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 5;
 		}
 	//1y -1x KEY_Y
-	distance = distnace_move(x1, y1, (x2 - 1), (y2  + 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 - 1), (y2  + 1));
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 6;
 		}
 		//1y 1x KEY_C
-	distance = distnace_move(x1, y1, (x2 + 1), (y2  + 1), map);
+	distance = MAP_DIJKSTRA(map, (x2 + 1), (y2  + 1));
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 7;
 		}	
-
-	switch(index) {
-		case 0: {
-				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN && distancesMax != INF) {
-					//LOG("X++\n");
-					ent->pos.x = ent->pos.x + 1;
+	u8 isMoved = 0;
+		switch(index) {
+			case 0: {
+					if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y)) {
+						//LOG("X++\n");
+						ent->pos.x = ent->pos.x + 1;
+						isMoved = 1;
+						}
+	
+					break;
 					}
-				break;
-				}
-
-		case 1: {
-				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-					//LOG("X--\n");
-					ent->pos.x--;
+					
+	
+			case 1: {
+					if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y)) {
+						//LOG("X--\n");
+						ent->pos.x--;
+						isMoved = 1;
+						}
+					break;
 					}
-				break;
-				}
-		case 2: {
-				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-					//LOG("Y++\n");
-					ent->pos.y++;
+			case 2: {
+					if(MAP_ISW(map, ent->pos.x, ent->pos.y + 1)) {
+						//LOG("Y++\n");
+						ent->pos.y++;
+						isMoved = 1;
+						}
+					break;
 					}
-				break;
-				}
-		case 3: {
-				if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-					//LOG("Y--\n");
-					ent->pos.y--;
+			case 3: {
+					if(MAP_ISW(map, ent->pos.x, ent->pos.y - 1)) {
+						//LOG("Y--\n");
+						ent->pos.y--;
+						isMoved = 1;
+						}
+					break;
 					}
-				break;
-				}
 			case 4:{
-					if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-						//LOG("Y--\n");
-						ent->pos.x--;
-						ent->pos.y--;
-						}
-					break;
+				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y - 1)) {
+					//LOG("Y--\n");
+					ent->pos.x--;
+					ent->pos.y--;
+					isMoved = 1;
 					}
-				
-			case 5:{
-					if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-						//LOG("Y--\n");
-						ent->pos.x++;
-						ent->pos.y--;
-						}
-					break;
-						}
-			case 6:{
-					if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-						//LOG("Y--\n");
-						ent->pos.x--;
-						ent->pos.y++;
-						}
-					break;
-				}
-			case 7:{
-					if(distancesMax >= DISTANCE_RANGE_ATTACK_MIN  && distancesMax != INF) {
-						//LOG("Y--\n");
-						ent->pos.x++;
-						ent->pos.y++;
-						}
-					break;
-				}		
-				
-		default: {
-				ASSERT("Unreachable");
 				break;
 				}
-		}
-		CLAMP(ent->pos.x, 1, MAP_X - 1);
-		CLAMP(ent->pos.y, 1, MAP_Y - 1);
+			
+			case 5:{
+				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y - 1)) {
+					//LOG("Y--\n");
+					ent->pos.x++;
+					ent->pos.y--;
+					isMoved = 1;
+					}
+				break;
+					}
+			case 6:{
+				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y + 1)) {
+					//LOG("Y--\n");
+					ent->pos.x--;
+					ent->pos.y++;
+					isMoved = 1;
+					}
+				break;
+			}
+			case 7:{
+				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y + 1)) {
+					//LOG("Y--\n");
+					ent->pos.x++;
+					ent->pos.y++;
+					isMoved = 1;
+					}
+				break;
+			}		
+			default: {
+					ASSERT("Unreachable");
+					break;
+					}
+			}
+			if(isMoved == 0){
+				make_best_move(player,ent, map);
+			}
+		CLAMP(ent->pos.x, 2, MAP_X - 2);
+		CLAMP(ent->pos.y, 2, MAP_Y - 2);
 
 	}
 	void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
@@ -1111,7 +1338,22 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 					monster_attack(player, ent, trueDistance);
 					break;
 					}
-				}		
+				}
+		case 'F': {
+			if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+				isRangeAttack = SDL_TRUE;
+				monster_attack(player, ent, trueDistance);
+				break;
+					}
+				}
+		
+		case 'D': {
+			if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+				isRangeAttack = SDL_TRUE;
+				monster_attack(player, ent, trueDistance);
+				break;
+					}
+				}						
 
 		}
 	if (isRangeAttack == SDL_TRUE){
@@ -1244,104 +1486,73 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map){
 		else if(entity.health == 1){
 			if(rand_f64() < entity.stateChance[STATE_RUNING]){
 				entity.state = STATE_RUNING;
-#ifdef LOG_AL
-				LOG("Entity(%s):  ", entity.name);
-				LOG("Channged to a running state\n");
-#endif				
+		
 			}
 			else if(rand_f64() < CHANCE_INCREMENT_HEALTH){
 				entity.health++;
 				entity.state = STATE_HUNTING;
 			}
 			else{
-#ifdef LOG_AL
-				LOG("Entity(%s):  ", entity.name);
-				LOG("Channged to a beserk state\n");
-#endif
+
 				entity.state = STATE_BESERK;
 			}			
 		}
+	else if(player->health <= 3){
+		entity.state = STATE_HUNTING;
+
+	}
 	else if(rand_f64() < entity.stateChance[STATE_SUMMON]  && entity.spell.cooldown < entity.spell.passedTurns){
 			entity.state = STATE_SUMMON;
 			entity.spell.passedTurns = 0; //RESET
-#ifdef LOG_AL
-				LOG("Entity(%s):  ", entity.name);
-				LOG("Channged to a summon state\n");
-				da_append(&MESSAGES, "Summon Ghoul");
-#endif
+
 		}
 	else if	(is_monster_visible(map, &entity) == SDL_TRUE && rand_f64() < entity.stateChance[STATE_SPELL] && entity.spell.passedTurns > entity.spell.cooldown){
 		i32 distance = DISTANCE(player->pos.x, player->pos.y, entity.pos.x, entity.pos.y);
 		if(distance < DISTANCE_RANGE_ATTACK_MAX + 2){
 			entity.state = STATE_SPELL;
 			entity.spell.passedTurns = 0;
-#ifdef LOG_AL
-			LOG("Entity(%s):  ", entity.name);
-			LOG("Channged to a casting spell state from wandering\n");
-#endif			
+			
 		}
 		else{
 			entity.state = STATE_MOVING_AWAY_RANGE;
 		}
 	}
+	else if(entity.state == STATE_WANDERING){
+		if(is_monster_visible(map, &entity) == SDL_TRUE){
+			if(rand_f64() < entity.stateChance[STATE_HUNTING]){
+				entity.state  = STATE_HUNTING;
+
+			}
+		}
+	else if(rand_f64() < entity.stateChance[STATE_RESTING]){
+			entity.state  = STATE_RESTING;
+
+		}
+	}
+	else if(entity.state == STATE_HUNTING){
+		if(rand_f64() < entity.stateChance[STATE_RESTING]){
+				entity.state  = STATE_RESTING;da_append(&MESSAGES, "Stop");
+		}
+	}
+	
+	else if(entity.state == STATE_RESTING){
+		if(rand_f64() < entity.stateChance[STATE_WANDERING]){
+			entity.state  = STATE_WANDERING;
+
+		}
+	}
 	else if(is_monster_visible(map, &entity) == SDL_TRUE){
 		if(rand_f64() < entity.stateChance[STATE_HUNTING]){
 				entity.state = STATE_HUNTING;
-#ifdef LOG_AL
-			    LOG("Entity(%s):  ", entity.name);
-			    LOG("Channged to a hunting state\n");
-#endif
 			}
 			else if(rand_f64() < entity.stateChance[STATE_MOVING_AWAY_RANGE]){
 				entity.state = STATE_MOVING_AWAY_RANGE;
-#ifdef LOG_AL
-			    LOG("Entity(%s):  ", entity.name);
-			    LOG("Channged to a moving away state\n");
-#endif
 			}
 			else if(rand_f64() < entity.stateChance[STATE_RUNING]){
 				entity.state = STATE_RUNING;
 			}
 		}
-		else if(entity.state == STATE_WANDERING){
-			if(is_monster_visible(map, &entity) == SDL_TRUE){
-				if(rand_f64() < entity.stateChance[STATE_HUNTING]){
-					entity.state  = STATE_HUNTING;
-#ifdef LOG_AL
-					LOG("Entity(%s):  ", entity.name);
-					LOG("Channged to a hunting state from wandering\n");
-#endif
-				}
-			}
-		else if(rand_f64() < entity.stateChance[STATE_RESTING]){
-				entity.state  = STATE_RESTING;
-#ifdef LOG_AL
-				LOG("Entity(%s):  ", entity.name);
-				LOG("Channged to a resting state\n");
-#endif
-			}
-		}
-		else if(entity.state == STATE_HUNTING){
-			if(is_monster_visible(map, &entity) == SDL_FALSE){
-				if(rand_f64() > entity.stateChance[STATE_WANDERING]){
-					entity.state  = STATE_WANDERING;
-#ifdef LOG_AL
-					LOG("Entity(%s):  ", entity.name);
-					LOG("Channged to a wandering state\n");
-#endif
-				}
-			}
-		}
 		
-		else if(entity.state == STATE_RESTING){
-			if(rand_f64() < entity.stateChance[STATE_WANDERING]){
-				entity.state  = STATE_WANDERING;
-#ifdef LOG_AL
-				LOG("Entity(%s):  ", entity.name); 
-				LOG("Channged to a wandering state\n");
-#endif
-			}
-		}
 	}
 	else if(entity.ch == 'S'){
 		entity.state = STATE_WANDERING;
@@ -1362,7 +1573,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 		{
 			if(entity.state == STATE_RESTING){
 				//NOTHING 
-				//LOG("Resting");
+				
 			}
 			else if(entity.state == STATE_WANDERING){
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
@@ -1396,13 +1607,12 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			else if(entity.state == STATE_SUMMON){
 				Entitiy* summon = create_entity(monsterChar[GHOUL_MONSTER], monsterName[GHOUL_MONSTER], 30, 3, (Position) {
 						.x = entity.pos.x, .y = entity.pos.y
-						});
+						}, WHITE);
 				summon->health = 2;
 				make_run_move(player, &entity, map);
 				entity.state = STATE_RUNING;		
 				entity.spell.cooldown *=3; 	
 				da_append(entitys, *summon);
-
 			}
 			else if(entity.state == STATE_SPELL){
 				switch (entity.spell.type){
@@ -1418,7 +1628,24 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 					CLAMP(player->health, 0, INF);
 					break;
 				}
-					
+
+				case SPELL_STUN:{
+					entity.spell.passedTurns = 0;
+					char* msg = "You are stunded";
+					player->isStunded += entity.spell.value;
+					da_append(&MESSAGES, msg);
+					break;
+				}
+				
+				case SPELL_DOUBLE_MOVE:{
+					entity.spell.passedTurns = 0;
+					for(i32 i = 0; i < entity.spell.value; i++){
+						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+						make_best_move(player, &entity, map);
+						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+					}
+					break;
+				}	
 				
 				default:
 				   ASSERT("Unrechable\n");
@@ -1606,6 +1833,25 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items) {
 				
 			}
 		}  */
+		for(u64 i = 0 ; i < entitys->count; i++){
+			Entitiy ent = entitys->items[i];
+			if(Is_Monster(ent.ch)){
+				i32 startX = ent.pos.x - 2;
+				CLAMP(startX, 2, MAP_X - 2);
+				i32 startY = ent.pos.y - 2;
+				CLAMP(startY, 2, MAP_Y - 2);
+				i32 stopX = ent.pos.x - 2;
+				CLAMP(stopX, 2, MAP_X - 2);
+				i32 stopY = ent.pos.y - 2;
+				CLAMP(stopY, 2, MAP_Y - 2);
+				for (i32 y = startY; y < stopY; y++){
+					for (i32 x = startX; x < stopX ; x++){
+						MAP_DIJKSTRA(map, x, y) += 2; 
+					}
+				}
+				
+			}
+		}
 		DROP(entitys);	
 	}
 	
