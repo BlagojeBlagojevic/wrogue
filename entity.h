@@ -40,6 +40,9 @@ typedef enum {
 	BERSERKER_MONSTER,
 	ARCHER_MONSTER,
 
+	//NEUTRAL 
+	RAT_MONSTER,
+	GOBLIN_MOSNTER,
 
 	NUM_MONSTER
 	//UPDATE ARR
@@ -50,7 +53,7 @@ typedef enum {
 
 
 
-static const char* monsterChar = "MAGNBFDOVA   ";
+static const char* monsterChar = "MAGNBFDOVARK   ";
 
 static const char* monsterName[] = {
 	"Monster",
@@ -63,6 +66,8 @@ static const char* monsterName[] = {
 	"Grunt",
 	"Berserker",
 	"Ork Archer",
+	"Rat",
+	"Goblin",
 	"Crow",
 	"Demon",
 	"Ghost",
@@ -86,6 +91,7 @@ typedef enum{
 	SPELL_DECRESE_MAX_HEALTH,
 	SPELL_STUN,
 	SPELL_DOUBLE_MOVE,
+	SPELL_KABUM,
 	SPELL_NUM
 }Spell_Type;
 
@@ -103,6 +109,9 @@ typedef struct spell{
 #define SPELL_DRAGON_EXPORT(entitiy){entitiy.spell.type = SPELL_STUN;entitiy.spell.value  = 4; entitiy.spell.passedTurns = 10; entitiy.spell.cooldown = 10;}
 
 #define SPELL_BESERKER_EXPORT(entitiy){entitiy.spell.type = SPELL_DOUBLE_MOVE; entitiy.spell.value  = 2; entitiy.spell.passedTurns = 5; entitiy.spell.cooldown = 5;}
+#define SPELL_SUMONM_RAT_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = RAT_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 10;};
+#define SPELL_GOBLIN_EXPORT(entitiy){entitiy.spell.type = SPELL_KABUM;entitiy.spell.value = 10; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 4;};
+
 
 typedef struct Entity Entitiy;
 
@@ -140,10 +149,11 @@ typedef struct {
 static Entitiy monsters[NUM_MONSTER];
 
 Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Position startPos, SDL_Color color);
+void free_entity(Entitiy* ent);
 i32 roll_the_dice(i32 attack, i32 defence);
 void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, Damage_Types type);
 void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage);
-void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map);
+SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map);
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance);
 void monster_definitions_export();
 void item_definitions_export();

@@ -73,18 +73,6 @@ typedef  double   f64;
 #define rand_f64() (f64)rand()/(f64)RAND_MAX
 
 //DYNAMIC ARRAY
-#define DA_SIZE 16
-#define da_append(da, item)                                                            \
-	do {                                                                                 \
-		if ((da)->count >= (da)->capacity) {                                               \
-			(da)->capacity = (da)->capacity == 0 ? DA_SIZE : (da)->capacity*2;               \
-			(da)->items = realloc((da)->items, (da)->capacity*sizeof(*(da)->items));         \
-			assert((da)->items != NULL && "Realloc fail !!!");                               \
-			}                                                                                \
-		\
-		(da)->items[(da)->count++] = (item);                                               \
-		} while (0)
-
 
 
 
@@ -98,6 +86,28 @@ typedef  double   f64;
 #define CLAMP(X, LOW, HIGH) {if(X < LOW) X = LOW; if(X > HIGH) X = HIGH;}
 #define ASSERT(msg) {fprintf(stderr, "aseert in:\n\tFILE %s\n\tLINE %d\n\tmsg: %s" , __FILE__, __LINE__, msg); exit(-1);}
 #define DROP(var) {(void)var;}
+
+#define DA_SIZE 16
+#define da_append(da, item)                                                            \
+	do {                                                                                 \
+		if ((da)->count >= (da)->capacity) {                                               \
+			(da)->capacity = (da)->capacity == 0 ? DA_SIZE : (da)->capacity*2;               \
+			(da)->items = realloc((da)->items, (da)->capacity*sizeof(*(da)->items));         \
+			assert((da)->items != NULL && "Realloc fail !!!");                               \
+			}                                                                                \
+		\
+		(da)->items[(da)->count++] = (item);                                               \
+		} while (0)
+
+
+#define da_remove_unordered(da, i)               					   \
+do {                                             					   \
+	size_t j = (i);                              					   \
+	if(j > (da)->count){ASSERT("Not that amount of elements in da");}  \
+	(da)->items[j] = (da)->items[--(da)->count]; 					   \
+} while(0)		
+
+
 
 typedef struct {
 	u64 	count;
