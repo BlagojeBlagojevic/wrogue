@@ -78,7 +78,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y-1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -93,7 +98,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -109,7 +119,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -125,7 +140,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -141,7 +161,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y - 1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 					}
 			}
@@ -157,7 +182,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y - 1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 					}
 			}
@@ -173,7 +203,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 					}
 			}
@@ -189,7 +224,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
-				player_attack(player, &entitis->items[witchIsMonster], items, map);
+				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
+				if(isF == SDL_TRUE){
+					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
+					free_entity(&entitis->items[witchIsMonster]);
+					da_remove_unordered(entitis, witchIsMonster);
+				}
 				MOVMENT = SDL_TRUE;
 					}
 			}
