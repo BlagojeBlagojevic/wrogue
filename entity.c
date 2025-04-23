@@ -37,7 +37,10 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 
 	return entity;
 	}
-
+void free_entity(Entitiy* ent){
+	free(ent->name);
+	//free(ent);
+}
 
 
 i32 roll_the_dice(i32 attack, i32 defence) {
@@ -107,7 +110,7 @@ void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 	}
 
 //TBD attack type
-void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
+SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
 	DROP(map);
 	i32 damage = roll_the_dice(player->attack[0], entity->defence[0]);
 	entity->health-=damage;
@@ -156,9 +159,13 @@ void player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) 
 					da_append(items, item);
 					}
 				}
-
 			}
+			return SDL_TRUE;
 		}
+		else{
+			return SDL_FALSE;
+		}
+		
 	}
 
 
@@ -759,6 +766,66 @@ void monster_definitions_export() {
 
 	monsters[ARCHER_MONSTER].color = GREEN;
 
+//NEUTRAL ANIMALS
+	monsters[RAT_MONSTER].radius = 10;
+	monsters[RAT_MONSTER].ch = 'R';
+	monsters[RAT_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[RAT_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[RAT_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[RAT_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[RAT_MONSTER].defence[DAMAGE_BASIC]  = 0;
+	monsters[RAT_MONSTER].defence[DAMAGE_POISON] = 0;
+	monsters[RAT_MONSTER].defence[DAMAGE_RANGE]  = 0;
+	monsters[RAT_MONSTER].defence[DAMAGE_SPELL]  = 0;
+	monsters[RAT_MONSTER].health = 1;
+	monsters[RAT_MONSTER].maxHealth = 1;
+
+	monsters[RAT_MONSTER].isRunning = SDL_FALSE;
+	monsters[RAT_MONSTER].runWoundedPercent = 0.6f;
+	monsters[RAT_MONSTER].state = STATE_WANDERING;
+
+	monsters[RAT_MONSTER].stateChance[STATE_RUNING] = 0.6f;
+	monsters[RAT_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[RAT_MONSTER].stateChance[STATE_HUNTING] = 0.05f;
+	monsters[RAT_MONSTER].stateChance[STATE_WANDERING] = 0.5f;
+	monsters[RAT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
+	monsters[RAT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[RAT_MONSTER].stateChance[STATE_SUMMON] = 0.8f;
+	SPELL_SUMONM_RAT_EXPORT(monsters[RAT_MONSTER]);
+
+//GOBLIN
+	monsters[GOBLIN_MOSNTER].radius = 10;
+	monsters[GOBLIN_MOSNTER].ch = 'K';
+	monsters[GOBLIN_MOSNTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[GOBLIN_MOSNTER].attack[DAMAGE_POISON] = 0;
+	monsters[GOBLIN_MOSNTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[GOBLIN_MOSNTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF
+	monsters[GOBLIN_MOSNTER].defence[DAMAGE_BASIC]  = 0;
+	monsters[GOBLIN_MOSNTER].defence[DAMAGE_POISON] = 0;
+	monsters[GOBLIN_MOSNTER].defence[DAMAGE_RANGE]  = 0;
+	monsters[GOBLIN_MOSNTER].defence[DAMAGE_SPELL]  = 0;
+	monsters[GOBLIN_MOSNTER].health = 3;
+	monsters[GOBLIN_MOSNTER].maxHealth = 3;
+
+	monsters[GOBLIN_MOSNTER].isRunning = SDL_FALSE;
+	monsters[GOBLIN_MOSNTER].runWoundedPercent = 0.6f;
+	monsters[GOBLIN_MOSNTER].state = STATE_WANDERING;
+
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_RUNING] = 0.6f;
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_HUNTING] = 0.05f;
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_WANDERING] = 0.5f;
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_RESTING] = 0.3f;
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[GOBLIN_MOSNTER].stateChance[STATE_SPELL] = 0.3f;
+	SPELL_GOBLIN_EXPORT(monsters[GOBLIN_MOSNTER]);
+	
+
+
+
+
 	//return monsters;
 	}
 
@@ -770,7 +837,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 			if(MAP_CH(map, x, y) != '#') {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%(NUM_MONSTER - 1) + 1;
-					//type = ARCHER_MONSTER;
+					//type = GOBLIN_MOSNTER;
 					i32 vison = rand()%40+1;
 					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
@@ -833,6 +900,8 @@ void block_movement(Entitiy_DA *entitys, Tile *map) {
 			i32 x = entitys->items[count].pos.x;
 			i32 y = entitys->items[count].pos.y;
 			MAP_ISW(map, x, y) = SDL_TRUE;
+			free_entity(&entitys->items[count]);
+			da_remove_unordered(entitys, count);
 			}
 		}
 	}
@@ -1142,26 +1211,34 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 		u8 isRangeAttack = SDL_FALSE;
 		switch(ent->ch) {
 			case 'A': {
-					if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-						isRangeAttack = SDL_TRUE;
-						break;
-						}
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, distancesMin);
+					break;
 					}
-			case 'C': {
-					if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-						isRangeAttack = SDL_TRUE;
-						break;
-						}
+				}
+		case 'B': {
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, distancesMin);
+					break;
 					}
-			case 'D': {
-					if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-						isRangeAttack = SDL_TRUE;
-						break;
-						}
-				default: {
-						break;
-						}
+				}
+		case 'F': {
+			if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+				isRangeAttack = SDL_TRUE;
+				monster_attack(player, ent, distancesMin);
+				break;
 					}
+				}
+		
+		case 'D': {
+			if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN &&distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+				isRangeAttack = SDL_TRUE;
+				monster_attack(player, ent, distancesMin);
+				break;
+					}
+				}
 			}
 		if (isRangeAttack == SDL_TRUE){
 			return;
@@ -1605,10 +1682,14 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				entity.state = STATE_HUNTING;
 			}
 			else if(entity.state == STATE_SUMMON){
-				Entitiy* summon = create_entity(monsterChar[GHOUL_MONSTER], monsterName[GHOUL_MONSTER], 30, 3, (Position) {
+				Monster_Types type = entity.spell.value;
+				//LOG("TYPE %d", entity.spell.value);
+				Entitiy* summon = create_entity(monsterChar[type], monsterName[type], 30, 3, (Position) {
 						.x = entity.pos.x, .y = entity.pos.y
 						}, WHITE);
 				summon->health = 2;
+				summon->spell.passedTurns = 0;
+				summon->stateChance[STATE_SUMMON] = 0.00f;
 				make_run_move(player, &entity, map);
 				entity.state = STATE_RUNING;		
 				entity.spell.cooldown *=3; 	
@@ -1644,6 +1725,19 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 						make_best_move(player, &entity, map);
 						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 					}
+					break;
+				}
+				case SPELL_KABUM:{
+					i32 damage = player->health * entity.spell.value / 100;
+					CLAMP(damage, 1, INF);
+					char* msg = "Kabooom";
+					da_append(&MESSAGES, msg);
+					player->health-=damage;
+					CLAMP(player->health, 0, INF);
+					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+					//MAYBE CASAM
+					//MAP_CH(map, entity.pos.x, entity.pos.y) = '+';
+					entity.health = 0;
 					break;
 				}	
 				
