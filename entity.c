@@ -5,7 +5,7 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 	Entitiy* entity = calloc(1, sizeof(Entitiy));
 	entity->health = health;
 	entity->maxHealth = health;
-	
+
 	if(ch != '@') {
 		for(Monster_Types m = 0; m < NUM_MONSTER; m++) {
 			if(ch == monsterChar[m]) {
@@ -17,9 +17,9 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 		entity->ch = ch;
 		entity->radius = radius;
 		}
-	if(entity->color.r == 0 && entity->color.g == 0 && entity->color.b == 0){
+	if(entity->color.r == 0 && entity->color.g == 0 && entity->color.b == 0) {
 		entity->color = color;
-	}
+		}
 	entity->pos.x = startPos.x;
 	entity->pos.y = startPos.y;
 	entity->isAlive = SDL_TRUE;
@@ -37,10 +37,10 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 
 	return entity;
 	}
-void free_entity(Entitiy* ent){
+void free_entity(Entitiy* ent) {
 	free(ent->name);
 	//free(ent);
-}
+	}
 
 
 i32 roll_the_dice(i32 attack, i32 defence) {
@@ -56,7 +56,6 @@ i32 roll_the_dice(i32 attack, i32 defence) {
 	//DEFENCE
 	for(i32 i = 0; i < defence; i++) {
 		num = rand_f64();
-
 		if(num > maxDefence) {
 			maxDefence = num;
 			}
@@ -112,7 +111,26 @@ void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 //TBD attack type
 SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
 	DROP(map);
-	i32 damage = roll_the_dice(player->attack[0], entity->defence[0]);
+	i32 iPl = 0, iEnt = 0;
+	for(u64 i = 0; i < player->inventory.count; i++) {
+		Item item = player->inventory.items[i];
+		if(item.isEquiped == SDL_TRUE) {
+			//MAYBE CHANCE TO DO SOMTHING
+			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
+			iPl += item.attack[0];
+			}
+		}
+	for(u64 i = 0; i < entity->inventory.count; i++) {
+		Item item = entity->inventory.items[i];
+		if(item.isEquiped == SDL_TRUE) {
+			//MAYBE CHANCE TO DO SOMTHING
+			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
+			iEnt += item.defence[0];
+			}
+		}
+	//LOG("player att %d decOrInc %d\n", player->attack[0] ,iPl );
+	//LOG("entity def %d decOrInc %d\n", entity->attack[0] ,iEnt );
+	i32 damage = roll_the_dice(player->attack[0] + iPl, entity->defence[0] + iEnt);
 	entity->health-=damage;
 	CLAMP(entity->health, 0, 100);
 	message_attacked_by_player(player, entity, damage);
@@ -160,12 +178,12 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 					}
 				}
 			}
-			return SDL_TRUE;
+		return SDL_TRUE;
 		}
-		else{
-			return SDL_FALSE;
+	else {
+		return SDL_FALSE;
 		}
-		
+
 	}
 
 
@@ -173,16 +191,46 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 //TBD range attack type aka fire attack
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//DROP(entity);
+	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
+	i32 lf = 0;
+	f64 lfC = 0.0f;
+	for(u64 i = 0; i < player->inventory.count; i++) {
+		Item item = player->inventory.items[i];
+		if(item.isEquiped == SDL_TRUE) {
+			//MAYBE CHANCE TO DO SOMTHING
+			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
+
+			for(i32 j = 0; j < DAMAGE_NUM; j++) {
+				iD[j] += item.defence[j];
+				}
+			}
+		}
+	for(u64 i = 0; i < entity->inventory.count; i++) {
+		Item item = entity->inventory.items[i];
+		//da_append(&MESSAGES, "MonsterItems");
+		//da_append(&MESSAGES, item.descripction);
+		if(item.isEquiped == SDL_TRUE) {
+			//MAYBE CHANCE TO DO SOMTHING
+			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
+			for(i32 j = 0; j < DAMAGE_NUM; j++) {
+				iA[j] += item.attack[j];
+				//LOG("ia %d\n", iA[j]);
+				lfC += item.lifeStealChance;
+				lf  += item.lifeSteal;
+				}
+			}
+		}
+
 	i32 damage = 0;
 	if(distance >= DISTANCE_RANGE_ATTACK_MIN && distance <= DISTANCE_RANGE_ATTACK_MAX) {
 		if(entity->attack[DAMAGE_RANGE] > entity->attack[DAMAGE_SPELL]) {
-			damage = roll_the_dice(entity->attack[DAMAGE_RANGE], player->defence[DAMAGE_RANGE]);
+			damage = roll_the_dice(entity->attack[DAMAGE_RANGE] + iA[DAMAGE_RANGE], player->defence[DAMAGE_RANGE]  + iD[DAMAGE_RANGE]);
 			if(entity->attack[DAMAGE_RANGE] != 0) {
 				message_attacked_by_monster(player, entity, damage, DAMAGE_RANGE);
 				}
 			}
 		else {
-			damage = roll_the_dice(entity->attack[DAMAGE_SPELL], player->defence[DAMAGE_SPELL]);
+			damage = roll_the_dice(entity->attack[DAMAGE_SPELL] + iA[DAMAGE_SPELL], player->defence[DAMAGE_SPELL] + iD[DAMAGE_SPELL]);
 			if(entity->attack[DAMAGE_SPELL] != 0) {
 				message_attacked_by_monster(player, entity, damage, DAMAGE_SPELL);
 				}
@@ -190,12 +238,12 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 		}
 
 	else {
-		if(entity->attack[DAMAGE_BASIC] > entity->attack[DAMAGE_POISON]) {
-			damage = roll_the_dice(entity->attack[DAMAGE_BASIC], player->defence[DAMAGE_BASIC]);
+		if(entity->attack[DAMAGE_BASIC]  > entity->attack[DAMAGE_POISON]) {
+			damage = roll_the_dice(entity->attack[DAMAGE_BASIC] + iA[DAMAGE_BASIC], player->defence[DAMAGE_BASIC] + iD[DAMAGE_BASIC]);
 			message_attacked_by_monster(player, entity, damage, DAMAGE_BASIC);
 			}
 		else {
-			damage = roll_the_dice(entity->attack[DAMAGE_POISON], player->defence[DAMAGE_POISON]);
+			damage = roll_the_dice(entity->attack[DAMAGE_POISON] + iA[DAMAGE_POISON], player->defence[DAMAGE_POISON] + iD[DAMAGE_POISON]);
 			message_attacked_by_monster(player, entity, damage, DAMAGE_POISON);
 			}
 		}
@@ -203,13 +251,13 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	player->health-=damage;
 	CLAMP(player->health, 0, INF);
 	//APPLAY LIFE STEAL TO ENEMY
-	if(rand_f64() < entity->lifeStealChance && entity->lifeStealValue != 0 && entity->health < entity->maxHealth){
-		entity->health+=(i32)entity->lifeStealValue;
+	if(rand_f64() < (entity->lifeStealChance - lfC)  && (entity->lifeStealValue + lf) != 0 && entity->health < entity->maxHealth) {
+		entity->health+=(i32)entity->lifeStealValue + lf;
 		CLAMP(entity->health, 0, entity->maxHealth);
 		char* msg = calloc(50, sizeof(char));
 		snprintf(msg, 50, "%s lifestealed %u", entity->name, entity->lifeStealValue);
 		da_append(&MESSAGES, msg);
-	}
+		}
 	//i32 startX =  player->pos.x;
 
 	//system("pause");
@@ -291,7 +339,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	monsters[WIZARD_MONSTER].isRunning = SDL_FALSE;
 	monsters[WIZARD_MONSTER].runWoundedPercent = 0.40f;
 	monsters[WIZARD_MONSTER].state = STATE_WANDERING;
-	
+
 	monsters[WIZARD_MONSTER].stateChance[STATE_RUNING] = 0.05f;
 	monsters[WIZARD_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.3f;
 	monsters[WIZARD_MONSTER].stateChance[STATE_HUNTING] = 0.5f;
@@ -339,7 +387,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	monsters[CROW_MONSTER].isRunning = SDL_FALSE;
 	monsters[CROW_MONSTER].runWoundedPercent = 0.30f;
 	monsters[CROW_MONSTER].state = STATE_WANDERING;
-	
+
 	monsters[CROW_MONSTER].stateChance[STATE_RUNING] = 0.05f;
 	monsters[CROW_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.5f;
 	monsters[CROW_MONSTER].stateChance[STATE_HUNTING] = 0.5f;
@@ -363,7 +411,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	monsters[DEMON_MONSTER].isRunning = SDL_FALSE;
 	monsters[DEMON_MONSTER].runWoundedPercent = 0.0f;
 	monsters[DEMON_MONSTER].state = STATE_WANDERING;
-	
+
 	monsters[DEMON_MONSTER].stateChance[STATE_RUNING] = 0.05f;
 	monsters[DEMON_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
 	monsters[DEMON_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
@@ -422,7 +470,7 @@ void monster_definitions_export() {
 	monsters[BASIC_MONSTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[BASIC_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 
-	//ACOLAYT 
+	//ACOLAYT
 	monsters[ACOLAYT_MONSTER].radius = 20;
 	monsters[ACOLAYT_MONSTER].ch = 'A';
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_BASIC]  = 1;
@@ -452,7 +500,8 @@ void monster_definitions_export() {
 	
 	monsters[ACOLAYT_MONSTER].lifeStealChance = 0.0f;
 	monsters[ACOLAYT_MONSTER].lifeStealValue = 0.0f;
-	//GHOUL 
+	monsters[ACOLAYT_MONSTER].color = UNDE_COL;
+	//GHOUL
 	monsters[GHOUL_MONSTER].radius = 30;
 	monsters[GHOUL_MONSTER].ch = 'G';
 	monsters[GHOUL_MONSTER].attack[DAMAGE_BASIC]  = 2;
@@ -468,8 +517,8 @@ void monster_definitions_export() {
 	monsters[GHOUL_MONSTER].maxHealth = 7;
 
 	monsters[GHOUL_MONSTER].isRunning = SDL_FALSE;
-	monsters[GHOUL_MONSTER].runWoundedPercent = 0.9f;
-	monsters[GHOUL_MONSTER].state = STATE_WANDERING;
+	monsters[GHOUL_MONSTER].runWoundedPercent = 0.6f;
+	monsters[GHOUL_MONSTER].state = STATE_HUNTING;
 
 	monsters[GHOUL_MONSTER].stateChance[STATE_RUNING] = 0.01f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
@@ -482,9 +531,9 @@ void monster_definitions_export() {
 
 	monsters[GHOUL_MONSTER].lifeStealChance = 0.1f;
 	monsters[GHOUL_MONSTER].lifeStealValue  = 1.0f;
-	
-	
-	//NECROMANCER_MONSTER 
+	monsters[GHOUL_MONSTER].color = UNDE_COL;
+
+	//NECROMANCER_MONSTER
 	monsters[NECROMANCER_MONSTER].radius = 5;
 	monsters[NECROMANCER_MONSTER].ch = 'N';
 	monsters[NECROMANCER_MONSTER].attack[DAMAGE_BASIC]  = 0;
@@ -514,11 +563,12 @@ void monster_definitions_export() {
 
 	monsters[NECROMANCER_MONSTER].lifeStealChance = 0.0f;
 	monsters[NECROMANCER_MONSTER].lifeStealValue  = 0.0f;
-
-	SPELL_SUMONM_GHOUL_EXPORT(monsters[NECROMANCER_MONSTER]);	
-
 	
-	//BANSHIE_MONSTER 
+	monsters[NECROMANCER_MONSTER].color = UNDE_COL;
+	SPELL_SUMONM_GHOUL_EXPORT(monsters[NECROMANCER_MONSTER]);
+
+
+	//BANSHIE_MONSTER
 	monsters[BANSHIE_MONSTER].radius = 5;
 	monsters[BANSHIE_MONSTER].ch = 'B';
 	monsters[BANSHIE_MONSTER].attack[DAMAGE_BASIC]  = 0;
@@ -548,14 +598,15 @@ void monster_definitions_export() {
 	monsters[BANSHIE_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
 
 	
-	
+
 
 	monsters[BANSHIE_MONSTER].lifeStealChance = 0.0f;
 	monsters[BANSHIE_MONSTER].lifeStealValue  = 0.0f;
 
+	monsters[BANSHIE_MONSTER].color  = UNDE_COL;
 	SPELL_DECRESE_MAX_HEALTH_EXPORT(monsters[BANSHIE_MONSTER]);
-	
-	//SPIDER_MONSTER 
+
+	//SPIDER_MONSTER
 	monsters[SPIDER_MONSTER].radius = 5;
 	monsters[SPIDER_MONSTER].ch = 'F';
 	monsters[SPIDER_MONSTER].attack[DAMAGE_BASIC]  = 0;
@@ -576,7 +627,7 @@ void monster_definitions_export() {
 
 	monsters[SPIDER_MONSTER].stateChance[STATE_RUNING] = 0.05f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.1f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_BESERK] = 0.01f;
@@ -584,51 +635,17 @@ void monster_definitions_export() {
 	monsters[SPIDER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
 
-	
-	
+
+
 
 	monsters[SPIDER_MONSTER].lifeStealChance = 0.01f;
 	monsters[SPIDER_MONSTER].lifeStealValue  = 1.0f;
 
+	monsters[SPIDER_MONSTER].color = UNDE_COL;
 	SPELL_SPIDER_EXPORT(monsters[SPIDER_MONSTER]);
-	
-		//SPIDER_MONSTER 
-	monsters[SPIDER_MONSTER].radius = 20;
-	monsters[SPIDER_MONSTER].ch = 'F';
-	monsters[SPIDER_MONSTER].attack[DAMAGE_BASIC]  = 0;
-	monsters[SPIDER_MONSTER].attack[DAMAGE_POISON] = 3;
-	monsters[SPIDER_MONSTER].attack[DAMAGE_RANGE]  = 3;
-	monsters[SPIDER_MONSTER].attack[DAMAGE_SPELL] = 0;
-	//DEF  light
-	monsters[SPIDER_MONSTER].defence[DAMAGE_BASIC]  = 2;
-	monsters[SPIDER_MONSTER].defence[DAMAGE_POISON] = 2;
-	monsters[SPIDER_MONSTER].defence[DAMAGE_RANGE]  = 2;
-	monsters[SPIDER_MONSTER].defence[DAMAGE_SPELL]  = 2;
-	monsters[SPIDER_MONSTER].health = 5;
-	monsters[SPIDER_MONSTER].maxHealth = 5;
 
-	monsters[SPIDER_MONSTER].isRunning = SDL_FALSE;
-	monsters[SPIDER_MONSTER].runWoundedPercent = 0.9f;
-	monsters[SPIDER_MONSTER].state = STATE_WANDERING;
 
-	monsters[SPIDER_MONSTER].stateChance[STATE_RUNING] = 0.05f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.1f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_BESERK] = 0.01f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
-
-	
-	
-
-	monsters[SPIDER_MONSTER].lifeStealChance = 0.01f;
-	monsters[SPIDER_MONSTER].lifeStealValue  = 1.0f;
-
-	SPELL_SPIDER_EXPORT(monsters[SPIDER_MONSTER]);
-	//DRAGON_MONSTER 
+	//DRAGON_MONSTER
 	monsters[DRAGON_MONSTER].radius = 30;
 	monsters[DRAGON_MONSTER].ch = 'D';
 	monsters[DRAGON_MONSTER].attack[DAMAGE_BASIC]  = 5;
@@ -644,27 +661,27 @@ void monster_definitions_export() {
 	monsters[DRAGON_MONSTER].maxHealth = 20;
 
 	monsters[DRAGON_MONSTER].isRunning = SDL_FALSE;
-	monsters[DRAGON_MONSTER].runWoundedPercent = 0.99f;
+	monsters[DRAGON_MONSTER].runWoundedPercent = 0.6f;
 	monsters[DRAGON_MONSTER].state = STATE_WANDERING;
 
 	monsters[DRAGON_MONSTER].stateChance[STATE_RUNING] = 0.01f;
 	monsters[DRAGON_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
-	monsters[DRAGON_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_HUNTING] = 0.99f;
 	monsters[DRAGON_MONSTER].stateChance[STATE_WANDERING] = 0.05f;
 	monsters[DRAGON_MONSTER].stateChance[STATE_RESTING] = 0.05f;
 	monsters[DRAGON_MONSTER].stateChance[STATE_BESERK] = 0.1f;
 	monsters[DRAGON_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[DRAGON_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
-	monsters[DRAGON_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
+	monsters[DRAGON_MONSTER].stateChance[STATE_SPELL]  = 0.99f;
 	monsters[DRAGON_MONSTER].color = BLUE;
-	
+
 	monsters[DRAGON_MONSTER].lifeStealChance = 0.1f;
 	monsters[DRAGON_MONSTER].lifeStealValue  = 1.0f;
 
 	SPELL_DRAGON_EXPORT(monsters[DRAGON_MONSTER]);
 
 //ORCS
-	//GRUNT 
+	//GRUNT
 	monsters[GRUNT_MONSTER].radius = 30;
 	monsters[GRUNT_MONSTER].ch = 'O';
 	monsters[GRUNT_MONSTER].attack[DAMAGE_BASIC]  = 3;
@@ -693,7 +710,7 @@ void monster_definitions_export() {
 	monsters[GRUNT_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
 
 	monsters[GRUNT_MONSTER].lifeStealChance = 0.3f;
-	monsters[GRUNT_MONSTER].lifeStealValue  = 1.0f;	
+	monsters[GRUNT_MONSTER].lifeStealValue  = 1.0f;
 	monsters[GRUNT_MONSTER].color = GREEN;
 
 //BERSERKER
@@ -723,10 +740,10 @@ void monster_definitions_export() {
 	monsters[BERSERKER_MONSTER].stateChance[STATE_BESERK] = 0.99f;
 	monsters[BERSERKER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[BERSERKER_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
-	
+
 
 	monsters[BERSERKER_MONSTER].lifeStealChance = 0.01f;
-	monsters[BERSERKER_MONSTER].lifeStealValue  = 1.0f;	
+	monsters[BERSERKER_MONSTER].lifeStealValue  = 1.0f;
 	monsters[BERSERKER_MONSTER].color = GREEN;
 
 	monsters[BERSERKER_MONSTER].stateChance[STATE_SPELL] = 0.8f;
@@ -821,7 +838,7 @@ void monster_definitions_export() {
 	monsters[GOBLIN_MOSNTER].stateChance[STATE_BESERK] = 0.01f;
 	monsters[GOBLIN_MOSNTER].stateChance[STATE_SPELL] = 0.3f;
 	SPELL_GOBLIN_EXPORT(monsters[GOBLIN_MOSNTER]);
-	
+
 
 
 
@@ -843,11 +860,15 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
 						.x = x, .y = y
 						}, WHITE);
-					if(rand_f64() < 0.5f) {
+					if(rand_f64() < 1.5f) {
 						u64 count = monsters->count;
 						if(count > 0) {
 							Item *item  = create_item(0, 0, SWORD_CREATE());
+							item->isEquiped = SDL_TRUE;
 							da_append(&monsters->items[count-1].inventory, (*item));
+							Item *item1  = create_item(0, 0, ARMOR_CREATE());
+							item1->isEquiped = SDL_TRUE;
+							da_append(&monsters->items[count-1].inventory, (*item1));
 							}
 						}
 					da_append(monsters, *temp);
@@ -857,6 +878,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 		}
 	LOG("\nGenerated monsters %d\n", (i32)monsters->count);
 	}
+
 
 SDL_bool Is_Monster(char c) {
 	for(Monster_Types t = BASIC_MONSTER; t < NUM_MONSTER; t++) {
@@ -952,14 +974,14 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map) {
 
 
 
-	
+
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 
 	f64 ox,oy;
 	ox = (f64)entity->pos.x;
 	oy = (f64)entity->pos.y;
 
-	for(i32 i = 0; i < RADIUS; i++) {
+	for(i32 i = 0; i < entity->radius; i++) {
 		CLAMP(ox, 0.00f, (f64)(MAP_X - 1));
 		CLAMP(ox, 0.00f, (f64)(MAP_Y - 1));
 		//LOG("%d %d\n", (u32)ox, (u32)oy);
@@ -1013,10 +1035,10 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 	i32 y1 = player->pos.y;
 	i32 x2 = ent->pos.x;
 	i32 y2 = ent->pos.y;
-	CLAMP(x2, 1 , MAP_X - 2);
-	CLAMP(y2, 1 , MAP_Y - 2);
+	CLAMP(x2, 1, MAP_X - 2);
+	CLAMP(y2, 1, MAP_Y - 2);
 	f64 distance  =  MAP_DIJKSTRA(map,x2, y2);
-	
+
 	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
 
 	//+1x
@@ -1061,50 +1083,50 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 		distancesMax = distance;
 		index = 6;
 		}
-		//1y 1x KEY_C
+	//1y 1x KEY_C
 	distance = MAP_DIJKSTRA(map, (x2 + 1), (y2  + 1));
 	if(distance > distancesMax  && distance != INF) {
 		distancesMax = distance;
 		index = 7;
-		}	
+		}
 	u8 isMoved = 0;
-		switch(index) {
-			case 0: {
-					if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y)) {
-						//LOG("X++\n");
-						ent->pos.x = ent->pos.x + 1;
-						isMoved = 1;
-						}
-	
-					break;
+	switch(index) {
+		case 0: {
+				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y)) {
+					//LOG("X++\n");
+					ent->pos.x = ent->pos.x + 1;
+					isMoved = 1;
 					}
-					
-	
-			case 1: {
-					if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y)) {
-						//LOG("X--\n");
-						ent->pos.x--;
-						isMoved = 1;
-						}
-					break;
+
+				break;
+				}
+
+
+		case 1: {
+				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y)) {
+					//LOG("X--\n");
+					ent->pos.x--;
+					isMoved = 1;
 					}
-			case 2: {
-					if(MAP_ISW(map, ent->pos.x, ent->pos.y + 1)) {
-						//LOG("Y++\n");
-						ent->pos.y++;
-						isMoved = 1;
-						}
-					break;
+				break;
+				}
+		case 2: {
+				if(MAP_ISW(map, ent->pos.x, ent->pos.y + 1)) {
+					//LOG("Y++\n");
+					ent->pos.y++;
+					isMoved = 1;
 					}
-			case 3: {
-					if(MAP_ISW(map, ent->pos.x, ent->pos.y - 1)) {
-						//LOG("Y--\n");
-						ent->pos.y--;
-						isMoved = 1;
-						}
-					break;
+				break;
+				}
+		case 3: {
+				if(MAP_ISW(map, ent->pos.x, ent->pos.y - 1)) {
+					//LOG("Y--\n");
+					ent->pos.y--;
+					isMoved = 1;
 					}
-			case 4:{
+				break;
+				}
+		case 4: {
 				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y - 1)) {
 					//LOG("Y--\n");
 					ent->pos.x--;
@@ -1113,8 +1135,8 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				break;
 				}
-			
-			case 5:{
+
+		case 5: {
 				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y - 1)) {
 					//LOG("Y--\n");
 					ent->pos.x++;
@@ -1122,8 +1144,8 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					isMoved = 1;
 					}
 				break;
-					}
-			case 6:{
+				}
+		case 6: {
 				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y + 1)) {
 					//LOG("Y--\n");
 					ent->pos.x--;
@@ -1131,8 +1153,8 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					isMoved = 1;
 					}
 				break;
-			}
-			case 7:{
+				}
+		case 7: {
 				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y + 1)) {
 					//LOG("Y--\n");
 					ent->pos.x++;
@@ -1140,77 +1162,77 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					isMoved = 1;
 					}
 				break;
-			}		
-			default: {
-					ASSERT("Unreachable");
-					break;
-					}
-			}
-			if(isMoved == 0){
-				make_best_move(player,ent, map);
-			}
-		CLAMP(ent->pos.x, 2, MAP_X - 2);
-		CLAMP(ent->pos.y, 2, MAP_Y - 2);
+				}
+		default: {
+				ASSERT("Unreachable");
+				break;
+				}
+		}
+	if(isMoved == 0) {
+		make_best_move(player,ent, map);
+		}
+	CLAMP(ent->pos.x, 2, MAP_X - 2);
+	CLAMP(ent->pos.y, 2, MAP_Y - 2);
 
 	}
-	void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
-		SDL_bool isMonsterVisible = is_monster_visible(map, ent);
-		i32 x1 = player->pos.x;
-		i32 y1 = player->pos.y;
-		i32 x2 = ent->pos.x;
-		i32 y2 = ent->pos.y;
-		f64 distance  = DISTANCE(x1, y1, x2, y2);
-		
-		//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
-	
-		//+1x
-		f64 distancesMin = distnace_move(x1, y1, (x2 + 1), y2, map);
-		i32 index = 0;
-		//-1x
-		distance = distnace_move(x1, y1, (x2 - 1), y2, map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 1;
-			}
-		//+1y
-		distance = distnace_move(x1, y1, x2, (y2 + 1), map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 2;
-			}
-		//-1y
-		distance = distnace_move(x1, y1, x2, (y2  - 1), map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 3;
-			}
-		//-1y -1x KEY_Q
-		distance = distnace_move(x1, y1, (x2 - 1), (y2  - 1), map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 4;
-			}
-		//-1y +1x KEY_E_
-		distance = distnace_move(x1, y1, (x2 + 1), (y2  - 1), map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 5;
-			}
-		//1y -1x KEY_Y
-		distance = distnace_move(x1, y1, (x2 - 1), (y2  + 1), map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 6;
-			}
-			//1y 1x KEY_C
-		distance = distnace_move(x1, y1, (x2 + 1), (y2  + 1), map);
-		if(distance < distancesMin) {
-			distancesMin = distance;
-			index = 7;
-			}	
-		u8 isRangeAttack = SDL_FALSE;
-		switch(ent->ch) {
-			case 'A': {
+void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
+	SDL_bool isMonsterVisible = is_monster_visible(map, ent);
+	i32 x1 = player->pos.x;
+	i32 y1 = player->pos.y;
+	i32 x2 = ent->pos.x;
+	i32 y2 = ent->pos.y;
+	f64 distance  = DISTANCE(x1, y1, x2, y2);
+
+	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
+
+	//+1x
+	f64 distancesMin = distnace_move(x1, y1, (x2 + 1), y2, map);
+	i32 index = 0;
+	//-1x
+	distance = distnace_move(x1, y1, (x2 - 1), y2, map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 1;
+		}
+	//+1y
+	distance = distnace_move(x1, y1, x2, (y2 + 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 2;
+		}
+	//-1y
+	distance = distnace_move(x1, y1, x2, (y2  - 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 3;
+		}
+	//-1y -1x KEY_Q
+	distance = distnace_move(x1, y1, (x2 - 1), (y2  - 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 4;
+		}
+	//-1y +1x KEY_E_
+	distance = distnace_move(x1, y1, (x2 + 1), (y2  - 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 5;
+		}
+	//1y -1x KEY_Y
+	distance = distnace_move(x1, y1, (x2 - 1), (y2  + 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 6;
+		}
+	//1y 1x KEY_C
+	distance = distnace_move(x1, y1, (x2 + 1), (y2  + 1), map);
+	if(distance < distancesMin) {
+		distancesMin = distance;
+		index = 7;
+		}
+	u8 isRangeAttack = SDL_FALSE;
+	switch(ent->ch) {
+		case 'A': {
 				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
 					isRangeAttack = SDL_TRUE;
 					monster_attack(player, ent, distancesMin);
@@ -1225,56 +1247,56 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				}
 		case 'F': {
-			if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-				isRangeAttack = SDL_TRUE;
-				monster_attack(player, ent, distancesMin);
-				break;
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, distancesMin);
+					break;
 					}
 				}
-		
+
 		case 'D': {
-			if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN &&distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
-				isRangeAttack = SDL_TRUE;
-				monster_attack(player, ent, distancesMin);
-				break;
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN &&distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, distancesMin);
+					break;
 					}
 				}
-			}
-		if (isRangeAttack == SDL_TRUE){
-			return;
 		}
-		
-		switch(index) {
-			case 0: {
-					if(distancesMin < INF && distancesMin != 0.0f) {
-						//LOG("X++\n");
-						ent->pos.x = ent->pos.x + 1;
-						}
-					break;
+	if (isRangeAttack == SDL_TRUE) {
+		return;
+		}
+
+	switch(index) {
+		case 0: {
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("X++\n");
+					ent->pos.x = ent->pos.x + 1;
 					}
-	
-			case 1: {
-					if(distancesMin < INF && distancesMin != 0.0f) {
-						//LOG("X--\n");
-						ent->pos.x--;
-						}
-					break;
+				break;
+				}
+
+		case 1: {
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("X--\n");
+					ent->pos.x--;
 					}
-			case 2: {
-					if(distancesMin < INF && distancesMin != 0.0f) {
-						//LOG("Y++\n");
-						ent->pos.y++;
-						}
-					break;
+				break;
+				}
+		case 2: {
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("Y++\n");
+					ent->pos.y++;
 					}
-			case 3: {
-					if(distancesMin < INF && distancesMin != 0.0f) {
-						//LOG("Y--\n");
-						ent->pos.y--;
-						}
-					break;
+				break;
+				}
+		case 3: {
+				if(distancesMin < INF && distancesMin != 0.0f) {
+					//LOG("Y--\n");
+					ent->pos.y--;
 					}
-			case 4:{
+				break;
+				}
+		case 4: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
 					//LOG("Y--\n");
 					ent->pos.x--;
@@ -1282,39 +1304,39 @@ void make_run_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				break;
 				}
-			
-			case 5:{
+
+		case 5: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
 					//LOG("Y--\n");
 					ent->pos.x++;
 					ent->pos.y--;
 					}
 				break;
-					}
-			case 6:{
+				}
+		case 6: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
 					//LOG("Y--\n");
 					ent->pos.x--;
 					ent->pos.y++;
 					}
 				break;
-			}
-			case 7:{
+				}
+		case 7: {
 				if(distancesMin < INF && distancesMin != 0.0f) {
 					//LOG("Y--\n");
 					ent->pos.x++;
 					ent->pos.y++;
 					}
 				break;
-			}		
-			default: {
-					ASSERT("Unreachable");
-					break;
-					}
-			}
-			CLAMP(ent->pos.x, 1 , MAP_X - 1);
-			CLAMP(ent->pos.y, 1 , MAP_Y - 1);
-		}	
+				}
+		default: {
+				ASSERT("Unreachable");
+				break;
+				}
+		}
+	CLAMP(ent->pos.x, 1, MAP_X - 1);
+	CLAMP(ent->pos.y, 1, MAP_Y - 1);
+	}
 //WE WILL SEE IF A* or Diakstra or This CRAP
 void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 	SDL_bool isMonsterVisible = is_monster_visible(map, ent);
@@ -1341,7 +1363,7 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 	i32 index = 0;
 	//-1x
 	distance = MAP_DIJKSTRA(map, (x2 + 1), y2) ;
-	
+
 	if(distance < distancesMin) {
 		distancesMin = distance;
 		trueDistance = distnace_move(x1, y1, (x2 + 1), y2, map);
@@ -1362,7 +1384,7 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 		distancesMin = distance;
 		trueDistance = distnace_move(x1, y1, (x2), (y2 + 1), map);
 		index = 2;
-		}	
+		}
 	//-1y
 	distance = MAP_DIJKSTRA(map, (x2), (y2 - 1));
 	if(distance < distancesMin) {
@@ -1391,14 +1413,14 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 		trueDistance = distnace_move(x1, y1, (x2 - 1), (y2 + 1), map);
 		index = 6;
 		}
-		//1y 1x KEY_C
+	//1y 1x KEY_C
 	distance = MAP_DIJKSTRA(map, (x2 + 1), (y2 + 1));
 	if(distance < distancesMin) {
 		distancesMin = distance;
 		trueDistance = distnace_move(x1, y1, (x2 + 1), (y2 + 1), map);
 		index = 7;
 		}
-		
+
 	//RANGE ATTACK
 	u8 isRangeAttack = SDL_FALSE;
 	switch(ent->ch) {
@@ -1417,25 +1439,25 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				}
 		case 'F': {
-			if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
-				isRangeAttack = SDL_TRUE;
-				monster_attack(player, ent, trueDistance);
-				break;
+				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, trueDistance);
+					break;
 					}
 				}
-		
+
 		case 'D': {
-			if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
-				isRangeAttack = SDL_TRUE;
-				monster_attack(player, ent, trueDistance);
-				break;
+				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, trueDistance);
+					break;
 					}
-				}						
+				}
 
 		}
-	if (isRangeAttack == SDL_TRUE){
+	if (isRangeAttack == SDL_TRUE) {
 		return;
-	}
+		}
 	u8 isMoved = 0;
 	switch(index) {
 		case 0: {
@@ -1447,7 +1469,7 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 
 				break;
 				}
-				
+
 
 		case 1: {
 				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y)) {
@@ -1473,170 +1495,171 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 					}
 				break;
 				}
-		case 4:{
-			if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y - 1)) {
-				//LOG("Y--\n");
-				ent->pos.x--;
-				ent->pos.y--;
-				isMoved = 1;
+		case 4: {
+				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y - 1)) {
+					//LOG("Y--\n");
+					ent->pos.x--;
+					ent->pos.y--;
+					isMoved = 1;
+					}
+				break;
 				}
-			break;
-			}
-		
-		case 5:{
-			if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y - 1)) {
-				//LOG("Y--\n");
-				ent->pos.x++;
-				ent->pos.y--;
-				isMoved = 1;
+
+		case 5: {
+				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y - 1)) {
+					//LOG("Y--\n");
+					ent->pos.x++;
+					ent->pos.y--;
+					isMoved = 1;
+					}
+				break;
 				}
-			break;
+		case 6: {
+				if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y + 1)) {
+					//LOG("Y--\n");
+					ent->pos.x--;
+					ent->pos.y++;
+					isMoved = 1;
+					}
+				break;
 				}
-		case 6:{
-			if(MAP_ISW(map, ent->pos.x - 1, ent->pos.y + 1)) {
-				//LOG("Y--\n");
-				ent->pos.x--;
-				ent->pos.y++;
-				isMoved = 1;
+		case 7: {
+				if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y + 1)) {
+					//LOG("Y--\n");
+					ent->pos.x++;
+					ent->pos.y++;
+					isMoved = 1;
+					}
+				break;
 				}
-			break;
-		}
-		case 7:{
-			if(MAP_ISW(map, ent->pos.x + 1, ent->pos.y + 1)) {
-				//LOG("Y--\n");
-				ent->pos.x++;
-				ent->pos.y++;
-				isMoved = 1;
-				}
-			break;
-		}		
 		default: {
 				ASSERT("Unreachable");
 				break;
 				}
 		}
-		if(isMoved == 0){
-			make_best_move(player,ent, map);
+	if(isMoved == 0) {
+		make_best_move(player,ent, map);
 		}
-		CLAMP(ent->pos.x, 1 , MAP_X - 1);
-		CLAMP(ent->pos.y, 1 , MAP_Y - 1);
+	CLAMP(ent->pos.x, 1, MAP_X - 1);
+	CLAMP(ent->pos.y, 1, MAP_Y - 1);
 
 	}
 
-SDL_bool is_monster_visible(Tile* map, Entitiy* ent){
+SDL_bool is_monster_visible(Tile* map, Entitiy* ent) {
 	if(MAP_ISV(map, ent->pos.x, ent->pos.y) == SDL_FALSE) {
 		return SDL_FALSE;
 		}
 	return SDL_TRUE;
-}	
+	}
 
 //#define LOG_AL
-void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map){
+void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	DROP(player);
-	for(u64 i = 0; i < entitys->count; i++){
+	for(u64 i = 0; i < entitys->count; i++) {
 		Entitiy entity = entitys->items[i];
-		
+
 		//IF HEALTH IS A LOW RUNING MONSTER
 		//ELSE GO BESERK
-		if(Is_Monster(entity.ch)){
+		if(Is_Monster(entity.ch)) {
 			entity.spell.passedTurns++;
-			if(entity.health == 0){
-			if(rand_f64() < entity.stateChance[STATE_RESURECT]){
-				i32 health = rand()%2 + 1;
-				entity.attack[DAMAGE_BASIC]++;
-				entity.color = RED;
-				char* msg = calloc(50, sizeof(char));
-				snprintf(msg, 50, "%s is resurected", entity.name);
-				da_append(&MESSAGES, msg);
-				
-			}
-			else{
-				char* msg = calloc(50, sizeof(char));
-				snprintf(msg, 50, "You slay the %s", entity.name);
-				da_append(&MESSAGES, msg);
-				char* msg1 = "His spirit is wandering in this world";
-				da_append(&MESSAGES, msg1);
-				entity.ch = 'S';
-				entity.color = GREEN;
-			}
-		}	
-		else if(entity.health == 1){
-			if(rand_f64() < entity.stateChance[STATE_RUNING]){
-				entity.state = STATE_RUNING;
-		
-			}
-			else if(rand_f64() < CHANCE_INCREMENT_HEALTH){
-				entity.health++;
+			if(entity.health == 0) {
+				if(rand_f64() < entity.stateChance[STATE_RESURECT]) {
+					i32 health = rand()%2 + 1;
+					entity.attack[DAMAGE_BASIC]++;
+					entity.color = RED;
+					char* msg = calloc(50, sizeof(char));
+					snprintf(msg, 50, "%s is resurected", entity.name);
+					da_append(&MESSAGES, msg);
+
+					}
+				else {
+					char* msg = calloc(50, sizeof(char));
+					snprintf(msg, 50, "You slay the %s", entity.name);
+					da_append(&MESSAGES, msg);
+					char* msg1 = "His spirit is wandering in this world";
+					da_append(&MESSAGES, msg1);
+					entity.ch = 'S';
+					entity.color = GREEN;
+					}
+				}
+			else if(entity.health == 1) {
+				if(rand_f64() < entity.stateChance[STATE_RUNING]) {
+					entity.state = STATE_RUNING;
+
+					}
+				else if(rand_f64() < CHANCE_INCREMENT_HEALTH) {
+					entity.health++;
+					entity.state = STATE_HUNTING;
+					}
+				else {
+
+					entity.state = STATE_BESERK;
+					}
+				}
+			else if(player->health <= 3 || rand_f64() < ((player->maxHealth - player->health) / 100)) {
 				entity.state = STATE_HUNTING;
+
+				}
+			else if(rand_f64() < entity.stateChance[STATE_SUMMON]  && entity.spell.cooldown < entity.spell.passedTurns) {
+				entity.state = STATE_SUMMON;
+				entity.spell.passedTurns = 0; //RESET
+
+				}
+			else if	(is_monster_visible(map, &entity) == SDL_TRUE && rand_f64() < entity.stateChance[STATE_SPELL] && entity.spell.passedTurns > entity.spell.cooldown) {
+				i32 distance = DISTANCE(player->pos.x, player->pos.y, entity.pos.x, entity.pos.y);
+				if(distance < DISTANCE_RANGE_ATTACK_MAX + 2) {
+					entity.state = STATE_SPELL;
+					entity.spell.passedTurns = 0;
+
+					}
+				else {
+					entity.state = STATE_MOVING_AWAY_RANGE;
+					}
+				}
+			else if(entity.state == STATE_WANDERING) {
+				if(is_monster_visible(map, &entity) == SDL_TRUE) {
+					if(rand_f64() < entity.stateChance[STATE_HUNTING]) {
+						entity.state  = STATE_HUNTING;
+
+						}
+					}
+				else if(rand_f64() < entity.stateChance[STATE_RESTING]) {
+					entity.state  = STATE_RESTING;
+
+					}
+				}
+			else if(entity.state == STATE_HUNTING) {
+				if(rand_f64() < entity.stateChance[STATE_RESTING]) {
+					entity.state  = STATE_RESTING;
+					da_append(&MESSAGES, "Stop");
+					}
+				}
+
+			else if(entity.state == STATE_RESTING) {
+				if(rand_f64() < entity.stateChance[STATE_WANDERING]) {
+					entity.state  = STATE_WANDERING;
+
+					}
+				}
+			else if(is_monster_visible(map, &entity) == SDL_TRUE) {
+				if(rand_f64() < entity.stateChance[STATE_HUNTING]) {
+					entity.state = STATE_HUNTING;
+					}
+				else if(rand_f64() < entity.stateChance[STATE_MOVING_AWAY_RANGE]) {
+					entity.state = STATE_MOVING_AWAY_RANGE;
+					}
+				else if(rand_f64() < entity.stateChance[STATE_RUNING]) {
+					entity.state = STATE_RUNING;
+					}
+				}
+
 			}
-			else{
-
-				entity.state = STATE_BESERK;
-			}			
-		}
-	else if(player->health <= 3){
-		entity.state = STATE_HUNTING;
-
-	}
-	else if(rand_f64() < entity.stateChance[STATE_SUMMON]  && entity.spell.cooldown < entity.spell.passedTurns){
-			entity.state = STATE_SUMMON;
-			entity.spell.passedTurns = 0; //RESET
-
-		}
-	else if	(is_monster_visible(map, &entity) == SDL_TRUE && rand_f64() < entity.stateChance[STATE_SPELL] && entity.spell.passedTurns > entity.spell.cooldown){
-		i32 distance = DISTANCE(player->pos.x, player->pos.y, entity.pos.x, entity.pos.y);
-		if(distance < DISTANCE_RANGE_ATTACK_MAX + 2){
-			entity.state = STATE_SPELL;
-			entity.spell.passedTurns = 0;
-			
-		}
-		else{
-			entity.state = STATE_MOVING_AWAY_RANGE;
-		}
-	}
-	else if(entity.state == STATE_WANDERING){
-		if(is_monster_visible(map, &entity) == SDL_TRUE){
-			if(rand_f64() < entity.stateChance[STATE_HUNTING]){
-				entity.state  = STATE_HUNTING;
-
+		else if(entity.ch == 'S') {
+			entity.state = STATE_WANDERING;
 			}
-		}
-	else if(rand_f64() < entity.stateChance[STATE_RESTING]){
-			entity.state  = STATE_RESTING;
-
+		entitys->items[i] = entity;
 		}
 	}
-	else if(entity.state == STATE_HUNTING){
-		if(rand_f64() < entity.stateChance[STATE_RESTING]){
-				entity.state  = STATE_RESTING;da_append(&MESSAGES, "Stop");
-		}
-	}
-	
-	else if(entity.state == STATE_RESTING){
-		if(rand_f64() < entity.stateChance[STATE_WANDERING]){
-			entity.state  = STATE_WANDERING;
-
-		}
-	}
-	else if(is_monster_visible(map, &entity) == SDL_TRUE){
-		if(rand_f64() < entity.stateChance[STATE_HUNTING]){
-				entity.state = STATE_HUNTING;
-			}
-			else if(rand_f64() < entity.stateChance[STATE_MOVING_AWAY_RANGE]){
-				entity.state = STATE_MOVING_AWAY_RANGE;
-			}
-			else if(rand_f64() < entity.stateChance[STATE_RUNING]){
-				entity.state = STATE_RUNING;
-			}
-		}
-		
-	}
-	else if(entity.ch == 'S'){
-		entity.state = STATE_WANDERING;
-	}	
-	entitys->items[i] = entity;
-	}
-}
 
 
 //IF IN VISON FIELD MOVE TOWARDS PLAYER
@@ -1646,199 +1669,202 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	DROP(co);
 	for(u64 count = 0; count < entitys->count; count++) {
 		Entitiy entity = entitys->items[count];
-		if(Is_Monster(entity.ch)) 
-		{
-			if(entity.state == STATE_RESTING){
-				//NOTHING 
-				
-			}
-			else if(entity.state == STATE_WANDERING){
+		if(Is_Monster(entity.ch)) {
+			if(entity.state == STATE_RESTING) {
+				//NOTHING
+
+				}
+			else if(entity.state == STATE_WANDERING) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				i32 chance = rand()%2;
-				if(chance) {make_run_move(player, &entity, map);}
-				else 	   {make_move_diakstra(player, &entity, map);}
+				if(chance) {
+					make_run_move(player, &entity, map);
+					}
+				else 	   {
+					make_move_diakstra(player, &entity, map);
+					}
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-			}
-			else if(entity.state == STATE_HUNTING){
+				}
+			else if(entity.state == STATE_HUNTING) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				//make_run_move(player, &entity, map);
 				make_move_diakstra(player, &entity, map);
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-			}
-			else if(entity.state == STATE_BESERK){
+				}
+			else if(entity.state == STATE_BESERK) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				make_move_diakstra(player, &entity, map);
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-			}
-			else if(entity.state == STATE_RUNING){
+				}
+			else if(entity.state == STATE_RUNING) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				make_run_move(player, &entity, map);
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
-			}
-			else if(entity.state == STATE_MOVING_AWAY_RANGE){
+				}
+			else if(entity.state == STATE_MOVING_AWAY_RANGE) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 				make_run_move(player, &entity, map);
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 				entity.state = STATE_HUNTING;
-			}
-			else if(entity.state == STATE_SUMMON){
+				}
+			else if(entity.state == STATE_SUMMON) {
 				Monster_Types type = entity.spell.value;
 				//LOG("TYPE %d", entity.spell.value);
 				Entitiy* summon = create_entity(monsterChar[type], monsterName[type], 30, 3, (Position) {
-						.x = entity.pos.x, .y = entity.pos.y
-						}, WHITE);
+					.x = entity.pos.x, .y = entity.pos.y
+					}, WHITE);
 				summon->health = 2;
 				summon->spell.passedTurns = 0;
 				summon->stateChance[STATE_SUMMON] = 0.00f;
 				make_run_move(player, &entity, map);
-				entity.state = STATE_RUNING;		
-				entity.spell.cooldown *=3; 	
+				entity.state = STATE_RUNING;
+				entity.spell.cooldown *=3;
 				da_append(entitys, *summon);
-			}
-			else if(entity.state == STATE_SPELL){
-				switch (entity.spell.type){
-					
-					case SPELL_DECRESE_MAX_HEALTH:{
-					entity.spell.passedTurns = 0;
-					char* msg = "You are cursed -1 max health";
-					da_append(&MESSAGES, msg);
-					player->maxHealth--;
-					player->health--;
-					entity.state = STATE_WANDERING;
-					CLAMP(player->maxHealth, 0, INF);
-					CLAMP(player->health, 0, INF);
-					break;
 				}
+			else if(entity.state == STATE_SPELL) {
+				switch (entity.spell.type) {
 
-				case SPELL_STUN:{
-					entity.spell.passedTurns = 0;
-					char* msg = "You are stunded";
-					player->isStunded += entity.spell.value;
-					da_append(&MESSAGES, msg);
-					break;
-				}
-				
-				case SPELL_DOUBLE_MOVE:{
-					entity.spell.passedTurns = 0;
-					for(i32 i = 0; i < entity.spell.value; i++){
-						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-						make_best_move(player, &entity, map);
-						MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+					case SPELL_DECRESE_MAX_HEALTH: {
+							entity.spell.passedTurns = 0;
+							char* msg = "You are cursed -1 max health";
+							da_append(&MESSAGES, msg);
+							player->maxHealth--;
+							player->health--;
+							entity.state = STATE_WANDERING;
+							CLAMP(player->maxHealth, 0, INF);
+							CLAMP(player->health, 0, INF);
+							break;
+							}
+
+					case SPELL_STUN: {
+							entity.spell.passedTurns = 0;
+							char* msg = "You are stunded";
+							player->isStunded = entity.spell.value;
+							da_append(&MESSAGES, msg);
+							break;
+							}
+
+					case SPELL_DOUBLE_MOVE: {
+							entity.spell.passedTurns = 0;
+							for(i32 i = 0; i < entity.spell.value; i++) {
+								MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+								make_best_move(player, &entity, map);
+								MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
+								}
+							break;
+							}
+					case SPELL_KABUM: {
+							i32 damage = player->health * entity.spell.value / 100;
+							CLAMP(damage, 1, INF);
+							char* msg = "Kabooom";
+							da_append(&MESSAGES, msg);
+							player->health-=damage;
+							CLAMP(player->health, 0, INF);
+							MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
+							//MAYBE CASAM
+							//MAP_CH(map, entity.pos.x, entity.pos.y) = '+';
+							entity.health = 0;
+							break;
+							}
+
+					default:
+						ASSERT("Unrechable\n");
+						break;
 					}
-					break;
 				}
-				case SPELL_KABUM:{
-					i32 damage = player->health * entity.spell.value / 100;
-					CLAMP(damage, 1, INF);
-					char* msg = "Kabooom";
-					da_append(&MESSAGES, msg);
-					player->health-=damage;
-					CLAMP(player->health, 0, INF);
-					MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-					//MAYBE CASAM
-					//MAP_CH(map, entity.pos.x, entity.pos.y) = '+';
-					entity.health = 0;
-					break;
-				}	
-				
-				default:
-				   ASSERT("Unrechable\n");
-					break;
-				}
-			}	
 
-					
-		}
+
+			}
 		/*else{
 			MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 			f64 chance = CHANCE_SPIRIT_ATTACK * (f64)COUNTMOVES;
 			CLAMP(chance, 0.0f, 0.10f);
 			if(rand_f64() < chance){
-				make_best_move(player, &entity, map);	
+				make_best_move(player, &entity, map);
 			}
 			else{
 				make_run_move(player, &entity, map);
 			}
-			
+
 			MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 		}  */
-		
+
 		entitys->items[count] = entity;
-	//LOG("Colided entitys %d\n", co);
-	}
-}
-void increment_player_health(Entitiy* player){
-	if(player->maxHealth != player->health){
-		//LOG("Difrent\n");
-		f64 chance = rand_f64();
-		if(chance < CHANCE_INCREMENT_HEALTH){
-			player->health++;
-			da_append(&MESSAGES, "Good luck strike you health +1\n");
+		//LOG("Colided entitys %d\n", co);
 		}
 	}
-}
-void player_destroy_boolder(Entitiy* player, Tile* map){
+void increment_player_health(Entitiy* player) {
+	if(player->maxHealth != player->health) {
+		//LOG("Difrent\n");
+		f64 chance = rand_f64();
+		if(chance < CHANCE_INCREMENT_HEALTH) {
+			player->health++;
+			da_append(&MESSAGES, "Good luck strike you health +1\n");
+			}
+		}
+	}
+void player_destroy_boolder(Entitiy* player, Tile* map) {
 	//SDL_bool isDoor = SDL_FALSE;
 	i32 startX = player->pos.x - 1;
 	i32 stopX  = player->pos.x + 1;
 	i32 startY = player->pos.y - 1;
 	i32 stopY  = player->pos.y + 1;
-	CLAMP(startX, 0 , MAP_X-1);
-	CLAMP(stopX, 0  , MAP_X-1);
-	CLAMP(startY, 0 , MAP_Y-1);
-	CLAMP(stopY, 0  , MAP_Y-1);
-	for (i32 y = startY; y <= stopY; y++){
-		for (i32 x = startX; x <= stopX; x++){
-			if(MAP_CH(map, x, y) == '+'){
-				if(rand_f64() < CHANCE_NON_CLEAR_RUINS){
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX, 0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY, 0, MAP_Y-1);
+	for (i32 y = startY; y <= stopY; y++) {
+		for (i32 x = startX; x <= stopX; x++) {
+			if(MAP_CH(map, x, y) == '+') {
+				if(rand_f64() < CHANCE_NON_CLEAR_RUINS) {
 					char* msg = "This ruins are tuff";
 					da_append(&MESSAGES, msg);
 
-				}
-				else{
+					}
+				else {
 					char* msg = "You clear the ruins";
 					da_append(&MESSAGES, msg);
 					MAP_CH(map, x, y) = '.';
 					MAP_ISW(map, x, y) = SDL_TRUE;
-					if(rand_f64() < CHANCE_DMG_CLEAR_RUINS){
+					if(rand_f64() < CHANCE_DMG_CLEAR_RUINS) {
 						i32 ran = rand()%4;
 						player->health-=ran;
 						char* msg = "This ruin is tuff";
 						da_append(&MESSAGES, msg);
 						char* msg1 = "Your health decresed";
 						da_append(&MESSAGES, msg1);
+						}
+					}
+
 				}
-				}
-				
+
 			}
-			
-		}	
-	}
+		}
 	OPENDOOR = SDL_FALSE;
-	
-}
+
+	}
 
 void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *items) {
-	
-	
+
+
 	state_entity(player, entitys, map);
 	move_entity(player, entitys, map);
 	block_movement(entitys, map);
 	field_of_vison(player, map);
 	increment_player_health(player);
-	
+
 	COUNTMOVES++;
-	if(OPENDOOR == SDL_TRUE){
+	if(OPENDOOR == SDL_TRUE) {
 		//player_open_door(player, map);
 		player_destroy_boolder(player, map);
-	}
-	
+		}
+
 
 	if(PICKITEM == SDL_TRUE) {
 		picking_item_from_list(player, items);
 		PICKITEM = SDL_FALSE;
 		}
-	calculate_diakstra_map(player, map, entitys, player->pos.x, player->pos.y);	
+	calculate_diakstra_map(player, map, entitys, player->pos.x, player->pos.y);
 	}
 
 
@@ -1872,81 +1898,85 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items) {
 		}
 	}
 
-	void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32 goalX, i32 goalY) {
-		
-	
-		for (i32 i = 0; i < MAP_X * MAP_Y; i++) {
-			map[i].distance = INF;
+void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32 goalX, i32 goalY) {
+
+
+	for (i32 i = 0; i < MAP_X * MAP_Y; i++) {
+		map[i].distance = INF;
 		}
-	
-		MAP_DIJKSTRA(map, player->pos.x, player->pos.y) = 0.0f;
-		Position* queue = calloc(MAP_X * MAP_Y, sizeof(Position));
-		i32 front = 0, back = 0;
-	
-		queue[back++] = (Position){goalX, goalY};
-	
-		// 8 directions: N, NE, E, SE, S, SW, W, NW
-		const i32 dx[8] = {  0,  1, 1,  1,  0, -1, -1, -1 };
-		const i32 dy[8] = { -1, -1, 0,  1,  1,  1,  0, -1 };
-	
-		while (front < back) {
-			Position p = queue[front++];
-			f64 current_dist = MAP_DIJKSTRA(map, p.x, p.y);
-	
-			for (i32 dir = 0; dir < 8; dir++) {
-				i32 nx = p.x + dx[dir];
-				i32 ny = p.y + dy[dir];
-	
-				if (nx < 0 || ny < 0 || nx >= MAP_X || ny >= MAP_Y) continue;
-				if (MAP_ISW(map, nx, ny) == SDL_FALSE) continue;
-	
-				if (MAP_DIJKSTRA(map, nx, ny) > current_dist + 1.0f) {
-					MAP_DIJKSTRA(map, nx, ny) = current_dist + 1.0f;
-					queue[back++] = (Position){nx, ny};
+
+	MAP_DIJKSTRA(map, player->pos.x, player->pos.y) = 0.0f;
+	Position* queue = calloc(MAP_X * MAP_Y, sizeof(Position));
+	i32 front = 0, back = 0;
+
+	queue[back++] = (Position) {
+		goalX, goalY
+		};
+
+	// 8 directions: N, NE, E, SE, S, SW, W, NW
+	const i32 dx[8] = {  0,  1, 1,  1,  0, -1, -1, -1 };
+	const i32 dy[8] = { -1, -1, 0,  1,  1,  1,  0, -1 };
+
+	while (front < back) {
+		Position p = queue[front++];
+		f64 current_dist = MAP_DIJKSTRA(map, p.x, p.y);
+
+		for (i32 dir = 0; dir < 8; dir++) {
+			i32 nx = p.x + dx[dir];
+			i32 ny = p.y + dy[dir];
+
+			if (nx < 0 || ny < 0 || nx >= MAP_X || ny >= MAP_Y) continue;
+			if (MAP_ISW(map, nx, ny) == SDL_FALSE) continue;
+
+			if (MAP_DIJKSTRA(map, nx, ny) > current_dist + 1.0f) {
+				MAP_DIJKSTRA(map, nx, ny) = current_dist + 1.0f;
+				queue[back++] = (Position) {
+					nx, ny
+					};
 				}
 			}
 		}
-		free(queue);
-		/* //HEARD BEHAIVIOR
-		for(u64 i = 0 ; i < entitys->count; i++){
-			Entitiy ent = entitys->items[i];
-			if(Is_Monster(ent.ch)){
-				i32 startX = ent.pos.x - 1;
-				CLAMP(startX, 0, MAP_X - 1);
-				i32 startY = ent.pos.y - 1;
-				CLAMP(startY, 0, MAP_Y - 1);
-				i32 stopX = ent.pos.x - 1;
-				CLAMP(stopX, 0, MAP_X - 1);
-				i32 stopY = ent.pos.y - 1;
-				CLAMP(stopY, 0, MAP_Y - 1);
-				for (i32 y = startY; y < stopY; y++){
-					for (i32 x = startX; x < stopX ; x++){
-						MAP_DIJKSTRA(map, x, y) += 1; 
+	free(queue);
+	/* //HEARD BEHAIVIOR
+	for(u64 i = 0 ; i < entitys->count; i++){
+		Entitiy ent = entitys->items[i];
+		if(Is_Monster(ent.ch)){
+			i32 startX = ent.pos.x - 1;
+			CLAMP(startX, 0, MAP_X - 1);
+			i32 startY = ent.pos.y - 1;
+			CLAMP(startY, 0, MAP_Y - 1);
+			i32 stopX = ent.pos.x - 1;
+			CLAMP(stopX, 0, MAP_X - 1);
+			i32 stopY = ent.pos.y - 1;
+			CLAMP(stopY, 0, MAP_Y - 1);
+			for (i32 y = startY; y < stopY; y++){
+				for (i32 x = startX; x < stopX ; x++){
+					MAP_DIJKSTRA(map, x, y) += 1;
+				}
+			}
+
+		}
+	}  */
+	for(u64 i = 0 ; i < entitys->count; i++) {
+		Entitiy ent = entitys->items[i];
+		if(Is_Monster(ent.ch)) {
+			i32 startX = ent.pos.x - 2;
+			CLAMP(startX, 2, MAP_X - 2);
+			i32 startY = ent.pos.y - 2;
+			CLAMP(startY, 2, MAP_Y - 2);
+			i32 stopX = ent.pos.x - 2;
+			CLAMP(stopX, 2, MAP_X - 2);
+			i32 stopY = ent.pos.y - 2;
+			CLAMP(stopY, 2, MAP_Y - 2);
+			for (i32 y = startY; y < stopY; y++) {
+				for (i32 x = startX; x < stopX ; x++) {
+					MAP_DIJKSTRA(map, x, y) += 2;
 					}
 				}
-				
-			}
-		}  */
-		for(u64 i = 0 ; i < entitys->count; i++){
-			Entitiy ent = entitys->items[i];
-			if(Is_Monster(ent.ch)){
-				i32 startX = ent.pos.x - 2;
-				CLAMP(startX, 2, MAP_X - 2);
-				i32 startY = ent.pos.y - 2;
-				CLAMP(startY, 2, MAP_Y - 2);
-				i32 stopX = ent.pos.x - 2;
-				CLAMP(stopX, 2, MAP_X - 2);
-				i32 stopY = ent.pos.y - 2;
-				CLAMP(stopY, 2, MAP_Y - 2);
-				for (i32 y = startY; y < stopY; y++){
-					for (i32 x = startX; x < stopX ; x++){
-						MAP_DIJKSTRA(map, x, y) += 2; 
-					}
-				}
-				
+
 			}
 		}
-		DROP(entitys);	
+	DROP(entitys);
 	}
-	
-	
+
+

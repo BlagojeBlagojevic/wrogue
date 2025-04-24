@@ -5,23 +5,7 @@
 #include "map.h"
 #include "item.h"
 
-typedef enum {
-	DAMAGE_BASIC,
-	DAMAGE_SPELL,
-	DAMAGE_POISON,
-	DAMAGE_RANGE,
-	DAMAGE_NUM,
 
-	} Damage_Types;
-
-
-static const char* damageStr[] = {
-	"BASIC",
-	"SPELL",
-	"POISON",
-	"RANGE",
-	"NUM",
-	};
 
 
 typedef enum {
@@ -135,7 +119,7 @@ typedef struct Entity {
 	u8 lifeStealValue;
 	u8 isStunded;
 	Spell spell;
-
+	i32 equiptedItems[EQUIPTED_NUM];
 	} Entitiy;
 
 typedef struct {

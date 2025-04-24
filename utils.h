@@ -27,6 +27,8 @@
 #define RED   (SDL_Color){255, 0, 0, 0}
 #define GREEN (SDL_Color){0, 255, 0, 0}
 #define BLUE  (SDL_Color){30, 0, 255, 0}
+#define UNDE_COL (SDL_Color){252, 3, 177, 0}
+
 //TTF
 #include<SDL2/SDL_ttf.h>
 //static const char* fontLoc = "assets/fonts/f.ttf";
@@ -55,7 +57,9 @@
 #define KEY_P 112
 #define KEY_O 111
 
+#define KEY_U 117
 
+#define KEY_BACKSPACE 8
 //#include<pthread.h> TBD asychronus stuff
 
 //TYPES
@@ -107,13 +111,19 @@ do {                                             					   \
 	(da)->items[j] = (da)->items[--(da)->count]; 					   \
 } while(0)		
 
-
+#define da_remove_last(da) do{ if((da)->count > 0){ (da)->count--; } }while(0)
 
 typedef struct {
 	u64 	count;
 	u64 	capacity;
 	char** items;
 	} Str;
+
+typedef struct{
+	u64 	count;
+	u64 	capacity;
+	i32* items;	
+}Num;
 
 #define MAP_X 80
 #define MAP_Y 80
@@ -130,9 +140,11 @@ typedef struct Graphics_State {
 	u8            isQuit;
 	SDL_bool      isMovmentEvent;
 	Str           messages;
+	Num           inputBuffer;
 	SDL_bool      isRenderItemsOnMap;
 	SDL_bool      isPickingItem;
 	SDL_bool      isOpeningDoor;
+	SDL_bool      isEquItem;
 	u64           countMoves;
 	} Graphics_State;
 
@@ -141,6 +153,7 @@ typedef struct Graphics_State {
 
 #define FONT_H_MESSAGES 20
 #define MAX_NAME 30
+#define MAX_DESCRIPTION 200
 
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
@@ -154,10 +167,12 @@ extern Graphics_State mainGraphics;
 #define HEIGHT     mainGraphics.height
 #define MOVMENT    mainGraphics.isMovmentEvent
 #define MESSAGES   mainGraphics.messages
+#define BUFFER     mainGraphics.inputBuffer
 #define ITEMSREND  mainGraphics.isRenderItemsOnMap
 #define PICKITEM   mainGraphics.isPickingItem
 #define OPENDOOR   mainGraphics.isOpeningDoor
 #define COUNTMOVES mainGraphics.countMoves
+#define EQUITEM    mainGraphics.isEquItem
 typedef struct {
 	i32 x;
 	i32 y;
@@ -190,4 +205,5 @@ typedef struct {
 #define CHANCE_CAVE_ROAD 0.05f
 #define CHANCE_SPIRIT_ATTACK 0.01f
 
+#define CHANCE_LIFESTEAL 0.1f
 #endif

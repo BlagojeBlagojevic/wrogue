@@ -27,7 +27,7 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
-	Entitiy* player = create_entity('@', "Some Name", 10, 10, (Position) {
+	Entitiy* player = create_entity('@', "Some Name", 5, 10, (Position) {
 		10, 10
 		}, WHITE);
 	player->attack[0]  = 2;
@@ -45,10 +45,12 @@ int main() {
 	Item_DA items = {0};
 	Item* sword = create_item(12, 12, SWORD_CREATE());
 	da_append(&items, (*sword));
-	Item* dart = create_item(14, 14, DART_CREATE());
-	da_append(&items, (*dart));
-	Item* potion = create_item(16, 16, POTION_CREATE());
-	da_append(&items, (*potion));
+	Item* armor = create_item(12, 14, ARMOR_CREATE());
+	da_append(&items, (*armor));
+	//Item* dart = create_item(14, 14, DART_CREATE());
+	//da_append(&items, (*dart));
+	//Item* potion = create_item(16, 16, POTION_CREATE());
+	//da_append(&items, (*potion));
 	//da_append(&items, (*item));
 	//da_append(&items, (*item));
 	//da_append(&items, (*item));
@@ -64,13 +66,19 @@ int main() {
 	genereate_monsters(&monsters, map);
 	MOVMENT = 0;
 	COUNTMOVES = 0;
-	main_renderer(player,  &monsters, &items, map);
+	
+	
 	//MAP_STDOUT();
 	while(!QUIT) {
-		update_entity(player, &monsters, map, &items);
+		if(EQUITEM == SDL_FALSE){
+			main_renderer(player,  &monsters, &items, map);
+			update_entity(player, &monsters, map, &items);	
+		}
 		main_renderer(player,  &monsters, &items, map);
 		event_user(player, &monsters, &items, map);
-		
+		if(EQUITEM == SDL_TRUE){
+			main_renderer(player,  &monsters, &items, map);
+		}
 		//for(u64 count = 0; count < MESSAGES.count; count++) {
 		//	LOG("%s", MESSAGES.items[count]);
 		//	}

@@ -37,7 +37,7 @@ void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 sta
 void render_player(Entitiy *player) {
 	i32 startX = player->pos.x * FONT_W;
 	i32 startY = player->pos.y * FONT_H;
-	
+
 	SDL_Color color;
 	if(player->health >= 3) {
 		color = player->color;
@@ -63,11 +63,31 @@ void render_player(Entitiy *player) {
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	MOVMENT = SDL_FALSE;  //NOT PROB
-	if(player->isStunded != 0){
+	if(EQUITEM == SDL_TRUE) {
+		MOVMENT = SDL_TRUE;
+		if(key >= '0' && key <= '9') {
+			da_append(&BUFFER, key);
+			}
+		else if(key == KEY_BACKSPACE){
+			da_remove_last(&BUFFER);
+		}
+		else if(key == KEY_U){
+			EQUITEM = SDL_FALSE;
+			MOVMENT = SDL_TRUE;
+			i32 buffer = 0, p = 1;
+				for(i32 i = BUFFER.count - 1; i >= 0; i--) {
+					buffer += ((BUFFER.items[i] - '0') * p);
+					p*=10;
+					}
+			//LOG("Buffer %d\n", buffer);
+			equiped_item(&player->inventory, (u64)buffer);
+		}
+		}
+	else if(player->isStunded != 0) {
 		MOVMENT = SDL_TRUE;
 		player->isStunded--;
 		CLAMP(player->isStunded, 0, 255);
-	}
+		}
 	else if(key == UP_ARROW || key == KEY_W) {
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
@@ -79,11 +99,11 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y-1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
+					}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -99,11 +119,11 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
+					}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -120,11 +140,11 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
+					}
 				MOVMENT = SDL_TRUE;
 				}
 			}
@@ -141,100 +161,100 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
+					}
 				MOVMENT = SDL_TRUE;
 				}
 			}
 		}
 	else if(key == KEY_Q) {
-			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y - 1) == SDL_TRUE) {
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				player->pos.x--;
-				player->pos.y--;
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				MOVMENT = SDL_TRUE;
-				}
+		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y - 1) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			player->pos.x--;
+			player->pos.y--;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			MOVMENT = SDL_TRUE;
+			}
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y - 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
-				MOVMENT = SDL_TRUE;
 					}
+				MOVMENT = SDL_TRUE;
+				}
 			}
 		}
 	else if(key == KEY_E) {
-			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y - 1) == SDL_TRUE) {
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				player->pos.x++;
-				player->pos.y--;
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				MOVMENT = SDL_TRUE;
-				}
+		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y - 1) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			player->pos.x++;
+			player->pos.y--;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			MOVMENT = SDL_TRUE;
+			}
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y - 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
-				MOVMENT = SDL_TRUE;
 					}
+				MOVMENT = SDL_TRUE;
+				}
 			}
 		}
 	else if(key == KEY_Z || key == KEY_Y) {
-			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y + 1) == SDL_TRUE) {
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				player->pos.x--;
-				player->pos.y++;
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				MOVMENT = SDL_TRUE;
-				}
+		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y + 1) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			player->pos.x--;
+			player->pos.y++;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			MOVMENT = SDL_TRUE;
+			}
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
-				MOVMENT = SDL_TRUE;
 					}
+				MOVMENT = SDL_TRUE;
+				}
 			}
 		}
 	else if(key == KEY_C) {
-			if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y + 1) == SDL_TRUE) {
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				player->pos.x++;
-				player->pos.y++;
-				MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
-				MOVMENT = SDL_TRUE;
-				}
+		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y + 1) == SDL_TRUE) {
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			player->pos.x++;
+			player->pos.y++;
+			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
+			MOVMENT = SDL_TRUE;
+			}
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
-				if(isF == SDL_TRUE){
+				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
 					free_entity(&entitis->items[witchIsMonster]);
 					da_remove_unordered(entitis, witchIsMonster);
-				}
-				MOVMENT = SDL_TRUE;
 					}
+				MOVMENT = SDL_TRUE;
+				}
 			}
-		}		
-		
+		}
+
 	else if(key == SPACE) {
 		//DO NOTHING
 		MOVMENT = SDL_TRUE;
@@ -256,13 +276,21 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		PICKITEM = SDL_TRUE;
 		MOVMENT = SDL_TRUE;
 		}
-	else if(key == KEY_O){
+	else if(key == KEY_O) {
 		char* msg = "Casted spell of moving rock!!!";
 		da_append(&MESSAGES, msg);
 		OPENDOOR = SDL_TRUE;
 		MOVMENT = SDL_TRUE;
+		BUFFER.count = 0;
 		//LOG("O\n");
-	}
+		}
+	else if(key == KEY_U) {
+		char* msg = "What item you want to equ ";
+		da_append(&MESSAGES, msg);
+		da_append(&MESSAGES, "Type what item you want to equip");
+		MOVMENT = SDL_TRUE;
+		EQUITEM = SDL_TRUE;
+		}
 	}
 
 
@@ -300,7 +328,7 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 	for(u64 count = 0; count < monsters->count; count++) {
 		//if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
 		//    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
-			if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE){
+		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
 			render_player(&monsters->items[count]);
 			}
 
@@ -317,19 +345,21 @@ void render_messages(i32 startX, i32 startY, char* message) {
 	}
 
 void render_item(Item* item, Tile* map) {
-	
+
 	i32 x = item->pos.x;
 	i32 y = item->pos.y;
 	i32 startX = x * FONT_W;
 	i32 startY = y * FONT_H;
-	char ch = item->ch;
+	char ch[2];
+	ch[0] = item->ch;
+	ch[1] = '\0';
 	//LOG("\nCHAR %c\n", ch);
 	SDL_Rect temp = {startX, startY, FONT_W, FONT_H};
 	DROP(temp);
 	if(MAP_ISW(map, x, y) == SDL_TRUE && MAP_ISV(map, x, y) == SDL_TRUE) {
 		//SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 		//SDL_RenderFillRect(RENDERER, &temp);
-		Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W+10, FONT_H+10, &ch, item->color);
+		Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, ch, item->color);
 		}
 	}
 
@@ -358,15 +388,15 @@ void render_inventory(Item_DA *inventory) {
 	i32 startX = 	MAP_X * FONT_H + 100;
 	i32 startY = 30 + FONT_H_MESSAGES * (NUM_RENDER_MSG+3); //THIS DEPENS CUZZ HOW MUTCH MESSAGES
 	i32 h = 580/2;
-	i32 w = 500;
-	
+	i32 w = 600;
+
 	SDL_Rect rec = {startX, startY, w, h};
 	SDL_SetRenderDrawColor(RENDERER, 0, 30, 10, 0);
 	SDL_RenderFillRect(RENDERER, &rec);
 	for(u64 i = 0; i < inventory->count; i++) {
 		;
 		//LOG("NAME:%s\n", inventory->items[i].name);
-		render_messages(startX, startY + (i*FONT_H_MESSAGES), inventory->items[i].name);
+		render_messages(startX, startY + (i*FONT_H_MESSAGES), inventory->items[i].descripction);
 		//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H_MESSAGES, inventory->items[i].name, WHITE);
 		}
 	}
@@ -374,7 +404,7 @@ void render_inventory(Item_DA *inventory) {
 
 void render_map_fov(Entitiy *player, Tile *map) {
 	//field_of_vison(player, map);
-	i32 radius = player->radius;
+	i32 radius = RADIUS;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
 	i32 stopX  = player->pos.x + radius;
@@ -394,29 +424,29 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					}
-				else if(ch == '/' ){
+				else if(ch == '/' ) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 80, 80, 80, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
-				}
+					}
 				else if(ch == ',') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					//DROP(textRect);
 					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					} // if(ch != '.')
-				else if(ch == '+'){
+				else if(ch == '+') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
-				}
-				else if(ch == '-'){
+					}
+				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
-				}
+					}
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
@@ -425,7 +455,7 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					}
 
 				}
-			else if (MAP_VISITED(map, x, y) == SDL_TRUE){
+			else if (MAP_VISITED(map, x, y) == SDL_TRUE) {
 				i32 startX = x * FONT_W;
 				i32 startY = y * FONT_H;
 				char ch = MAP_CH(map, x, y);
@@ -434,30 +464,30 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_SetRenderDrawColor(RENDERER, 60, 60, 60, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					}
-				else if(ch == '/' ){
+				else if(ch == '/' ) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
-				}
-				else if(ch == '+'){
+					}
+				else if(ch == '+') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
-				}
-				else if(ch == '-'){
+					}
+				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
-				}
+					}
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					DROP(textRect);
 					}
-			}	
+				}
 			else {
 				i32 startX = x * FONT_W;
 				i32 startY = y * FONT_H;
@@ -483,22 +513,22 @@ void render_map_dikstra(Entitiy *player, Tile *map) {
 	CLAMP(stopY,  0, MAP_Y-1);
 	for(i32 y  = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
-				//DROP(textRect);
-				i32 startX = x * FONT_W;
-				i32 startY = y * FONT_H;
-				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
-				u64 c = 0xFFFFFFF * MAP_DIJKSTRA(map, x, y);
-				u8 r = (c & 0xFF000000) >> 24; 
-				u8 g = (c & 0x00FF0000) >> 16; 
-				u8 b = (c & 0x0000FF00) >> 8;
-				u8 a = (c & 0x000000FF) >> 0;
-				LOG("Color %lu\n", c);
-				SDL_SetRenderDrawColor(RENDERER, r, r, r, a);
-				SDL_RenderFillRect(RENDERER, &textRect);
+			//DROP(textRect);
+			i32 startX = x * FONT_W;
+			i32 startY = y * FONT_H;
+			SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+			u64 c = 0xFFFFFFF * MAP_DIJKSTRA(map, x, y);
+			u8 r = (c & 0xFF000000) >> 24;
+			u8 g = (c & 0x00FF0000) >> 16;
+			u8 b = (c & 0x0000FF00) >> 8;
+			u8 a = (c & 0x000000FF) >> 0;
+			LOG("Color %lu\n", c);
+			SDL_SetRenderDrawColor(RENDERER, r, r, r, a);
+			SDL_RenderFillRect(RENDERER, &textRect);
 
+			}
 		}
-	}	
-}	
+	}
 
 void render_map(Tile *map, Entitiy *player) {
 	Text_Renderer_C(RENDERER, FONT, WIDTH/2, 0, 10*10+10, 20, "ROUGE GAME()", WHITE);
@@ -548,16 +578,16 @@ void render_map(Tile *map, Entitiy *player) {
 					else if(ch == '-') {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						//DROP(textRect);
-						
+
 						SDL_SetRenderDrawColor(RENDERER, 0, 10, 255, 100);
 						SDL_RenderFillRect(RENDERER, &textRect);
 						Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
-							}
-					else if(ch == '/'){
+						}
+					else if(ch == '/') {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						SDL_SetRenderDrawColor(RENDERER, 10, 255, 10, 100);
 						SDL_RenderFillRect(RENDERER, &textRect);
-					}
+						}
 					else {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
@@ -580,15 +610,32 @@ void render_map(Tile *map, Entitiy *player) {
 				render_items(items, map, player);
 				}
 			render_monsters(monster, player, map);
-			
+
 			render_inventory(&player->inventory);
 			render_stats(player);
 			i32 count = 1;
 			SDL_Rect temp = {MAP_X*FONT_W + 10, 30, 600, 150};
 			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
 			SDL_RenderFillRect(RENDERER, &temp);
-			for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
-				render_messages((MAP_X*FONT_W + 10), (30 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
+			if(EQUITEM == SDL_FALSE) {
+
+				for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
+					render_messages((MAP_X*FONT_W + 10), (30 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
+					}
+				}
+			else {
+				i32 count = 1;
+				for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
+					render_messages((MAP_X*FONT_W + 10), (30 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
+					}
+				i32 buffer = 0, p = 1;
+				for(i32 i = BUFFER.count - 1; i >= 0; i--) {
+					buffer += ((BUFFER.items[i] - '0') * p);
+					p*=10;
+					}
+				char* msg = calloc(MAX_NAME, sizeof(char));
+				snprintf(msg, MAX_NAME, "You typed %d", buffer);
+				da_append(&MESSAGES, msg);
 				}
 			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X20, 0X20, 0X20, 0XFF));
 			SDL_RenderPresent(RENDERER);
