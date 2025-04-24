@@ -1,6 +1,6 @@
 #include "item.h"
 
-Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color) {
+Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color,	Item_Type type, u8 isCursed, SDL_bool isEquipped) {
 	Item* item = calloc(1, sizeof(Item));
 	if(item == NULL) {
 		ASSERT("CALLOC FAIL");
@@ -8,17 +8,65 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 	item->ch = ch;
 	item->health = health;
 	item->name = calloc(MAX_NAME, sizeof(char));
-	if(item->name == NULL) {
+	item->descripction = calloc(MAX_DESCRIPTION, sizeof(char));
+	if(item->name == NULL || item->descripction == NULL) {
 		ASSERT("CALLOC FAIL");
 		}
 	else {
 		i32 len =  strlen(name);
 		CLAMP(len, 0, (MAX_NAME - 1));
 		memcpy(item->name, name, len);
+		memcpy(item->descripction, name, len);
+
 		}
+
 	item->pos.x = x;
 	item->pos.y = y;
 	item->color = color;
+	item->isEquiped = isEquipped;
+	item->isCursed = isCursed;
+	switch(type) {
+		case SWORD_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = 0;
+					}
+				item->attack[0]  = rand()%5 + 1;  //SWORDS ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[0] = 1;
+				item->equipedTo = EQUIPTED_WEPON;
+				if(rand_f64() < CHANCE_LIFESTEAL) {
+					item->lifeSteal = 1;
+					item->lifeStealChance = rand_f64();
+					}
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d,%.2f)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal, item->lifeStealChance);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+
+				}
+		case ARMOR_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = rand()%5;
+					}
+				item->equipedTo = EQUIPTED_ARMOR;
+
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+
+				break;
+				}
+		default: {
+				ASSERT("UNRECHABLE");
+				break;
+				}
+		}
 	return item;
 	}
 
@@ -30,4 +78,30 @@ void pick_item_from_ground(Item* item, Item_DA *inventory) {
 	item->pos.y = -200; //JUST HIDE A ITEM
 	da_append(inventory, (*item));
 	//IF CURSED OR OTHER STUFS
+	}
+void equiped_item(Item_DA *items, u64 numItem) {
+	if(items->items  == NULL || items->count == 0) {
+		da_append(&MESSAGES, "Number is larger then number of items");
+		return;
+		}
+	if(numItem > items->count) {
+		da_append(&MESSAGES, "Number is larger then number of items");
+		EQUITEM = SDL_FALSE;
+		return;
+		}
+	Item itemToEquipt = items->items[numItem];
+	Item_Equipted type = itemToEquipt.equipedTo;
+	itemToEquipt.isEquiped = SDL_TRUE;
+	for(u64 i = 0; i < items->count; i++) {
+		if(items->items[i].equipedTo == type) {
+			if(items->items[i].isEquiped == SDL_TRUE) {
+				items->items[i].isEquiped = SDL_FALSE;
+				break;
+				}
+			}
+		}
+	char* msg = calloc(MAX_NAME, sizeof(char));
+	snprintf(msg, MAX_NAME, "You equipped(%d) %s", (i32)numItem, itemToEquipt.name);
+	da_append(&MESSAGES, msg);
+	items->items[numItem] = itemToEquipt;
 	}
