@@ -59,9 +59,50 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
+				}
+		case HELMET_ITEM: {
 
+				item->equipedTo = EQUIPTED_HEAD;
+				item->defence[DAMAGE_BASIC]  = 1 + rand()%5;
+				item->defence[DAMAGE_POISON] = rand()%2;
+				item->defence[DAMAGE_RANGE]  = 1 + rand()%3;
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
 				}
+
+		case SHIELD_ITEM: {
+				item->equipedTo = EQUIPTED_SHIELD;
+				item->attack[DAMAGE_BASIC] = rand()%2;
+				item->defence[DAMAGE_BASIC]  = 1 + rand()%5;
+				item->defence[DAMAGE_POISON] = rand()%2;
+				item->defence[DAMAGE_RANGE]  = 1 + rand()%3;
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+				break;
+				}
+
+		case SHOES_ITEM: {
+				item->equipedTo = EQUIPTED_LEGS;
+				item->defence[DAMAGE_BASIC]  = 1;
+				item->defence[DAMAGE_POISON] = rand()%2;
+				item->defence[DAMAGE_SPELL]  =rand()%2;
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+
+				}
+
 		default: {
 				ASSERT("UNRECHABLE");
 				break;
@@ -84,7 +125,7 @@ void equiped_item(Item_DA *items, u64 numItem) {
 		da_append(&MESSAGES, "Number is larger then number of items");
 		return;
 		}
-	if(numItem > items->count) {
+	if(numItem > items->count-1) {
 		da_append(&MESSAGES, "Number is larger then number of items");
 		EQUITEM = SDL_FALSE;
 		return;

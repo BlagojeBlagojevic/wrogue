@@ -8,6 +8,9 @@ typedef enum{
 	SWORD_ITEM,
 	DART_ITEM,
 	ARMOR_ITEM,
+	HELMET_ITEM,
+	SHIELD_ITEM,
+	SHOES_ITEM,
 	POTION_ITEM,
 	NUM_ITEM,
 }Item_Type;
@@ -38,11 +41,12 @@ static const char* damageStr[] = {
 	};
 
 typedef enum{
-	EQUIPTED_HELMET,
+	
 	EQUIPTED_ARMOR,
 	EQUIPTED_WEPON,
 	EQUIPTED_SHIELD,
 	EQUIPTED_LEGS,
+	EQUIPTED_HEAD,
 	EQUIPTED_NUM,
 	
 }Item_Equipted;
@@ -51,8 +55,11 @@ typedef enum{
 #define DAMAGE_NUMi 4 
 
 
-#define SWORD_CREATE()  5, "SWORD",  '{', WHITE, SWORD_ITEM, NORMAL, SDL_FALSE
-#define ARMOR_CREATE()    5, "ARMOR",  '[', WHITE, ARMOR_ITEM, NORMAL, SDL_FALSE 
+#define SWORD_CREATE()     5, "SWORD",  '{', WHITE, SWORD_ITEM,  NORMAL, SDL_FALSE
+#define ARMOR_CREATE()     5, "ARMOR",  '[', WHITE, ARMOR_ITEM,  NORMAL, SDL_FALSE 
+#define HELMET_CREATE()    5, "HELMET", '[', WHITE, HELMET_ITEM, NORMAL, SDL_FALSE
+#define SHIELD_CREATE()    5, "SHIELD", '[', WHITE, SHIELD_ITEM, NORMAL, SDL_FALSE
+#define SHOES_CREATE()     5, "SHOES",  '[', WHITE, SHOES_ITEM,  NORMAL, SDL_FALSE
 //#define DART_CREATE()   5, "DART",   '|', BLUE
 //#define POTION_CREATE() 5, "POTION", '#', BLUE
 

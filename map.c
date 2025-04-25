@@ -437,7 +437,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	//nRooms = 100;
 	//nRooms = 5;
 	Room *rooms = calloc(nRooms+200, sizeof(Room));
-	rooms[0] = create_room(9, 9, 10, 10);
+	rooms[0] = create_room(35, 35, 7, 7);
 	add_room_to_map(map, rooms[0]);
 
 	//add_room_wall_to_map(map, rooms[0]);
@@ -496,7 +496,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	connect_room_centers(rooms[i].center, rooms[minIndex].center, map, SDL_FALSE);
 }
 	connect_room_centers(rooms[nRooms-1].center, rooms[0].center, map, SDL_FALSE);
-	//caved_map(map, percantage);
+//	caved_map(map, percantage);
 	//add_doors(map);
 
 	for(i32 y = 0; y < MAP_Y; y++) {

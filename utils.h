@@ -194,7 +194,7 @@ typedef struct {
 
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
-#define RADIUS 10
+#define RADIUS 7
 #define CHANCE_INCREMENT_HEALTH 0.05f
 #define CHANCE_SPAWN_DOOR 0.1f
 #define CHANCE_NON_IN_ROOM 0.1f
@@ -206,4 +206,8 @@ typedef struct {
 #define CHANCE_SPIRIT_ATTACK 0.01f
 
 #define CHANCE_LIFESTEAL 0.1f
+#define CHANCE_DROP_ITEM 0.1f
+#define CHANCE_ITEM_USED_IN_COMBAT 0.33f
+#define CHANCE_USE_DEF 0.1f
+#define CHANCE_NEGATIVE_DAMAGE 0.33f
 #endif

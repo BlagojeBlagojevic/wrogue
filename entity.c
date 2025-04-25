@@ -39,6 +39,7 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 	}
 void free_entity(Entitiy* ent) {
 	free(ent->name);
+	//TBD FREE INVENTORY;
 	//free(ent);
 	}
 
@@ -62,10 +63,18 @@ i32 roll_the_dice(i32 attack, i32 defence) {
 		}
 
 	if(maxDefence > maxAttack) {
+		if(rand_f64() < CHANCE_NEGATIVE_DAMAGE){
+			return (i32)((maxAttack - maxDefence) * defence);
+		}
 		return 0;
 		}
-
-	i32 diff = (i32)((maxAttack - maxDefence) * attack);
+	i32 diff;
+	if(rand_f64() < CHANCE_USE_DEF){
+		diff = (i32)((maxAttack - maxDefence) * attack);
+	}
+	else{
+		diff = (i32)((maxAttack) * attack);	
+	}
 	CLAMP(diff, 1, INF);
 	return diff;
 	}
@@ -117,7 +126,9 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 		if(item.isEquiped == SDL_TRUE) {
 			//MAYBE CHANCE TO DO SOMTHING
 			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
-			iPl += item.attack[0];
+			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT) {
+				iPl += item.attack[0];
+				}
 			}
 		}
 	for(u64 i = 0; i < entity->inventory.count; i++) {
@@ -125,13 +136,21 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 		if(item.isEquiped == SDL_TRUE) {
 			//MAYBE CHANCE TO DO SOMTHING
 			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
-			iEnt += item.defence[0];
+			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT) {
+				iEnt += item.defence[0];
+				}
 			}
 		}
 	//LOG("player att %d decOrInc %d\n", player->attack[0] ,iPl );
 	//LOG("entity def %d decOrInc %d\n", entity->attack[0] ,iEnt );
 	i32 damage = roll_the_dice(player->attack[0] + iPl, entity->defence[0] + iEnt);
-	entity->health-=damage;
+	if(damage < 0){
+		player->health+=damage;
+	}
+	else{
+		entity->health-=damage;	
+	}
+	
 	CLAMP(entity->health, 0, 100);
 	message_attacked_by_player(player, entity, damage);
 	//DROP(player);
@@ -174,7 +193,10 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 					item.pos.x = x;
 					item.pos.y = y;
 					//LOG("Droped(%d %d)\n\n", x, y);
-					da_append(items, item);
+					if(rand_f64() < CHANCE_DROP_ITEM) {
+						da_append(items, item);
+						}
+
 					}
 				}
 			}
@@ -199,9 +221,10 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 		if(item.isEquiped == SDL_TRUE) {
 			//MAYBE CHANCE TO DO SOMTHING
 			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
-
-			for(i32 j = 0; j < DAMAGE_NUM; j++) {
-				iD[j] += item.defence[j];
+			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT) {
+				for(i32 j = 0; j < DAMAGE_NUM; j++) {
+					iD[j] += item.defence[j];
+					}
 				}
 			}
 		}
@@ -212,11 +235,13 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 		if(item.isEquiped == SDL_TRUE) {
 			//MAYBE CHANCE TO DO SOMTHING
 			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
-			for(i32 j = 0; j < DAMAGE_NUM; j++) {
-				iA[j] += item.attack[j];
-				//LOG("ia %d\n", iA[j]);
-				lfC += item.lifeStealChance;
-				lf  += item.lifeSteal;
+			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT) {
+				for(i32 j = 0; j < DAMAGE_NUM; j++) {
+					iA[j] += item.attack[j];
+					//LOG("ia %d\n", iA[j]);
+					lfC += item.lifeStealChance;
+					lf  += item.lifeSteal;
+					}
 				}
 			}
 		}
@@ -247,16 +272,22 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 			message_attacked_by_monster(player, entity, damage, DAMAGE_POISON);
 			}
 		}
-
-	player->health-=damage;
+	if(damage > 0){
+		player->health-=damage;	
+	}
+	else{
+		entity->health+=damage;
+		//TBD TEXT STORY
+	}
+	
 	CLAMP(player->health, 0, INF);
 	//APPLAY LIFE STEAL TO ENEMY
 	if(rand_f64() < (entity->lifeStealChance - lfC)  && (entity->lifeStealValue + lf) != 0 && entity->health < entity->maxHealth) {
 		entity->health+=(i32)entity->lifeStealValue + lf;
 		CLAMP(entity->health, 0, entity->maxHealth);
 		char* msg = calloc(50, sizeof(char));
-		snprintf(msg, 50, "%s lifestealed %u", entity->name, entity->lifeStealValue);
-		da_append(&MESSAGES, msg);
+		//snprintf(msg, 50, "%s lifestealed %u", entity->name, entity->lifeStealValue);
+		//da_append(&MESSAGES, msg);
 		}
 	//i32 startX =  player->pos.x;
 
@@ -471,7 +502,7 @@ void monster_definitions_export() {
 	monsters[BASIC_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 
 	//ACOLAYT
-	monsters[ACOLAYT_MONSTER].radius = 20;
+	monsters[ACOLAYT_MONSTER].radius = 25;
 	monsters[ACOLAYT_MONSTER].ch = 'A';
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -497,12 +528,12 @@ void monster_definitions_export() {
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESURECT] = 0.30f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
-	
+
 	monsters[ACOLAYT_MONSTER].lifeStealChance = 0.0f;
 	monsters[ACOLAYT_MONSTER].lifeStealValue = 0.0f;
 	monsters[ACOLAYT_MONSTER].color = UNDE_COL;
 	//GHOUL
-	monsters[GHOUL_MONSTER].radius = 30;
+	monsters[GHOUL_MONSTER].radius = 35;
 	monsters[GHOUL_MONSTER].ch = 'G';
 	monsters[GHOUL_MONSTER].attack[DAMAGE_BASIC]  = 2;
 	monsters[GHOUL_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -534,7 +565,7 @@ void monster_definitions_export() {
 	monsters[GHOUL_MONSTER].color = UNDE_COL;
 
 	//NECROMANCER_MONSTER
-	monsters[NECROMANCER_MONSTER].radius = 5;
+	monsters[NECROMANCER_MONSTER].radius = 10;
 	monsters[NECROMANCER_MONSTER].ch = 'N';
 	monsters[NECROMANCER_MONSTER].attack[DAMAGE_BASIC]  = 0;
 	monsters[NECROMANCER_MONSTER].attack[DAMAGE_POISON] = 1;
@@ -563,13 +594,13 @@ void monster_definitions_export() {
 
 	monsters[NECROMANCER_MONSTER].lifeStealChance = 0.0f;
 	monsters[NECROMANCER_MONSTER].lifeStealValue  = 0.0f;
-	
+
 	monsters[NECROMANCER_MONSTER].color = UNDE_COL;
 	SPELL_SUMONM_GHOUL_EXPORT(monsters[NECROMANCER_MONSTER]);
 
 
 	//BANSHIE_MONSTER
-	monsters[BANSHIE_MONSTER].radius = 5;
+	monsters[BANSHIE_MONSTER].radius = 10;
 	monsters[BANSHIE_MONSTER].ch = 'B';
 	monsters[BANSHIE_MONSTER].attack[DAMAGE_BASIC]  = 0;
 	monsters[BANSHIE_MONSTER].attack[DAMAGE_POISON] = 1;
@@ -597,7 +628,7 @@ void monster_definitions_export() {
 	monsters[BANSHIE_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
 
-	
+
 
 
 	monsters[BANSHIE_MONSTER].lifeStealChance = 0.0f;
@@ -607,7 +638,7 @@ void monster_definitions_export() {
 	SPELL_DECRESE_MAX_HEALTH_EXPORT(monsters[BANSHIE_MONSTER]);
 
 	//SPIDER_MONSTER
-	monsters[SPIDER_MONSTER].radius = 5;
+	monsters[SPIDER_MONSTER].radius = 10;
 	monsters[SPIDER_MONSTER].ch = 'F';
 	monsters[SPIDER_MONSTER].attack[DAMAGE_BASIC]  = 0;
 	monsters[SPIDER_MONSTER].attack[DAMAGE_POISON] = 3;
@@ -646,7 +677,7 @@ void monster_definitions_export() {
 
 
 	//DRAGON_MONSTER
-	monsters[DRAGON_MONSTER].radius = 30;
+	monsters[DRAGON_MONSTER].radius = 35;
 	monsters[DRAGON_MONSTER].ch = 'D';
 	monsters[DRAGON_MONSTER].attack[DAMAGE_BASIC]  = 5;
 	monsters[DRAGON_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -682,7 +713,7 @@ void monster_definitions_export() {
 
 //ORCS
 	//GRUNT
-	monsters[GRUNT_MONSTER].radius = 30;
+	monsters[GRUNT_MONSTER].radius = 35;
 	monsters[GRUNT_MONSTER].ch = 'O';
 	monsters[GRUNT_MONSTER].attack[DAMAGE_BASIC]  = 3;
 	monsters[GRUNT_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -714,7 +745,7 @@ void monster_definitions_export() {
 	monsters[GRUNT_MONSTER].color = GREEN;
 
 //BERSERKER
-	monsters[BERSERKER_MONSTER].radius = 30;
+	monsters[BERSERKER_MONSTER].radius = 35;
 	monsters[BERSERKER_MONSTER].ch = 'V';
 	monsters[BERSERKER_MONSTER].attack[DAMAGE_BASIC]  = 4;
 	monsters[BERSERKER_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -750,7 +781,7 @@ void monster_definitions_export() {
 	SPELL_BESERKER_EXPORT(monsters[BERSERKER_MONSTER]);
 
 //ARCHER
-	monsters[ARCHER_MONSTER].radius = 20;
+	monsters[ARCHER_MONSTER].radius = 25;
 	monsters[ARCHER_MONSTER].ch = 'A';
 	monsters[ARCHER_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[ARCHER_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -784,7 +815,7 @@ void monster_definitions_export() {
 	monsters[ARCHER_MONSTER].color = GREEN;
 
 //NEUTRAL ANIMALS
-	monsters[RAT_MONSTER].radius = 10;
+	monsters[RAT_MONSTER].radius = 15;
 	monsters[RAT_MONSTER].ch = 'R';
 	monsters[RAT_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[RAT_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -812,7 +843,7 @@ void monster_definitions_export() {
 	SPELL_SUMONM_RAT_EXPORT(monsters[RAT_MONSTER]);
 
 //GOBLIN
-	monsters[GOBLIN_MOSNTER].radius = 10;
+	monsters[GOBLIN_MOSNTER].radius = 15;
 	monsters[GOBLIN_MOSNTER].ch = 'K';
 	monsters[GOBLIN_MOSNTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[GOBLIN_MOSNTER].attack[DAMAGE_POISON] = 0;
@@ -981,7 +1012,7 @@ void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 	ox = (f64)entity->pos.x;
 	oy = (f64)entity->pos.y;
 
-	for(i32 i = 0; i < entity->radius; i++) {
+	for(i32 i = 0; i < RADIUS; i++) {
 		CLAMP(ox, 0.00f, (f64)(MAP_X - 1));
 		CLAMP(ox, 0.00f, (f64)(MAP_Y - 1));
 		//LOG("%d %d\n", (u32)ox, (u32)oy);
@@ -1352,7 +1383,7 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 	if(distance <= DISTANCE_RANGE_ATTACK_MIN) {
 		monster_attack(player, ent, distance);
 		//LOG("Range\n");
-		da_append(&MESSAGES, "Mele");
+		//da_append(&MESSAGES, "Mele");
 		return;
 		}
 	//MOVES WILL DEPEND OF WHAT MONSTER IS!!!
@@ -1607,10 +1638,9 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				}
 			else if	(is_monster_visible(map, &entity) == SDL_TRUE && rand_f64() < entity.stateChance[STATE_SPELL] && entity.spell.passedTurns > entity.spell.cooldown) {
 				i32 distance = DISTANCE(player->pos.x, player->pos.y, entity.pos.x, entity.pos.y);
-				if(distance < DISTANCE_RANGE_ATTACK_MAX + 2) {
+				if(distance <= DISTANCE_RANGE_ATTACK_MAX + 2) {
 					entity.state = STATE_SPELL;
 					entity.spell.passedTurns = 0;
-
 					}
 				else {
 					entity.state = STATE_MOVING_AWAY_RANGE;
@@ -1631,7 +1661,7 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			else if(entity.state == STATE_HUNTING) {
 				if(rand_f64() < entity.stateChance[STATE_RESTING]) {
 					entity.state  = STATE_RESTING;
-					da_append(&MESSAGES, "Stop");
+					da_append(&MESSAGES, "You stop hearing noices");
 					}
 				}
 
@@ -1668,8 +1698,11 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	i32 co = 0;
 	DROP(co);
 	for(u64 count = 0; count < entitys->count; count++) {
+
 		Entitiy entity = entitys->items[count];
+
 		if(Is_Monster(entity.ch)) {
+			entity.spell.passedTurns++;
 			if(entity.state == STATE_RESTING) {
 				//NOTHING
 
@@ -1716,6 +1749,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				summon->health = 2;
 				summon->spell.passedTurns = 0;
 				summon->stateChance[STATE_SUMMON] = 0.00f;
+				summon->state = STATE_HUNTING;
 				make_run_move(player, &entity, map);
 				entity.state = STATE_RUNING;
 				entity.spell.cooldown *=3;
@@ -1740,6 +1774,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 							entity.spell.passedTurns = 0;
 							char* msg = "You are stunded";
 							player->isStunded = entity.spell.value;
+							entity.state = STATE_HUNTING;
 							da_append(&MESSAGES, msg);
 							break;
 							}

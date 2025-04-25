@@ -117,7 +117,7 @@ typedef struct Entity {
 	f64 stateChance[STATE_NUM];
 	f64 lifeStealChance;
 	u8 lifeStealValue;
-	u8 isStunded;
+	i16 isStunded;
 	Spell spell;
 	i32 equiptedItems[EQUIPTED_NUM];
 	} Entitiy;

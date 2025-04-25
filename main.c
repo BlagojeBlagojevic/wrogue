@@ -14,9 +14,9 @@ int main() {
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
 	monster_definitions_export();
-	u64 seed = (u64)time(0);  
+	u64 seed = (u64)time(0);
 	srand(seed);
-	
+
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
 	(void)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
@@ -28,7 +28,7 @@ int main() {
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
 	Entitiy* player = create_entity('@', "Some Name", 5, 10, (Position) {
-		10, 10
+		40, 40
 		}, WHITE);
 	player->attack[0]  = 2;
 	player->defence[0] = 2;
@@ -43,10 +43,16 @@ int main() {
 	Tile *map = init_map();
 	Entitiy_DA monsters = {0};
 	Item_DA items = {0};
-	Item* sword = create_item(12, 12, SWORD_CREATE());
+	Item* sword = create_item(36, 36, SWORD_CREATE());
 	da_append(&items, (*sword));
-	Item* armor = create_item(12, 14, ARMOR_CREATE());
+	Item* armor = create_item(38, 38, ARMOR_CREATE());
 	da_append(&items, (*armor));
+	Item* helmet = create_item(40, 38, HELMET_CREATE());
+	da_append(&items, (*helmet));
+	Item* shield = create_item(36, 40, SHIELD_CREATE());
+	da_append(&items, (*shield));
+	Item* shoes = create_item(36, 38, SHOES_CREATE());
+	da_append(&items, (*shoes));
 	//Item* dart = create_item(14, 14, DART_CREATE());
 	//da_append(&items, (*dart));
 	//Item* potion = create_item(16, 16, POTION_CREATE());
@@ -62,23 +68,30 @@ int main() {
 		}
 	char* msg = calloc(30, sizeof(char));
 	snprintf(msg, 30, "Your seed is %ld", seed);
-	da_append(&MESSAGES, msg);	
+	da_append(&MESSAGES, msg);
 	genereate_monsters(&monsters, map);
 	MOVMENT = 0;
 	COUNTMOVES = 0;
-	
-	
+
+
 	//MAP_STDOUT();
 	while(!QUIT) {
-		if(EQUITEM == SDL_FALSE){
+		if(EQUITEM == SDL_FALSE) {
 			main_renderer(player,  &monsters, &items, map);
-			update_entity(player, &monsters, map, &items);	
-		}
+			update_entity(player, &monsters, map, &items);
+			}
 		main_renderer(player,  &monsters, &items, map);
 		event_user(player, &monsters, &items, map);
-		if(EQUITEM == SDL_TRUE){
+		if(EQUITEM == SDL_TRUE) {
 			main_renderer(player,  &monsters, &items, map);
-		}
+			LOG("Items:\n");
+			for(u64 i = 0; i < player->inventory.count; i++) {
+				Item item = player->inventory.items[i];
+				if(item.isEquiped == SDL_TRUE) {
+					LOG("\t%s\n", item.descripction);
+					}
+				}
+			}
 		//for(u64 count = 0; count < MESSAGES.count; count++) {
 		//	LOG("%s", MESSAGES.items[count]);
 		//	}

@@ -68,25 +68,26 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		if(key >= '0' && key <= '9') {
 			da_append(&BUFFER, key);
 			}
-		else if(key == KEY_BACKSPACE){
+		else if(key == KEY_BACKSPACE) {
 			da_remove_last(&BUFFER);
-		}
-		else if(key == KEY_U){
+			}
+		else if(key == KEY_U) {
 			EQUITEM = SDL_FALSE;
 			MOVMENT = SDL_TRUE;
 			i32 buffer = 0, p = 1;
-				for(i32 i = BUFFER.count - 1; i >= 0; i--) {
-					buffer += ((BUFFER.items[i] - '0') * p);
-					p*=10;
-					}
+			for(i32 i = BUFFER.count - 1; i >= 0; i--) {
+				buffer += ((BUFFER.items[i] - '0') * p);
+				p*=10;
+				}
 			//LOG("Buffer %d\n", buffer);
 			equiped_item(&player->inventory, (u64)buffer);
+			BUFFER.count = 0;
+			}
 		}
-		}
-	else if(player->isStunded != 0) {
+	else if(player->isStunded > 0) {
 		MOVMENT = SDL_TRUE;
 		player->isStunded--;
-		CLAMP(player->isStunded, 0, 255);
+		//CLAMP(player->isStunded, 0, 255);
 		}
 	else if(key == UP_ARROW || key == KEY_W) {
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
@@ -325,9 +326,11 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 	CLAMP(stopX,  0, MAP_X-1);
 	CLAMP(startY, 0, MAP_Y-1);
 	CLAMP(stopY,  0, MAP_Y-1);//*/
+	
 	for(u64 count = 0; count < monsters->count; count++) {
 		//if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
 		//    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
+		//f64 distance = DISTANCE(player->pos.x, player->pos.y, monsters->items[count].pos.x, monsters->items[count].pos.y);
 		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
 			render_player(&monsters->items[count]);
 			}
@@ -404,7 +407,7 @@ void render_inventory(Item_DA *inventory) {
 
 void render_map_fov(Entitiy *player, Tile *map) {
 	//field_of_vison(player, map);
-	i32 radius = RADIUS;
+	i32 radius = player->radius;
 	i32 startX = player->pos.x - radius;
 	i32 startY = player->pos.y - radius;
 	i32 stopX  = player->pos.x + radius;
