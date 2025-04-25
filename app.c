@@ -604,8 +604,8 @@ void render_map(Tile *map, Entitiy *player) {
 
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
-			render_map(map, player);
-			//render_map_fov(player, map);
+			//render_map(map, player);
+			render_map_fov(player, map);
 			//render_map_dikstra(player, map);
 			render_player(player);
 			//render_player(&monster->items[0]);
