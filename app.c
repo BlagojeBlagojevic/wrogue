@@ -81,6 +81,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				}
 			//LOG("Buffer %d\n", buffer);
 			equiped_item(&player->inventory, (u64)buffer);
+			if(USEITEM == SDL_TRUE){
+				
+				use_item(player, entitis, &player->inventory, (u64)buffer);
+				da_append(&MESSAGES, "Use item:");
+				USEITEM = SDL_FALSE;
+			}
 			BUFFER.count = 0;
 			}
 		}
@@ -525,7 +531,7 @@ void render_map_dikstra(Entitiy *player, Tile *map) {
 			u8 g = (c & 0x00FF0000) >> 16;
 			u8 b = (c & 0x0000FF00) >> 8;
 			u8 a = (c & 0x000000FF) >> 0;
-			LOG("Color %lu\n", c);
+			//LOG("Color %lu\n", c);
 			SDL_SetRenderDrawColor(RENDERER, r, r, r, a);
 			SDL_RenderFillRect(RENDERER, &textRect);
 
