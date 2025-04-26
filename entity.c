@@ -63,18 +63,18 @@ i32 roll_the_dice(i32 attack, i32 defence) {
 		}
 
 	if(maxDefence > maxAttack) {
-		if(rand_f64() < CHANCE_NEGATIVE_DAMAGE){
+		if(rand_f64() < CHANCE_NEGATIVE_DAMAGE) {
 			return (i32)((maxAttack - maxDefence) * defence);
-		}
+			}
 		return 0;
 		}
 	i32 diff;
-	if(rand_f64() < CHANCE_USE_DEF){
+	if(rand_f64() < CHANCE_USE_DEF) {
 		diff = (i32)((maxAttack - maxDefence) * attack);
-	}
-	else{
-		diff = (i32)((maxAttack) * attack);	
-	}
+		}
+	else {
+		diff = (i32)((maxAttack) * attack);
+		}
 	CLAMP(diff, 1, INF);
 	return diff;
 	}
@@ -117,6 +117,7 @@ void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 	//Text_Renderer_C(RENDERER, FONT, WIDTH - 100, HEIGHT - 100, 100, 20, "Da li ovo radi", WHITE);
 	}
 
+//TBD CURSED ITEMS
 //TBD attack type
 SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
 	DROP(map);
@@ -144,13 +145,13 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 	//LOG("player att %d decOrInc %d\n", player->attack[0] ,iPl );
 	//LOG("entity def %d decOrInc %d\n", entity->attack[0] ,iEnt );
 	i32 damage = roll_the_dice(player->attack[0] + iPl, entity->defence[0] + iEnt);
-	if(damage < 0){
+	if(damage < 0) {
 		player->health+=damage;
-	}
-	else{
-		entity->health-=damage;	
-	}
-	
+		}
+	else {
+		entity->health-=damage;
+		}
+
 	CLAMP(entity->health, 0, 100);
 	message_attacked_by_player(player, entity, damage);
 	//DROP(player);
@@ -209,8 +210,7 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 	}
 
 
-//TBD attack type(Monsters prob always use a higest stats for attack
-//TBD range attack type aka fire attack
+//TBD CURSED ITEMS
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//DROP(entity);
 	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
@@ -272,14 +272,14 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 			message_attacked_by_monster(player, entity, damage, DAMAGE_POISON);
 			}
 		}
-	if(damage > 0){
-		player->health-=damage;	
-	}
-	else{
+	if(damage > 0) {
+		player->health-=damage;
+		}
+	else {
 		entity->health+=damage;
 		//TBD TEXT STORY
-	}
-	
+		}
+
 	CLAMP(player->health, 0, INF);
 	//APPLAY LIFE STEAL TO ENEMY
 	if(rand_f64() < (entity->lifeStealChance - lfC)  && (entity->lifeStealValue + lf) != 0 && entity->health < entity->maxHealth) {
@@ -522,7 +522,7 @@ void monster_definitions_export() {
 
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RUNING] = 0.05f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
-	monsters[ACOLAYT_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_HUNTING] = 0.3f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_WANDERING] = 0.5f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
@@ -584,7 +584,7 @@ void monster_definitions_export() {
 	monsters[NECROMANCER_MONSTER].state = STATE_WANDERING;
 
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_RUNING] = 0.3f;
-	monsters[NECROMANCER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.001f;
+	monsters[NECROMANCER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.6f;
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_HUNTING] = 0.01f;
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
@@ -1627,7 +1627,8 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 					entity.state = STATE_BESERK;
 					}
 				}
-			else if(player->health <= 3 || rand_f64() < ((player->maxHealth - player->health) / 100)) {
+			//else if(player->health <= 3 || rand_f64() < ((player->maxHealth - player->health) / 100)) {
+			else if(player->health <= 3) {
 				entity.state = STATE_HUNTING;
 
 				}
@@ -1933,6 +1934,8 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items) {
 		}
 	}
 
+
+
 void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32 goalX, i32 goalY) {
 
 
@@ -1940,7 +1943,7 @@ void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32
 		map[i].distance = INF;
 		}
 
-	MAP_DIJKSTRA(map, player->pos.x, player->pos.y) = 0.0f;
+	MAP_DIJKSTRA(map, goalX, goalY) = 0.0f;
 	Position* queue = calloc(MAP_X * MAP_Y, sizeof(Position));
 	i32 front = 0, back = 0;
 
@@ -2006,12 +2009,184 @@ void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32
 			for (i32 y = startY; y < stopY; y++) {
 				for (i32 x = startX; x < stopX ; x++) {
 					MAP_DIJKSTRA(map, x, y) += 2;
+					CLAMP(MAP_DIJKSTRA(map, x, y), 0, INF);
 					}
 				}
 
 			}
 		}
 	DROP(entitys);
+	DROP(player);
 	}
 
 
+
+void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem) {
+	Item itemToEquipt = items->items[numItem];
+	Item_Equipted type = itemToEquipt.equipedTo;
+	switch(itemToEquipt.type) {
+		case HEALING_ITEM: {
+				i32 isCursed = 0;
+				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
+					da_append(&MESSAGES,"Seems to restor the health");
+					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be potion of healing");
+					}
+				else {
+					da_append(&MESSAGES,"Seems to decreased the health");
+					player->health-= player->maxHealth * itemToEquipt.health / 100;
+					CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be cursed potion of healing");
+
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		default: {
+				ASSERT("UNRECHABLE");
+				break;
+				}
+		}
+	DROP(entitis);
+	}
+
+void export_generators() {
+	generators[GENERATOR_GRAVEYARD].type = GENERATOR_GRAVEYARD;
+	memset(generators[GENERATOR_GRAVEYARD].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_GRAVEYARD].chanceToSpawn[ACOLAYT_MONSTER] = 0.9f;
+	generators[GENERATOR_GRAVEYARD].chanceToSpawn[NECROMANCER_MONSTER] = 0.05f;
+	generators[GENERATOR_GRAVEYARD].chanceToSpawn[BANSHIE_MONSTER] = 0.05f;
+	generators[GENERATOR_GRAVEYARD].levelDungon = 1;
+	generators[GENERATOR_GRAVEYARD].monsterNumber = 0;
+
+	generators[GENERATOR_GRAVEYARD].maxDistanceDikstra = 20;
+
+	generators[GENERATOR_CAVE].type = GENERATOR_CAVE;
+	memset(generators[GENERATOR_CAVE].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_CAVE].chanceToSpawn[GOBLIN_MOSNTER] = 0.9f;
+	generators[GENERATOR_CAVE].chanceToSpawn[RAT_MONSTER] = 0.4f;
+	generators[GENERATOR_CAVE].chanceToSpawn[ARCHER_MONSTER] = 0.5f;
+	generators[GENERATOR_CAVE].levelDungon = 1;
+	generators[GENERATOR_CAVE].monsterNumber = 2;
+
+	generators[GENERATOR_CAVE].maxDistanceDikstra = 20;
+	}
+void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room) {
+	i32 stopY = room.pos.y + room.height;
+	CLAMP(stopY, 3, MAP_Y - 2);
+	i32 stopX = room.pos.x + room.width;
+	CLAMP(stopX, 3, MAP_X - 2);
+	i32 startX = room.pos.x;
+	CLAMP(startX, 3, MAP_Y - 2);
+	i32 startY = room.pos.y - 1;
+	CLAMP(startY, 3, MAP_Y - 2);
+	i32 generatedGenerators = 1; //
+	Generator gen;
+	i32 counter1=0, counter2=0, counter3=0, counter4=0, counter5=0;
+	LOG("\nNum OF GENERATORS %d\n", generatedGenerators);
+
+	while(generatedGenerators > 0) {
+		counter1++;
+		if(counter1 >= 1000) {
+			break;
+			}
+		Position pos = {0, 0};
+		gen.levelDungon = (i32)INF;
+
+		//GENERATE APROPRITE FOR LEVEL
+		counter2 = 0;
+		while(gen.levelDungon > level) {
+			counter2++;
+			if(counter2 == 1000) {
+				break;
+				}
+			i32 chance = rand()%GENERATOR_NUM;
+			//memcpy(&gen, &generators[chance], sizeof(generators[chance]));
+			gen = generators[chance];
+			LOG("Generator %d \n", chance);
+			LOG("gen.monsterNumber = %d\n", gen.monsterNumber);
+			//system("pause");
+			}
+		//GENERATE CORDINATES FOR START
+		counter3 = 0;
+		while(MAP_CH(map, pos.x, pos.y) != '.') {
+			counter3++;
+			if(counter3 == 1000) {
+				break;
+				}
+			//MUST BE POSITIVE
+			//pos.x = (i32)(rand()*(sin(generatedGenerators*pos.y) + 1))%(MAP_X);
+			//pos.y = (i32)(rand()*(sin(generatedGenerators*pos.x) + 1))%(MAP_Y);
+			pos.x = startX + rand()%room.width;
+			pos.y = startY + rand()%room.height;
+			CLAMP(pos.x, startX, stopX);
+			CLAMP(pos.y, startY, stopY);
+			//LOG("Generator pos(%d %d %c)\n", pos.x, pos.y, MAP_CH(map, pos.x, pos.y));
+			//system("pause");
+			}
+		LOG("Generator pos(%d %d %c)\n", pos.x, pos.y, MAP_CH(map, pos.x, pos.y));
+		//CALCULATE DIKSTRA DEPENDING ON POS
+		//calculate_diakstra_map(player, map, monsters, pos.x, pos.y);
+		//GENERATE DEPENDING ON GENERATOR AND CORDINATE
+
+		while(gen.monsterNumber >= 0) {
+			//LOG("gen.monsterNumber = %d\n", gen.monsterNumber);
+			//system("pause");
+			counter4++;
+			if(counter4 == 1000) {
+				break;
+				}
+			calculate_diakstra_map(player, map, monsters, pos.x, pos.y);
+			i32 x = 0, y = 0;
+			i32 counter6 = 0;
+			while(1) {
+				counter6++;
+				if(counter6 == 1000) {
+					break;
+					}
+				x = rand()%(MAP_X);
+				y = rand()%(MAP_Y);
+				CLAMP(x, startX, stopX);
+				CLAMP(y, startY, stopY);
+				//LOG("(X,Y)=>(%d, %d) (%c)\n", x, y, MAP_CH(map, x, y));
+				if(MAP_CH(map, x, y) == '.') {
+					//system("pause");
+					break;
+					}
+				}
+
+
+			if(MAP_DIJKSTRA(map, x, y) <= gen.maxDistanceDikstra) {
+				SDL_bool isGenerated = SDL_FALSE;
+				i32 type = 0;
+				while(!isGenerated) {
+					counter5++;
+					if(counter5 == 1000) {
+						break;
+						}
+					type = rand()%NUM_MONSTER;
+					i32 chance = rand_f64();
+					if(chance < gen.chanceToSpawn[type]) {
+						isGenerated = SDL_TRUE;
+						}
+					}
+				Entitiy *temp = create_entity(monsterChar[type], monsterName[type], 1, 3, (Position) {
+					.x = x, .y = y
+					}, WHITE);
+				LOG("Monster cordinates (%d %d)\n", x, y);
+				temp->state = STATE_WANDERING;
+				da_append(monsters, (*temp));
+				gen.monsterNumber--;
+				//system("pause");
+				}
+
+
+			}
+
+
+		//TBD TILES TYPES
+		generatedGenerators--;
+		}
+//ITEMS
+	}
