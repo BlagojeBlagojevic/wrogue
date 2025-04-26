@@ -6,6 +6,7 @@
 #include<time.h>
 
 Graphics_State mainGraphics;
+
 int main() {
 
 	DROP(damageStr);
@@ -13,7 +14,7 @@ int main() {
 	DROP(monsters);
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
-	monster_definitions_export();
+
 	u64 seed = (u64)time(0);
 	srand(seed);
 
@@ -40,19 +41,31 @@ int main() {
 	player->defence[3] = 2;
 
 	//player->invertory = {0};
-	Tile *map = init_map();
+	monster_definitions_export();
+	export_generators();
+
+	Room_DA rooms = {0};
+	Tile *map = init_map(&rooms);
 	Entitiy_DA monsters = {0};
 	Item_DA items = {0};
 	Item* sword = create_item(36, 36, SWORD_CREATE());
-	da_append(&items, (*sword));
+	sword->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*sword));
 	Item* armor = create_item(38, 38, ARMOR_CREATE());
-	da_append(&items, (*armor));
+	armor->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*armor));
 	Item* helmet = create_item(40, 38, HELMET_CREATE());
-	da_append(&items, (*helmet));
+	helmet->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*helmet));
 	Item* shield = create_item(36, 40, SHIELD_CREATE());
-	da_append(&items, (*shield));
+	shield->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*shield));
 	Item* shoes = create_item(36, 38, SHOES_CREATE());
-	da_append(&items, (*shoes));
+	shoes->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*shoes));
+	Item* healing = create_item(37, 38, HEALING_CREATE());
+	da_append(&player->inventory, (*healing));
+
 	//Item* dart = create_item(14, 14, DART_CREATE());
 	//da_append(&items, (*dart));
 	//Item* potion = create_item(16, 16, POTION_CREATE());
@@ -69,7 +82,21 @@ int main() {
 	char* msg = calloc(30, sizeof(char));
 	snprintf(msg, 30, "Your seed is %ld", seed);
 	da_append(&MESSAGES, msg);
-	genereate_monsters(&monsters, map);
+	//genereate_monsters(&monsters, map);
+	Room room;
+	room.pos.x  = 0;
+	room.pos.y  = 0;
+	room.width  = 20;
+	room.height = 38;
+	for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
+		room.pos.y=y;
+		for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
+			room.pos.x=x;  
+			genereate_monsters_generator(player, &monsters, map, 1, room);
+			}
+			
+		}
+
 	MOVMENT = 0;
 	COUNTMOVES = 0;
 
@@ -89,6 +116,7 @@ int main() {
 				Item item = player->inventory.items[i];
 				if(item.isEquiped == SDL_TRUE) {
 					LOG("\t%s\n", item.descripction);
+					da_append(&MESSAGES, item.descripction);
 					}
 				}
 			}
