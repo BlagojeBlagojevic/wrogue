@@ -113,6 +113,11 @@ do {                                             					   \
 
 #define da_remove_last(da) do{ if((da)->count > 0){ (da)->count--; } }while(0)
 
+
+
+
+
+
 typedef struct {
 	u64 	count;
 	u64 	capacity;
@@ -141,6 +146,7 @@ typedef struct Graphics_State {
 	SDL_bool      isMovmentEvent;
 	Str           messages;
 	Num           inputBuffer;
+	SDL_bool      useItem;
 	SDL_bool      isRenderItemsOnMap;
 	SDL_bool      isPickingItem;
 	SDL_bool      isOpeningDoor;
@@ -167,6 +173,7 @@ extern Graphics_State mainGraphics;
 #define HEIGHT     mainGraphics.height
 #define MOVMENT    mainGraphics.isMovmentEvent
 #define MESSAGES   mainGraphics.messages
+#define USEITEM    mainGraphics.useItem
 #define BUFFER     mainGraphics.inputBuffer
 #define ITEMSREND  mainGraphics.isRenderItemsOnMap
 #define PICKITEM   mainGraphics.isPickingItem
@@ -208,6 +215,8 @@ typedef struct {
 #define CHANCE_LIFESTEAL 0.1f
 #define CHANCE_DROP_ITEM 0.1f
 #define CHANCE_ITEM_USED_IN_COMBAT 0.33f
-#define CHANCE_USE_DEF 0.1f
-#define CHANCE_NEGATIVE_DAMAGE 0.33f
+#define CHANCE_USE_DEF 0.8f
+#define CHANCE_NEGATIVE_DAMAGE 0.05f
+#define CHANCE_ITEM_PER_LEVEL 0.02f
+
 #endif

@@ -26,6 +26,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 	item->isEquiped = isEquipped;
 	item->isCursed = isCursed;
 	switch(type) {
+		//TBD ADD TYPE
 		case SWORD_ITEM: {
 				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
 					item->attack[i]   = 0;
@@ -86,7 +87,6 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
-				break;
 				}
 
 		case SHOES_ITEM: {
@@ -100,7 +100,22 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
+				}
+		case HEALING_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = HEALING_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				item->isCursed = rand()%2;
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "Potion named %s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
 
+				free(text);
+				break;
 				}
 
 		default: {
@@ -120,6 +135,7 @@ void pick_item_from_ground(Item* item, Item_DA *inventory) {
 	da_append(inventory, (*item));
 	//IF CURSED OR OTHER STUFS
 	}
+
 void equiped_item(Item_DA *items, u64 numItem) {
 	if(items->items  == NULL || items->count == 0) {
 		da_append(&MESSAGES, "Number is larger then number of items");
@@ -130,8 +146,14 @@ void equiped_item(Item_DA *items, u64 numItem) {
 		EQUITEM = SDL_FALSE;
 		return;
 		}
+
 	Item itemToEquipt = items->items[numItem];
 	Item_Equipted type = itemToEquipt.equipedTo;
+	if(type == EQUIPTED_USE) {
+		USEITEM = SDL_TRUE;
+		//da_append(&MESSAGES, "Item is not equipped");
+		return;
+		}
 	itemToEquipt.isEquiped = SDL_TRUE;
 	for(u64 i = 0; i < items->count; i++) {
 		if(items->items[i].equipedTo == type) {

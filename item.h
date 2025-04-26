@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-
+//TBD CURSED ITEMS
 typedef enum{
 	SWORD_ITEM,
 	DART_ITEM,
@@ -11,7 +11,7 @@ typedef enum{
 	HELMET_ITEM,
 	SHIELD_ITEM,
 	SHOES_ITEM,
-	POTION_ITEM,
+	HEALING_ITEM,
 	NUM_ITEM,
 }Item_Type;
 
@@ -47,6 +47,7 @@ typedef enum{
 	EQUIPTED_SHIELD,
 	EQUIPTED_LEGS,
 	EQUIPTED_HEAD,
+	EQUIPTED_USE,
 	EQUIPTED_NUM,
 	
 }Item_Equipted;
@@ -55,11 +56,12 @@ typedef enum{
 #define DAMAGE_NUMi 4 
 
 
-#define SWORD_CREATE()     5, "SWORD",  '{', WHITE, SWORD_ITEM,  NORMAL, SDL_FALSE
-#define ARMOR_CREATE()     5, "ARMOR",  '[', WHITE, ARMOR_ITEM,  NORMAL, SDL_FALSE 
-#define HELMET_CREATE()    5, "HELMET", '[', WHITE, HELMET_ITEM, NORMAL, SDL_FALSE
-#define SHIELD_CREATE()    5, "SHIELD", '[', WHITE, SHIELD_ITEM, NORMAL, SDL_FALSE
-#define SHOES_CREATE()     5, "SHOES",  '[', WHITE, SHOES_ITEM,  NORMAL, SDL_FALSE
+#define SWORD_CREATE()     5, "SWORD",  '{', WHITE, SWORD_ITEM,    NORMAL, SDL_FALSE
+#define ARMOR_CREATE()     5, "ARMOR",  '[', WHITE, ARMOR_ITEM,    NORMAL, SDL_FALSE 
+#define HELMET_CREATE()    5, "HELMET", '[', WHITE, HELMET_ITEM,   NORMAL, SDL_FALSE
+#define SHIELD_CREATE()    5, "SHIELD", '[', WHITE, SHIELD_ITEM,   NORMAL, SDL_FALSE
+#define SHOES_CREATE()     5, "SHOES",  '[', WHITE, SHOES_ITEM,    NORMAL, SDL_FALSE
+#define HEALING_CREATE()	 5, "",       '!', WHITE, HEALING_ITEM,  NORMAL, SDL_FALSE
 //#define DART_CREATE()   5, "DART",   '|', BLUE
 //#define POTION_CREATE() 5, "POTION", '#', BLUE
 
@@ -72,6 +74,7 @@ typedef struct{
 	char* descripction;
 	char ch;
 	SDL_Color color;
+	Item_Type type;
 	i32 attack[DAMAGE_NUMi];
 	i32 defence[DAMAGE_NUMi];
 	u8 isCursed;
@@ -92,6 +95,7 @@ typedef struct {
 Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color,	Item_Type type, u8 isCursed, SDL_bool isEquipped);
 void pick_item_from_ground(Item* item, Item_DA *inventory);
 void equiped_item(Item_DA *items, u64 numItem);
+
 //ALL LOGIC WILL BE HANDLED IN A player_attack and monster_attack for adjustin the stats
 
 #endif
