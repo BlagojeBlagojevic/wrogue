@@ -1,44 +1,40 @@
 
 #include "map.h"
-SDL_bool checkCollision(i32 x1, i32 y1, i32 w1, i32 h1, i32 x2, i32 y2, i32 w2, i32 h2){
+SDL_bool checkCollision(i32 x1, i32 y1, i32 w1, i32 h1, i32 x2, i32 y2, i32 w2, i32 h2) {
 	SDL_Rect A = {.h = h1, .w = w1, .x = x1, .y = y1 };
 	SDL_Rect B = {.h = h2, .w = w2, .x = x2, .y = y2 };
-    i16 leftA, leftB;
-    i16 rightA, rightB;
-    i16 topA, topB;
-    i16 bottomA, bottomB;
+	i16 leftA, leftB;
+	i16 rightA, rightB;
+	i16 topA, topB;
+	i16 bottomA, bottomB;
 
-    leftA = A.x;
-    rightA = A.x + A.w;
-    topA = A.y;
-    bottomA = A.y + A.h;
+	leftA = A.x;
+	rightA = A.x + A.w;
+	topA = A.y;
+	bottomA = A.y + A.h;
 
-    leftB = B.x;
-    rightB = B.x + B.w;
-    topB = B.y;
-    bottomB = B.y + B.h;
+	leftB = B.x;
+	rightB = B.x + B.w;
+	topB = B.y;
+	bottomB = B.y + B.h;
 
-    if( bottomA <= topB )
-    {
-        return SDL_FALSE;
-    }
+	if( bottomA <= topB ) {
+		return SDL_FALSE;
+		}
 
-    if( topA >= bottomB )
-    {
-        return SDL_FALSE;
-    }
+	if( topA >= bottomB ) {
+		return SDL_FALSE;
+		}
 
-    if( rightA <= leftB )
-    {
-        return SDL_FALSE;
-    }
+	if( rightA <= leftB ) {
+		return SDL_FALSE;
+		}
 
-    if( leftA >= rightB )
-    {
-        return SDL_FALSE;
-    }
-    return SDL_TRUE;
-}
+	if( leftA >= rightB ) {
+		return SDL_FALSE;
+		}
+	return SDL_TRUE;
+	}
 
 
 
@@ -91,106 +87,110 @@ void add_room_wall_rectangle(Tile *map, Room room) {
 	CLAMP(startY, 3, MAP_Y - 2);
 	for(i32 y = startY; y < stopY; y++) {
 		for(i32 x = startX; x < stopX; x++) {
-				if(y == room.pos.y && MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
-					if(MAP_CH(map, x, y) != ','){
-						MAP_CH(map, x, y)  = '/';
-						MAP_ISW(map, x, y) = SDL_FALSE;
+			if(y == room.pos.y && MAP_CH(map, x, y) != ','  &&  MAP_CH(map, x, y-1) != ',')  {
+				if(MAP_CH(map, x, y) != ',') {
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
 					}
-					else{
-						break;
+				else {
+					break;
 					}
+				}
+			else if(x == room.pos.x && MAP_CH(map, x, y) != ',' && MAP_CH(map, x-1, y) != ',') {
+				if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+') {
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
 					}
-				else if(x == room.pos.x && MAP_CH(map, x, y) != ',' && MAP_CH(map, x-1, y) != ',') {
-					if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+'){
-						MAP_CH(map, x, y)  = '/';
-						MAP_ISW(map, x, y) = SDL_FALSE;
+				else {
+					break;
 					}
-					else{
-						break;
+				}
+			else if(x == room.pos.x + room.width - 1 && MAP_CH(map, x+1, y) != ',') {
+				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+') {
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
 					}
+				else {
+					break;
 					}
-				else if(x == room.pos.x + room.width - 1 && MAP_CH(map, x+1, y) != ',') {
-					if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
-						MAP_CH(map, x, y)  = '/';
-						MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+			else if(y == room.pos.y + room.height - 1 && MAP_CH(map, x, y+1) != ',') {
+				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+') {
+					MAP_CH(map, x, y)  = '/';
+					MAP_ISW(map, x, y) = SDL_FALSE;
 					}
-					else{
-						break;
-					}
-					}
-				else if(y == room.pos.y + room.height - 1 && MAP_CH(map, x, y+1) != ',') {
-					if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
-						MAP_CH(map, x, y)  = '/';
-						MAP_ISW(map, x, y) = SDL_FALSE;
-					}
-					else{
-						break;
-					}
+				else {
+					break;
 					}
 				}
 			}
 		}
-void add_room_wall_circle(Tile *map, Room room) {
-			i32 stopY = room.pos.y + room.height;
-			CLAMP(stopY, 3, MAP_Y - 2);
-			i32 stopX = room.pos.x + room.width;
-			CLAMP(stopX, 3, MAP_X - 2);
-			i32 startX = room.pos.x;
-			CLAMP(startX, 3, MAP_Y - 2);
-			i32 startY = room.pos.y - 1;
-			CLAMP(startY, 3, MAP_Y - 2);
-			f64 radius = DISTANCE(room.pos.x, room.pos.y, room.center.x, room.center.y)-3;
-			CLAMP(radius, 6.0f, INF);
-			//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
-			for(i32 y = startY; y < stopY; y++) {
-				for(i32 x = startX; x < stopX; x++) {
-					f64 distance = (x - room.center.x)*(x - room.center.x) + (y - room.center.y)*(y - room.center.y);
+	}
 
-					//LOG("Distance %f Radius %f\n", distance, radius);
-					if(distance > (radius*radius)){
-						if(MAP_CH(map, x, y) != ','  && ((y-1) != 0) &&  MAP_CH(map, x, y-1) != ',')  {
-							if(MAP_CH(map, x, y) != ','){
-								MAP_CH(map, x, y)  = '/';
-								MAP_ISW(map, x, y) = SDL_FALSE;
-							}
-							else{
-								break;
-							}
-							}
-						else if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x-1, y) != ',') {
-							if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+'){
-								MAP_CH(map, x, y)  = '/';
-								MAP_ISW(map, x, y) = SDL_FALSE;
-							}
-							else{
-								break;
-							}
-							}
-						else if(MAP_CH(map, x+1, y) != ',') {
-							if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
-								MAP_CH(map, x, y)  = '/';
-								MAP_ISW(map, x,  y) = SDL_FALSE;
-							}
-							else{
-								break;
-							}
-							}
-						else if(MAP_CH(map, x, y+1) != ',') {
-							if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
-								MAP_CH(map, x, y)  = '/';
-								MAP_ISW(map, x, y) = SDL_FALSE;
-							}
-							else{
-								break;
-							}
-							}	
+
+
+
+void add_room_wall_circle(Tile *map, Room room) {
+	i32 stopY = room.pos.y + room.height;
+	CLAMP(stopY, 3, MAP_Y - 2);
+	i32 stopX = room.pos.x + room.width;
+	CLAMP(stopX, 3, MAP_X - 2);
+	i32 startX = room.pos.x;
+	CLAMP(startX, 3, MAP_Y - 2);
+	i32 startY = room.pos.y - 1;
+	CLAMP(startY, 3, MAP_Y - 2);
+	f64 radius = DISTANCE(room.pos.x, room.pos.y, room.center.x, room.center.y)-3;
+	CLAMP(radius, 6.0f, INF);
+	//LOG("STOP X %d STOP Y %d\n", stopX, stopY);
+	for(i32 y = startY; y < stopY; y++) {
+		for(i32 x = startX; x < stopX; x++) {
+			f64 distance = (x - room.center.x)*(x - room.center.x) + (y - room.center.y)*(y - room.center.y);
+
+			//LOG("Distance %f Radius %f\n", distance, radius);
+			if(distance > (radius*radius)) {
+				if(MAP_CH(map, x, y) != ','  && ((y-1) != 0) &&  MAP_CH(map, x, y-1) != ',')  {
+					if(MAP_CH(map, x, y) != ',') {
+						MAP_CH(map, x, y)  = '/';
+						MAP_ISW(map, x, y) = SDL_FALSE;
+						}
+					else {
+						break;
+						}
 					}
-					
+				else if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x-1, y) != ',') {
+					if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+') {
+						MAP_CH(map, x, y)  = '/';
+						MAP_ISW(map, x, y) = SDL_FALSE;
+						}
+					else {
+						break;
+						}
+					}
+				else if(MAP_CH(map, x+1, y) != ',') {
+					if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+') {
+						MAP_CH(map, x, y)  = '/';
+						MAP_ISW(map, x,  y) = SDL_FALSE;
+						}
+					else {
+						break;
+						}
+					}
+				else if(MAP_CH(map, x, y+1) != ',') {
+					if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+') {
+						MAP_CH(map, x, y)  = '/';
+						MAP_ISW(map, x, y) = SDL_FALSE;
+						}
+					else {
+						break;
+						}
 					}
 				}
+
 			}
-	
-void add_room_wall_blob(Tile *map, Room room){
+		}
+	}
+
+void add_room_wall_blob(Tile *map, Room room) {
 	i32 stopY = room.pos.y + room.height;
 	CLAMP(stopY, 3, MAP_Y - 2);
 	i32 stopX = room.pos.x + room.width;
@@ -202,64 +202,76 @@ void add_room_wall_blob(Tile *map, Room room){
 	for(i32 y = startY; y < stopY; y++) {
 		for(i32 x = startX; x < stopX; x++) {
 			if(MAP_CH(map, x, y) != ','  && ((y-1) != 0) &&   MAP_CH(map, x, y-1) != ',')  {
-				if(MAP_CH(map, x, y) != ','){
+				if(MAP_CH(map, x, y) != ',') {
 					MAP_CH(map, x, y)  = '/';
 					MAP_ISW(map, x, y) = SDL_FALSE;
-				}
-				else{
+					}
+				else {
 					break;
-				}
+					}
 				}
 			else if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x-1, y) != ',') {
-				if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+'){
+				if(MAP_CH(map, x, y) != ',' && MAP_CH(map, x, y) != '+') {
 					MAP_CH(map, x, y)  = '/';
 					MAP_ISW(map, x, y) = SDL_FALSE;
-				}
-				else{
+					}
+				else {
 					break;
-				}
+					}
 				}
 			else if(MAP_CH(map, x+1, y) != ',') {
-				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
+				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+') {
 					MAP_CH(map, x, y)  = '/';
 					MAP_ISW(map, x, y) = SDL_FALSE;
-				}
-				else{
+					}
+				else {
 					break;
-				}
+					}
 				}
 			else if(MAP_CH(map, x, y+1) != ',') {
-				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+'){
+				if(MAP_CH(map, x, y) != ','  && MAP_CH(map, x, y) != '+') {
 					MAP_CH(map, x, y)  = '/';
 					MAP_ISW(map, x, y) = SDL_FALSE;
-				}
-				else{
+					}
+				else {
 					break;
+					}
 				}
-				}	
+			}
 		}
-		}
-		for(i32 y = room.pos.y; y < stopY; y++) {
-			for(i32 x = room.pos.x; x < stopX; x++) {
-				if(rand_f64() < 0.3f)
+	for(i32 y = room.pos.y; y < stopY; y++) {
+		for(i32 x = room.pos.x; x < stopX; x++) {
+			if(rand_f64() < 0.3f)
 				caved_part(map, x, y);
-			}}
-		
-}
+			}
+		}
 
-		
+	}
+
+
 void add_room_wall_to_map(Tile *map, Room room) {
+
 	i32 chance = rand()%3;
 	if(chance == 0) add_room_wall_rectangle(map, room);
 	else if(chance == 1) add_room_wall_circle(map, room);
-	else {chance = rand()%3;
-		if(chance == 0)      add_room_wall_rectangle(map, room);
-		else if(chance == 1) add_room_wall_circle(map, room); 
+	else {
+		chance = rand()%3;
+		if(chance == 0) {
+			add_room_wall_rectangle(map, room);
+			i32 c = rand()%2;
+			if(c == 0) {
+				MAP_CH(map, room.center.x-1, room.center.y-1) = '/';
+				MAP_CH(map, room.center.x-1, room.center.y)   = '/';
+				MAP_CH(map, room.center.x+1, room.center.y)   = '/';
+				MAP_CH(map, room.center.x+1, room.center.y+1) = '/';
+				}
+			}
+		else if(chance == 1) add_room_wall_circle(map, room);
 		else                 add_room_wall_blob(map, room);
-	}
+		}
 	}
 
-SDL_bool isDoor(Tile *map, Position pos){
+SDL_bool isDoor(Tile *map, Position pos) {
 	i32 count = 0;
 	i32 startX = pos.x - 1;
 	i32 startY = pos.y - 1;
@@ -269,38 +281,38 @@ SDL_bool isDoor(Tile *map, Position pos){
 	CLAMP(startY, 0, MAP_Y - 1);
 	CLAMP(stopX, 0, MAP_X - 1);
 	CLAMP(stopY, 0, MAP_Y - 1);
-	for (i32 y = startY; y <= stopY; y++){
-		for (i32 x = startX; x <= stopX; x++){
-			if(MAP_CH(map, x, y) == '.'){
+	for (i32 y = startY; y <= stopY; y++) {
+		for (i32 x = startX; x <= stopX; x++) {
+			if(MAP_CH(map, x, y) == '.') {
 				count++;
-			}
-			else if(MAP_CH(map, x, y) == '1'){
+				}
+			else if(MAP_CH(map, x, y) == '1') {
 				count = 0;
 				break;
+				}
+
 			}
-			
-		}	
-	}
-	
-	if(count == 4){
+		}
+
+	if(count == 4) {
 		//LOG("ISdoor\n");
 		return SDL_TRUE;
-	}	
+		}
 	else
 		return SDL_FALSE;
-}
-void add_doors(Tile *map){
-	for (u64 y = 0; y < MAP_Y; y++){
-		for (u64 x = 0; x < MAP_X; x++){
+	}
+void add_doors(Tile *map) {
+	for (u64 y = 0; y < MAP_Y; y++) {
+		for (u64 x = 0; x < MAP_X; x++) {
 			Position temp = {.x = x, .y = y};
-			if(isDoor(map, temp) == SDL_TRUE && rand_f64() < CHANCE_SPAWN_DOOR){
+			if(isDoor(map, temp) == SDL_TRUE && rand_f64() < CHANCE_SPAWN_DOOR) {
 				MAP_CH(map, x, y) = '1';
 				MAP_ISW(map, x, y) = SDL_FALSE;
-			}		
+				}
+			}
 		}
+
 	}
-	
-}
 
 void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL_bool isDoorDis) {
 	Position temp;
@@ -316,29 +328,29 @@ void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL
 			temp.y++;
 		else if (abs((temp.y - 1) - centerTwo.y) < abs(temp.y - centerTwo.y))
 			temp.y--;
-		else{
+		else {
 			break;
-		}
-		if(temp.x == 1 || temp.x == MAP_X-1 || temp.y == 1 || temp.y == MAP_Y - 1 ){
+			}
+		if(temp.x == 1 || temp.x == MAP_X-1 || temp.y == 1 || temp.y == MAP_Y - 1 ) {
 			break;
-		}	
-		if(MAP_CH(map, temp.x, temp.y) == '/' && isDoorDis == SDL_FALSE){
+			}
+		if(MAP_CH(map, temp.x, temp.y) == '/' && isDoorDis == SDL_FALSE) {
 			MAP_CH(map, temp.x, temp.y) = '+';
 			MAP_ISW(map, temp.x, temp.y) = SDL_FALSE;
 			//temp.x--;
 			//temp.y--;
 			countDoors++;
-			if(countDoors == 10){
+			if(countDoors == 10) {
 				break;
-			}	
-		}
-		else{
+				}
+			}
+		else {
 			MAP_CH(map, temp.x, temp.y) = ',';
 			MAP_ISW(map, temp.x, temp.y) = SDL_TRUE;
-		}
-	
-	
-		
+			}
+
+
+
 		//MAP_CH(map, temp.x+1, temp.y) = '.';
 		//MAP_ISW(map, temp.x+1, temp.y) = SDL_FALSE;
 
@@ -373,7 +385,7 @@ void add_walls_around_roads(Tile* map) {
 	}
 
 void caved_part(Tile *map, i32 x, i32 y) {
-	
+
 	for(i32 carved = 0; carved < rand()%10 + 3; carved++) {
 		i32 xr = rand()%3 - 1 + x;
 		i32 yr = rand()%3 - 1 + y;
@@ -427,7 +439,7 @@ void caved_map(Tile *map, f64 percantage) {
 
 
 
-void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
+void generete_dungons(Room_DA* room, Tile *map, i32 minRooms, i32 maxRooms) {
 	i32 width, height, x, y, nRooms;
 	u8 isColided = SDL_FALSE;
 	if(minRooms >= maxRooms) {
@@ -443,70 +455,73 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 	//add_room_wall_to_map(map, rooms[0]);
 	i32 count = 0;
 	for(i32 i = 1; i < nRooms; i++) {
-		while(1){
+		while(1) {
 			isColided = SDL_FALSE;
 			y = (rand() % (MAP_Y - 13));
 			x = (rand() % (MAP_X - 13));
 			height = (rand() % 5) + 7;
 			width  = (rand() % 5) + 7;
-			for(i32 j = 0; j < i; j++){
+			for(i32 j = 0; j < i; j++) {
 				if(checkCollision(x, y, width, height,
-					 rooms[j].pos.x, rooms[j].pos.y, rooms[j].width, rooms[j].height)){
-						isColided = SDL_TRUE; 
-						break;
-					 }
-			}
-			if(isColided == SDL_FALSE){
+				                  rooms[j].pos.x, rooms[j].pos.y, rooms[j].width, rooms[j].height)) {
+					isColided = SDL_TRUE;
+					break;
+					}
+				}
+			if(isColided == SDL_FALSE) {
 				break;
-			}
-			if(count == 100){
+				}
+			if(count == 100) {
 				break;
-			}
+				}
 			count++;
-		}
-		if(count == 100){
+			}
+		if(count == 100) {
 			nRooms = i;
 			break;
-		}
+			}
 		//rooms[i].center.x  = 0;
 		rooms[i] = create_room(x, y, height, width);
-		
+		da_append(room, rooms[i]);
 		add_room_to_map(map, rooms[i]);
 		add_room_wall_to_map(map, rooms[i]);
 		count = 0;
 		//connect_room_centers(rooms[i-1].center, rooms[i].center, map, SDL_FALSE);
 		}
 	///*
-	
+
 	//*/
 	//add_walls_around_roads(map);
-	f64 percantage = 0.01f + rand_f64()/2.0f;
+	f64 percantage = 0.01f + rand_f64();
 	LOG("percantage of caved map %f", percantage);
-	
-	for(i32 i = 0; i < nRooms; i++){
+
+	for(i32 i = 0; i < nRooms; i++) {
 		i32 minDistance = INF;
 		i32 minIndex = i;
-		for(i32 j = i + 1; j < nRooms-1; j++){
-		i32 distance = DISTANCE(rooms[j].center.x, rooms[j].center.y, rooms[i].center.x, rooms[i].center.y);
-		if(distance < minDistance){
-			minDistance = distance;
-			minIndex = j;
-		}	
-	}
-	connect_room_centers(rooms[i].center, rooms[minIndex].center, map, SDL_FALSE);
-}
+		for(i32 j = i + 1; j < nRooms-1; j++) {
+			i32 distance = DISTANCE(rooms[j].center.x, rooms[j].center.y, rooms[i].center.x, rooms[i].center.y);
+			if(distance < minDistance) {
+				minDistance = distance;
+				minIndex = j;
+				}
+			}
+		connect_room_centers(rooms[i].center, rooms[minIndex].center, map, SDL_FALSE);
+		}
 	connect_room_centers(rooms[nRooms-1].center, rooms[0].center, map, SDL_FALSE);
-//	caved_map(map, percantage);
+	//caved_map(map, percantage);
 	//add_doors(map);
 
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
-			if(y == 0 || x == 0 || y == MAP_Y-1 || x == MAP_X-1 ){
+			if(y == 0 || x == 0 || y == MAP_Y-1 || x == MAP_X-1 ) {
 				MAP_CH(map, x, y) = '/';
-				MAP_ISW(map, x, y) = SDL_FALSE; 
+				MAP_ISW(map, x, y) = SDL_FALSE;
 
-			}}}
-	free(rooms);
+				}
+			}
+		}
+	//free(rooms);
+	
 	}
 
 
@@ -535,7 +550,7 @@ void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms) {
 		}
 
 
-Tile* init_map() {
+Tile* init_map(Room_DA* rooms) {
 	Tile *map;
 	map = calloc(MAP_Y*MAP_Y + 1, sizeof(Tile));
 	//RAND_MAP();
@@ -547,7 +562,7 @@ Tile* init_map() {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	generete_dungons(map, 20, 200);
+	generete_dungons(rooms, map, 20, 200);
 	return map;
 	}
 
