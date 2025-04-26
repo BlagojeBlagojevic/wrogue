@@ -32,6 +32,12 @@ typedef enum {
 	//UPDATE ARR
 	} Monster_Types;
 
+typedef struct{
+	Monster_Types* items;
+	u64 count;
+	u64 capacity;
+}Monster_Types_DA;
+
 //DEFINES FOR INITING OF A MONSTER
 
 
@@ -128,6 +134,22 @@ typedef struct {
 	u64 count;
 	} Entitiy_DA;
 
+typedef enum{
+	GENERATOR_GRAVEYARD,
+	GENERATOR_CAVE,
+	GENERATOR_NUM
+}Generator_Type;
+
+typedef struct __attribute__((packed)) generator{
+	Generator_Type type;
+	f64 chanceToSpawn[NUM_MONSTER];
+	i32 maxDistanceDikstra;
+	i32 levelDungon;
+	i32 monsterNumber;
+}Generator;
+
+static Generator generators[GENERATOR_NUM];
+
 //MONSTER TYPES  as global for now
 //later it will be load from file for now  monster_definitions_export()
 static Entitiy monsters[NUM_MONSTER];
@@ -164,5 +186,8 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items);
 
 void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32 goalX, i32 goalY);
 
+void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem);
 
+void export_generators(); //TBF FILE 
+void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room);
 #endif
