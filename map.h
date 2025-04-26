@@ -3,11 +3,9 @@
 
 #include "utils.h"
 
-typedef enum{
-	ROOM_BLANC,
-	ROOM_SOME,
-	NUM_TYPE_ROOM
-}Room_Type;
+
+
+
 
 typedef struct {
 	char ch;
@@ -24,6 +22,13 @@ typedef struct {
 	Position pos;
 	Position center;
 	} Room;
+	
+typedef struct {
+	Room *items;
+	u64 capacity;
+	u64 count;
+	} Room_DA;	
+
 	
 #define MAP(map, x, y)      	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
 #define MAP_CH(map, x, y)   	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
@@ -50,9 +55,9 @@ void connect_room_centers(Position centerOne, Position centerTwo, Tile* map, SDL
 void add_walls_around_roads(Tile* map);
 void caved_part(Tile *map, i32 x, i32 y);
 void caved_map(Tile *map, f64 percantage);
-void generete_dungons(Tile *map, i32 minRooms, i32 maxRooms);
+void generete_dungons(Room_DA* room, Tile *map, i32 minRooms, i32 maxRooms);
 
-Tile* init_map();
+Tile* init_map(Room_DA* rooms);
 
 
 
