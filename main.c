@@ -1,9 +1,11 @@
 //#include"utils.h"
+
 #include "map.h"
 #include "entity.h"
 #include "app.h"
 #define SEED 12344
 #include<time.h>
+
 
 Graphics_State mainGraphics;
 
@@ -31,6 +33,7 @@ int main() {
 	Entitiy* player = create_entity('@', "Some Name", 5, 10, (Position) {
 		40, 40
 		}, WHITE);
+	
 	player->attack[0]  = 2;
 	player->defence[0] = 2;
 	player->attack[1]  = 2;
@@ -46,14 +49,18 @@ int main() {
 
 	Room_DA rooms = {0};
 	Tile *map = init_map(&rooms);
+	MAP_CH(map, 41, 41) = TILE_RUINS_TRAP;
 	Entitiy_DA monsters = {0};
 	Item_DA items = {0};
 	Item* sword = create_item(36, 36, SWORD_CREATE());
+	sword->attack[DAMAGE_BASIC] = 2;
 	sword->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*sword));
 	Item* armor = create_item(38, 38, ARMOR_CREATE());
+	armor->defence[DAMAGE_BASIC] = 1;
 	armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
+	/*
 	Item* helmet = create_item(40, 38, HELMET_CREATE());
 	helmet->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*helmet));
@@ -63,6 +70,7 @@ int main() {
 	Item* shoes = create_item(36, 38, SHOES_CREATE());
 	shoes->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*shoes));
+	//*/
 	Item* healing = create_item(37, 38, HEALING_CREATE());
 	da_append(&player->inventory, (*healing));
 
@@ -83,6 +91,7 @@ int main() {
 	snprintf(msg, 30, "Your seed is %ld", seed);
 	da_append(&MESSAGES, msg);
 	//genereate_monsters(&monsters, map);
+	/*
 	Room room;
 	room.pos.x  = 0;
 	room.pos.y  = 0;
@@ -91,12 +100,19 @@ int main() {
 	for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
 		room.pos.y=y;
 		for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
-			room.pos.x=x;  
+			room.pos.x=x;
 			genereate_monsters_generator(player, &monsters, map, 1, room);
 			}
-			
 		}
+	//*/
+	for(u64 i = 1; i < rooms.count; i++) {
+		genereate_monsters_generator(player, &monsters, map, 1, rooms.items[i]);
 
+		}
+	//calculate_diakstra_map(player, map, &monsters, rooms.items[0].pos.x, rooms.items[0].pos.y);
+	//caved_part_generator(TILE_TREE, map, 5);	
+	//calculate_diakstra_map(player, map, &monsters,  rooms.items[0].pos.x, rooms.items[0].pos.y);
+	//caved_part_generator(TILE_GRASS, map, 100);	
 	MOVMENT = 0;
 	COUNTMOVES = 0;
 
@@ -126,6 +142,7 @@ int main() {
 
 		//system("pause");
 		//SDL_Delay(1000);
+		//Sleep(1);
 		}
 
 	return 0;
