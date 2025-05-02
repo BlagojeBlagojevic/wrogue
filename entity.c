@@ -502,7 +502,7 @@ void monster_definitions_export() {
 	monsters[BASIC_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 
 	//ACOLAYT
-	monsters[ACOLAYT_MONSTER].radius = 25;
+	monsters[ACOLAYT_MONSTER].radius = 5;
 	monsters[ACOLAYT_MONSTER].ch = 'A';
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -533,7 +533,7 @@ void monster_definitions_export() {
 	monsters[ACOLAYT_MONSTER].lifeStealValue = 0.0f;
 	monsters[ACOLAYT_MONSTER].color = UNDE_COL;
 	//GHOUL
-	monsters[GHOUL_MONSTER].radius = 35;
+	monsters[GHOUL_MONSTER].radius = 14;
 	monsters[GHOUL_MONSTER].ch = 'G';
 	monsters[GHOUL_MONSTER].attack[DAMAGE_BASIC]  = 2;
 	monsters[GHOUL_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -713,7 +713,7 @@ void monster_definitions_export() {
 
 //ORCS
 	//GRUNT
-	monsters[GRUNT_MONSTER].radius = 35;
+	monsters[GRUNT_MONSTER].radius = 15;
 	monsters[GRUNT_MONSTER].ch = 'O';
 	monsters[GRUNT_MONSTER].attack[DAMAGE_BASIC]  = 3;
 	monsters[GRUNT_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -745,7 +745,7 @@ void monster_definitions_export() {
 	monsters[GRUNT_MONSTER].color = GREEN;
 
 //BERSERKER
-	monsters[BERSERKER_MONSTER].radius = 35;
+	monsters[BERSERKER_MONSTER].radius = 15;
 	monsters[BERSERKER_MONSTER].ch = 'V';
 	monsters[BERSERKER_MONSTER].attack[DAMAGE_BASIC]  = 4;
 	monsters[BERSERKER_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -781,7 +781,7 @@ void monster_definitions_export() {
 	SPELL_BESERKER_EXPORT(monsters[BERSERKER_MONSTER]);
 
 //ARCHER
-	monsters[ARCHER_MONSTER].radius = 25;
+	monsters[ARCHER_MONSTER].radius = 10;
 	monsters[ARCHER_MONSTER].ch = 'A';
 	monsters[ARCHER_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[ARCHER_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -814,8 +814,42 @@ void monster_definitions_export() {
 
 	monsters[ARCHER_MONSTER].color = GREEN;
 
+//WITCH DOC
+	monsters[WITCH_MONSTER].radius = 10;
+	monsters[WITCH_MONSTER].ch = 'W';
+	monsters[WITCH_MONSTER].attack[DAMAGE_BASIC]  = 0;
+	monsters[WITCH_MONSTER].attack[DAMAGE_POISON] = 1;
+	monsters[WITCH_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[WITCH_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  light
+	monsters[WITCH_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[WITCH_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[WITCH_MONSTER].defence[DAMAGE_RANGE]  = 1;
+	monsters[WITCH_MONSTER].defence[DAMAGE_SPELL]  = 3;
+	monsters[WITCH_MONSTER].health = 3;
+	monsters[WITCH_MONSTER].maxHealth = 3;
+
+	monsters[WITCH_MONSTER].isRunning = SDL_FALSE;
+	monsters[WITCH_MONSTER].runWoundedPercent = 0.9f;
+	monsters[WITCH_MONSTER].state = STATE_WANDERING;
+
+	monsters[WITCH_MONSTER].stateChance[STATE_RUNING] = 0.3f;
+	monsters[WITCH_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.6f;
+	monsters[WITCH_MONSTER].stateChance[STATE_HUNTING] = 0.01f;
+	monsters[WITCH_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[WITCH_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[WITCH_MONSTER].stateChance[STATE_BESERK] = 0.00f;
+	monsters[WITCH_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[WITCH_MONSTER].stateChance[STATE_SPELL] = 0.8f;
+
+	monsters[WITCH_MONSTER].lifeStealChance = 0.0f;
+	monsters[WITCH_MONSTER].lifeStealValue  = 0.0f;
+
+	monsters[WITCH_MONSTER].color = GREEN;
+	SPELL_WITCH_EXPORT(monsters[WITCH_MONSTER]);
+
 //NEUTRAL ANIMALS
-	monsters[RAT_MONSTER].radius = 15;
+	monsters[RAT_MONSTER].radius = 5;
 	monsters[RAT_MONSTER].ch = 'R';
 	monsters[RAT_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[RAT_MONSTER].attack[DAMAGE_POISON] = 0;
@@ -843,7 +877,7 @@ void monster_definitions_export() {
 	SPELL_SUMONM_RAT_EXPORT(monsters[RAT_MONSTER]);
 
 //GOBLIN
-	monsters[GOBLIN_MOSNTER].radius = 15;
+	monsters[GOBLIN_MOSNTER].radius = 20;
 	monsters[GOBLIN_MOSNTER].ch = 'K';
 	monsters[GOBLIN_MOSNTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[GOBLIN_MOSNTER].attack[DAMAGE_POISON] = 0;
@@ -882,10 +916,10 @@ void monster_definitions_export() {
 void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
-			if(MAP_CH(map, x, y) != '#') {
+			if(MAP_CH(map, x, y) != TILE_BLOCKED) {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%(NUM_MONSTER - 1) + 1;
-					//type = GOBLIN_MOSNTER;
+					type = WITCH_MONSTER;
 					i32 vison = rand()%40+1;
 					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
@@ -1292,6 +1326,13 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 					break;
 					}
 				}
+		case 'W': {
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN &&distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, distancesMin);
+					break;
+					}
+				}
 		}
 	if (isRangeAttack == SDL_TRUE) {
 		return;
@@ -1478,6 +1519,13 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 				}
 
 		case 'D': {
+				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, trueDistance);
+					break;
+					}
+				}
+		case 'W': {
 				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
 					isRangeAttack = SDL_TRUE;
 					monster_attack(player, ent, trueDistance);
@@ -1703,6 +1751,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 		Entitiy entity = entitys->items[count];
 
 		if(Is_Monster(entity.ch)) {
+			calculate_diakstra_map(player, map, entitys, player->pos.x, player->pos.y);
 			entity.spell.passedTurns++;
 			if(entity.state == STATE_RESTING) {
 				//NOTHING
@@ -1710,11 +1759,11 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				}
 			else if(entity.state == STATE_WANDERING) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
-				i32 chance = rand()%2;
+				i32 chance = rand()%5;
 				if(chance) {
 					make_run_move(player, &entity, map);
 					}
-				else 	   {
+				else {
 					make_move_diakstra(player, &entity, map);
 					}
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
@@ -1749,11 +1798,12 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 					}, WHITE);
 				summon->health = 2;
 				summon->spell.passedTurns = 0;
+				summon->spell.cooldown = 255;
 				summon->stateChance[STATE_SUMMON] = 0.00f;
 				summon->state = STATE_HUNTING;
 				make_run_move(player, &entity, map);
 				entity.state = STATE_RUNING;
-				entity.spell.cooldown *=3;
+				entity.spell.cooldown *=4;
 				da_append(entitys, *summon);
 				}
 			else if(entity.state == STATE_SPELL) {
@@ -1798,8 +1848,25 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 							CLAMP(player->health, 0, INF);
 							MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
 							//MAYBE CASAM
-							//MAP_CH(map, entity.pos.x, entity.pos.y) = '+';
+							//MAP_CH(map, entity.pos.x, entity.pos.y) = TILE_RUINS;
 							entity.health = 0;
+							break;
+							}
+
+					case SPELL_STATIS_TRAP: {
+							entity.spell.passedTurns = 0;
+							i32 tileX = rand()%entity.spell.value - entity.spell.value / 2;
+							i32 tileY = rand()%entity.spell.value - entity.spell.value / 2;
+							tileX += entity.pos.x;
+							tileY += entity.pos.y;
+							CLAMP(tileX, 1, MAP_X - 1);
+							CLAMP(tileY, 1, MAP_Y - 1);
+							if(MAP_ISW(map, tileX, tileY) == SDL_TRUE) {
+								MAP_CH(map, tileX, tileY) = TILE_STUN_TRAP;
+								//LOG("SetTrap\n");
+								}
+
+
 							break;
 							}
 
@@ -1851,7 +1918,7 @@ void player_destroy_boolder(Entitiy* player, Tile* map) {
 	CLAMP(stopY, 0, MAP_Y-1);
 	for (i32 y = startY; y <= stopY; y++) {
 		for (i32 x = startX; x <= stopX; x++) {
-			if(MAP_CH(map, x, y) == '+') {
+			if(MAP_CH(map, x, y) == TILE_RUINS) {
 				if(rand_f64() < CHANCE_NON_CLEAR_RUINS) {
 					char* msg = "This ruins are tuff";
 					da_append(&MESSAGES, msg);
@@ -1860,7 +1927,7 @@ void player_destroy_boolder(Entitiy* player, Tile* map) {
 				else {
 					char* msg = "You clear the ruins";
 					da_append(&MESSAGES, msg);
-					MAP_CH(map, x, y) = '.';
+					MAP_CH(map, x, y) = TILE_FLOOR;
 					MAP_ISW(map, x, y) = SDL_TRUE;
 					if(rand_f64() < CHANCE_DMG_CLEAR_RUINS) {
 						i32 ran = rand()%4;
@@ -1888,7 +1955,8 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 	block_movement(entitys, map);
 	field_of_vison(player, map);
 	increment_player_health(player);
-
+	//is_player_trigerd_trap(ma)
+	player_trap_calculations(map, player, entitys);
 	COUNTMOVES++;
 	if(OPENDOOR == SDL_TRUE) {
 		//player_open_door(player, map);
@@ -2056,21 +2124,23 @@ void export_generators() {
 	memset(generators[GENERATOR_GRAVEYARD].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_GRAVEYARD].chanceToSpawn[ACOLAYT_MONSTER] = 0.9f;
 	generators[GENERATOR_GRAVEYARD].chanceToSpawn[NECROMANCER_MONSTER] = 0.05f;
-	generators[GENERATOR_GRAVEYARD].chanceToSpawn[BANSHIE_MONSTER] = 0.05f;
+	generators[GENERATOR_GRAVEYARD].chanceToSpawn[BANSHIE_MONSTER] = 0.1f;
 	generators[GENERATOR_GRAVEYARD].levelDungon = 1;
 	generators[GENERATOR_GRAVEYARD].monsterNumber = 0;
-
 	generators[GENERATOR_GRAVEYARD].maxDistanceDikstra = 20;
+	generators[GENERATOR_GRAVEYARD].typeOfTile = TILE_BLIGHT;
 
 	generators[GENERATOR_CAVE].type = GENERATOR_CAVE;
 	memset(generators[GENERATOR_CAVE].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_CAVE].chanceToSpawn[GOBLIN_MOSNTER] = 0.9f;
 	generators[GENERATOR_CAVE].chanceToSpawn[RAT_MONSTER] = 0.4f;
 	generators[GENERATOR_CAVE].chanceToSpawn[ARCHER_MONSTER] = 0.5f;
+	generators[GENERATOR_CAVE].chanceToSpawn[WITCH_MONSTER] = 0.01f;
 	generators[GENERATOR_CAVE].levelDungon = 1;
-	generators[GENERATOR_CAVE].monsterNumber = 2;
+	generators[GENERATOR_CAVE].monsterNumber = 1;
 
-	generators[GENERATOR_CAVE].maxDistanceDikstra = 20;
+	generators[GENERATOR_CAVE].maxDistanceDikstra = 10;
+	generators[GENERATOR_CAVE].typeOfTile = TILE_RUINS;
 	}
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room) {
 	i32 stopY = room.pos.y + room.height;
@@ -2110,7 +2180,7 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 			}
 		//GENERATE CORDINATES FOR START
 		counter3 = 0;
-		while(MAP_CH(map, pos.x, pos.y) != '.') {
+		while(MAP_CH(map, pos.x, pos.y) != TILE_FLOOR) {
 			counter3++;
 			if(counter3 == 1000) {
 				break;
@@ -2138,6 +2208,10 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 				break;
 				}
 			calculate_diakstra_map(player, map, monsters, pos.x, pos.y);
+
+			//GENERATING RANDOM TILES
+			caved_part_generator(gen.typeOfTile, map, gen.maxDistanceDikstra);
+			//
 			i32 x = 0, y = 0;
 			i32 counter6 = 0;
 			while(1) {
@@ -2150,7 +2224,7 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 				CLAMP(x, startX, stopX);
 				CLAMP(y, startY, stopY);
 				//LOG("(X,Y)=>(%d, %d) (%c)\n", x, y, MAP_CH(map, x, y));
-				if(MAP_CH(map, x, y) == '.') {
+				if(MAP_CH(map, x, y) == TILE_FLOOR) {
 					//system("pause");
 					break;
 					}
@@ -2166,7 +2240,7 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 						break;
 						}
 					type = rand()%NUM_MONSTER;
-					i32 chance = rand_f64();
+					f64 chance = rand_f64();
 					if(chance < gen.chanceToSpawn[type]) {
 						isGenerated = SDL_TRUE;
 						}
@@ -2189,4 +2263,60 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 		generatedGenerators--;
 		}
 //ITEMS
+	}
+
+void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters) {
+	if(!is_trap(map, player->pos.x, player->pos.y)) {
+		return;
+		}
+
+	switch(MAP_CH(map, player->pos.x, player->pos.y)) {
+		case TILE_STUN_TRAP: {
+				da_append(&MESSAGES, "You steped on stun trap\n");
+				//MAYBE CHANCE
+				player->isStunded +=1;
+				da_append(&MESSAGES, "You are stuned\n");
+				MAP_CH(map, player->pos.x, player->pos.y) = TILE_FLOOR;
+				break;
+				}
+		case TILE_RUINS_TRAP: {
+				da_append(&MESSAGES, "Seling around you is colapsed");
+				da_append(&MESSAGES, "You are traped");
+				i32 startX = player->pos.x - 1;
+				i32 stopX  = player->pos.x + 1;
+				i32 startY = player->pos.y - 1;
+				i32 stopY  = player->pos.y + 1;
+				f64 chance = rand_f64();
+				CLAMP(startX, 0, MAP_X - 1);
+				CLAMP(stopX,  0, MAP_X - 1);
+				CLAMP(startY, 0, MAP_Y - 1);
+				CLAMP(stopY,  0, MAP_Y - 1);
+				if(chance < CHANCE_DROP_SELING_CAUSE_DAMAGE) {
+					i32 percentDamage = rand_f64();
+					i32 damage = (i32)(player->maxHealth * rand_f64());
+					player->health -= damage;
+					CLAMP(player->health, 0, player->maxHealth);
+					}
+				for(i32 y = startY; y < stopY; y++) {
+					for(i32 x= startX; x < stopX; x++) {
+						if(MAP_ISW(map, x, y) == SDL_TRUE || MAP_CH(map, x, y) == TILE_WALL) {
+							if(rand_f64() < CHANCE_DROP_SELING_CAUSE_DAMAGE) {
+								MAP_CH(map, x, y)  = TILE_RUINS;
+								MAP_ISW(map, x, y) = SDL_FALSE;
+								}
+							}
+						}
+					}
+
+				MAP_CH(map, player->pos.x, player->pos.y) = TILE_FLOOR;
+				break;
+				}
+
+		default: {
+				ASSERT("UNRECHABLE");
+				break;
+				}
+		}
+
+	DROP(monsters);
 	}
