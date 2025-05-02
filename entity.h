@@ -23,7 +23,7 @@ typedef enum {
 	GRUNT_MONSTER,
 	BERSERKER_MONSTER,
 	ARCHER_MONSTER,
-
+	WITCH_MONSTER,
 	//NEUTRAL 
 	RAT_MONSTER,
 	GOBLIN_MOSNTER,
@@ -43,7 +43,7 @@ typedef struct{
 
 
 
-static const char* monsterChar = "MAGNBFDOVARK   ";
+static const char* monsterChar = "MAGNBFDOVAWRK   ";
 
 static const char* monsterName[] = {
 	"Monster",
@@ -56,6 +56,7 @@ static const char* monsterName[] = {
 	"Grunt",
 	"Berserker",
 	"Ork Archer",
+	"Witch Doc",
 	"Rat",
 	"Goblin",
 	"Crow",
@@ -82,6 +83,7 @@ typedef enum{
 	SPELL_STUN,
 	SPELL_DOUBLE_MOVE,
 	SPELL_KABUM,
+	SPELL_STATIS_TRAP,
 	SPELL_NUM
 }Spell_Type;
 
@@ -93,14 +95,15 @@ typedef struct spell{
 	
 }Spell;
 
-#define SPELL_SUMONM_GHOUL_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = GHOUL_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 20;};
+#define SPELL_SUMONM_GHOUL_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = GHOUL_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 30;};
 #define SPELL_DECRESE_MAX_HEALTH_EXPORT(entitiy){entitiy.spell.type = SPELL_DECRESE_MAX_HEALTH;entitiy.spell.value  = -1; entitiy.spell.passedTurns = 30; entitiy.spell.cooldown = 30;};
 #define SPELL_SPIDER_EXPORT(entitiy){entitiy.spell.type = SPELL_STUN;entitiy.spell.value  = 2; entitiy.spell.passedTurns = 10; entitiy.spell.cooldown = 10;}
 #define SPELL_DRAGON_EXPORT(entitiy){entitiy.spell.type = SPELL_STUN;entitiy.spell.value  = 4; entitiy.spell.passedTurns = 10; entitiy.spell.cooldown = 10;}
 
 #define SPELL_BESERKER_EXPORT(entitiy){entitiy.spell.type = SPELL_DOUBLE_MOVE; entitiy.spell.value  = 2; entitiy.spell.passedTurns = 5; entitiy.spell.cooldown = 5;}
-#define SPELL_SUMONM_RAT_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = RAT_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 10;};
+#define SPELL_SUMONM_RAT_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = RAT_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 30;};
 #define SPELL_GOBLIN_EXPORT(entitiy){entitiy.spell.type = SPELL_KABUM;entitiy.spell.value = 10; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 4;};
+#define SPELL_WITCH_EXPORT(entitiy){entitiy.spell.type = SPELL_STATIS_TRAP;entitiy.spell.value = 10; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 4;};
 
 
 typedef struct Entity Entitiy;
@@ -146,6 +149,7 @@ typedef struct __attribute__((packed)) generator{
 	i32 maxDistanceDikstra;
 	i32 levelDungon;
 	i32 monsterNumber;
+	Tile_Type typeOfTile;
 }Generator;
 
 static Generator generators[GENERATOR_NUM];
@@ -190,4 +194,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 
 void export_generators(); //TBF FILE 
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room);
+
+void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters);
+
 #endif

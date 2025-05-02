@@ -81,12 +81,12 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				}
 			//LOG("Buffer %d\n", buffer);
 			equiped_item(&player->inventory, (u64)buffer);
-			if(USEITEM == SDL_TRUE){
-				
+			if(USEITEM == SDL_TRUE) {
+
 				use_item(player, entitis, &player->inventory, (u64)buffer);
 				da_append(&MESSAGES, "Use item:");
 				USEITEM = SDL_FALSE;
-			}
+				}
 			BUFFER.count = 0;
 			}
 		}
@@ -332,7 +332,7 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 	CLAMP(stopX,  0, MAP_X-1);
 	CLAMP(startY, 0, MAP_Y-1);
 	CLAMP(stopY,  0, MAP_Y-1);//*/
-	
+
 	for(u64 count = 0; count < monsters->count; count++) {
 		//if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
 		//    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
@@ -411,6 +411,127 @@ void render_inventory(Item_DA *inventory) {
 	}
 
 
+void render_map_fov_vision(Entitiy *player, Tile *map) {
+	//field_of_vison(player, map);
+	i32 radius = RADIUS;
+	i32 startX = player->pos.x - radius;
+	i32 startY = player->pos.y - radius;
+	i32 stopX  = player->pos.x + radius;
+	i32 stopY  = player->pos.y + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);
+	for(i32 y  = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			f64 distance = DISTANCE(x, y, player->pos.x, player->pos.y);
+			//distance*=distance;
+			if(MAP_ISV(map, x, y) == SDL_TRUE) {
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				char ch = MAP_CH(map, x, y);
+				if(ch == TILE_BLOCKED) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_WALL ) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 80, 80, 80, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_ROAD) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					} // if(ch != TILE_FLOOR)
+				else if(ch == TILE_RUINS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+					}
+				else if(ch == TILE_BLIGHT) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", BLACK);
+					}
+				else if(ch == TILE_TREE) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ":", GREEN);
+					}
+				else if(ch == TILE_GRASS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
+					}
+				else if(ch == '-') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+					}
+
+				else {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					DROP(textRect);
+					}
+
+				}
+			else if (MAP_VISITED(map, x, y) == SDL_TRUE&&0) {
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				char ch = MAP_CH(map, x, y);
+				if(ch == TILE_BLOCKED) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 60, 60, 60, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_WALL ) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_RUINS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+					}
+				else if(ch == '-') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+					}
+				else {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					DROP(textRect);
+					}
+				}
+			else {
+				i32 startX = x * FONT_W;
+				i32 startY = y * FONT_H;
+				SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+				SDL_SetRenderDrawColor(RENDERER, 0X20, 0X20, 0X20, 0XFF);
+				//SDL_SetRenderDrawColor(RENDERER, 255, 0, 0, 0);
+				SDL_RenderFillRect(RENDERER, &textRect);
+				DROP(textRect);
+				}
+			}
+		}
+	}
 void render_map_fov(Entitiy *player, Tile *map) {
 	//field_of_vison(player, map);
 	i32 radius = player->radius;
@@ -451,10 +572,30 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
 					}
 				else if(ch == '-') {
-					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_Rect textRect = {.x=startX-1, .y = startY-1, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+					}
+				else if(ch == TILE_BLIGHT) {
+					//SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
+					//SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", BLACK);
+					}
+				else if(ch == TILE_TREE) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ":", GREEN);
+					}
+				else if(ch == TILE_GRASS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
 					}
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
@@ -509,6 +650,9 @@ void render_map_fov(Entitiy *player, Tile *map) {
 			}
 		}
 	}
+
+
+
 
 void render_map_dikstra(Entitiy *player, Tile *map) {
 	i32 radius = player->radius;
@@ -566,18 +710,24 @@ void render_map(Tile *map, Entitiy *player) {
 					i32 startX = x * FONT_W;
 					i32 startY = y * FONT_H;
 					char ch = MAP_CH(map, x, y);
-					if(ch == '#') {
+					if(ch == TILE_BLOCKED) {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 						SDL_RenderFillRect(RENDERER, &textRect);
 						}
-					else if(ch == ',') {
+					else if(ch == TILE_BLIGHT) {
+						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+						SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
+						SDL_RenderFillRect(RENDERER, &textRect);
+						//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", BLIGHT_COL);
+						}
+					else if(ch == TILE_ROAD) {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						//DROP(textRect);
 						SDL_SetRenderDrawColor(RENDERER, 100, 10, 10, 100);
 						SDL_RenderFillRect(RENDERER, &textRect);
-						} // if(ch != '.')
-					else if(ch == '+') {
+						} // if(ch != TILE_FLOOR)
+					else if(ch == TILE_RUINS) {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						//DROP(textRect);
 						SDL_SetRenderDrawColor(RENDERER, 0, 10, 255, 100);
@@ -592,11 +742,12 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_RenderFillRect(RENDERER, &textRect);
 						Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &ch, WHITE);
 						}
-					else if(ch == '/') {
+					else if(ch == TILE_WALL) {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						SDL_SetRenderDrawColor(RENDERER, 10, 255, 10, 100);
 						SDL_RenderFillRect(RENDERER, &textRect);
 						}
+
 					else {
 						SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 						SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
@@ -605,7 +756,6 @@ void render_map(Tile *map, Entitiy *player) {
 						}
 					}
 				}
-
 			}
 
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {

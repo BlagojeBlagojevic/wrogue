@@ -28,11 +28,11 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 	switch(type) {
 		//TBD ADD TYPE
 		case SWORD_ITEM: {
-				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
+				for(i32 i = 0; i < DAMAGE_NUM; i++) {
 					item->attack[i]   = 0;
 					item->defence[i]  = 0;
 					}
-				item->attack[0]  = rand()%5 + 1;  //SWORDS ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->attack[0]  = 2;  //SWORDS ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
 				item->defence[0] = 1;
 				item->equipedTo = EQUIPTED_WEPON;
 				if(rand_f64() < CHANCE_LIFESTEAL) {

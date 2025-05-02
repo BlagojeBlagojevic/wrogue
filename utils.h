@@ -23,12 +23,13 @@
 #undef main
 
 //COLORS
-#define WHITE (SDL_Color){255, 255, 255, 0}
-#define RED   (SDL_Color){255, 0, 0, 0}
-#define GREEN (SDL_Color){0, 255, 0, 0}
-#define BLUE  (SDL_Color){30, 0, 255, 0}
-#define UNDE_COL (SDL_Color){252, 3, 177, 0}
-
+#define WHITE      (SDL_Color){255, 255, 255, 0}
+#define RED        (SDL_Color){255, 0, 0, 0}
+#define GREEN      (SDL_Color){0, 255, 0, 0}
+#define BLUE       (SDL_Color){30, 0, 255, 0}
+#define BLACK      (SDL_Color){0, 0, 0, 0}
+#define UNDE_COL   (SDL_Color){252, 3, 177, 0}
+#define BLIGHT_COL (SDL_Color){32, 43, 34, 0}
 //TTF
 #include<SDL2/SDL_ttf.h>
 //static const char* fontLoc = "assets/fonts/f.ttf";
@@ -201,7 +202,7 @@ typedef struct {
 
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
-#define RADIUS 7
+#define RADIUS 10
 #define CHANCE_INCREMENT_HEALTH 0.05f
 #define CHANCE_SPAWN_DOOR 0.1f
 #define CHANCE_NON_IN_ROOM 0.1f
@@ -214,9 +215,10 @@ typedef struct {
 
 #define CHANCE_LIFESTEAL 0.1f
 #define CHANCE_DROP_ITEM 0.1f
-#define CHANCE_ITEM_USED_IN_COMBAT 0.33f
+#define CHANCE_ITEM_USED_IN_COMBAT 0.1f
 #define CHANCE_USE_DEF 0.8f
 #define CHANCE_NEGATIVE_DAMAGE 0.05f
 #define CHANCE_ITEM_PER_LEVEL 0.02f
+#define CHANCE_DROP_SELING_CAUSE_DAMAGE 0.8f
 
 #endif
