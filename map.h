@@ -4,6 +4,20 @@
 #include "utils.h"
 
 
+typedef enum {
+	TILE_BLOCKED    = '#',
+	TILE_FLOOR      = '.',
+	TILE_ROAD       = ',',
+	TILE_WALL       = '/',
+	TILE_RUINS      = '+',
+	TILE_BLIGHT     = ':',
+	TILE_TREE       = ';',
+	TILE_GRASS      = 'G',
+	TILE_STUN_TRAP  = 'T',
+	TILE_RUINS_TRAP = 'R', 
+	TILE_NON,
+	TILE_NUM
+	} Tile_Type;
 
 
 
@@ -15,21 +29,21 @@ typedef struct {
 	u8   visited;
 	f64  distance;
 	} Tile;
-	
+
 typedef struct {
 	i32 width;
 	i32 height;
 	Position pos;
 	Position center;
 	} Room;
-	
+
 typedef struct {
 	Room *items;
 	u64 capacity;
 	u64 count;
-	} Room_DA;	
+	} Room_DA;
 
-	
+
 #define MAP(map, x, y)      	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
 #define MAP_CH(map, x, y)   	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
 #define MAP_ISW(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
@@ -56,10 +70,15 @@ void add_walls_around_roads(Tile* map);
 void caved_part(Tile *map, i32 x, i32 y);
 void caved_map(Tile *map, f64 percantage);
 void generete_dungons(Room_DA* room, Tile *map, i32 minRooms, i32 maxRooms);
+void caved_part_generator(Tile_Type type, Tile *map, i32 maxDistanceD);
+
+SDL_bool is_trap(Tile* map, i32 x, i32 y);
 
 Tile* init_map(Room_DA* rooms);
 
 
+
+//CUSTOM ROOM TYPES
 
 
 #endif
