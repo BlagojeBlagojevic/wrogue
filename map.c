@@ -700,8 +700,8 @@ Tile* init_map(Room_DA* rooms) {
 		}
 	//RAND_MAP();
 	Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
-	add_room_drunkard_walk(map, allMap, 10000);
-	//generete_dungons(rooms, map, 200, 600); //LEVEL 1
+	//add_room_drunkard_walk(map, allMap, 10000);
+	generete_dungons(rooms, map, 200, 600); //LEVEL 1
 
 	return map;
 	}
