@@ -90,8 +90,8 @@ typedef enum{
 typedef struct spell{
 	Spell_Type type;
 	i32 value;
-	u8 passedTurns;
-	u8 cooldown;
+	i32 passedTurns;
+	i32 cooldown;
 	
 }Spell;
 
@@ -140,6 +140,10 @@ typedef struct {
 typedef enum{
 	GENERATOR_GRAVEYARD,
 	GENERATOR_CAVE,
+	GENERATOR_ORC,
+	GENERATOR_FIEND, 
+	GENERATOR_NECRO,
+	GENERATOR_DRAGON,
 	GENERATOR_NUM
 }Generator_Type;
 
