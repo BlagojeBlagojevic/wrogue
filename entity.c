@@ -24,17 +24,55 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 	entity->pos.y = startPos.y;
 	entity->isAlive = SDL_TRUE;
 	memset(&entity->inventory, 0, sizeof(Item_DA));
-	//DROP(health);
-	//i32 len = strlen(name);
-	//entity->name = calloc(name, )
-	//strcpy(entity->name, name);
 	if(name != NULL) {
 		i32 len = strlen(name);
 		CLAMP(len, 1, (MAX_NAME-1));
 		entity->name = calloc(NUM_MONSTER, sizeof(char*));
 		memcpy(entity->name, name, len);
 		}
+	if(ch != '@') {
+		Item *GOLD = create_item(0, 0, GOLD_CREATE());
+		Item i = *GOLD;
+		da_append(&entity->inventory, (i));
+		LOG("Gold\n");
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
 
+			Item *item  = create_item(0, 0, SWORD_CREATE());
+			item->isEquiped = SDL_TRUE;
+			i = *item;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, ARMOR_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item* helmet = create_item(40, 38, HELMET_CREATE());
+			helmet->isEquiped = SDL_TRUE;
+			i = *helmet;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item* shield = create_item(36, 40, SHIELD_CREATE());
+			shield->isEquiped = SDL_TRUE;
+			i = *shield;
+			da_append(&entity->inventory, (i));
+
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item* shoes = create_item(36, 38, SHOES_CREATE());
+			shoes->isEquiped = SDL_TRUE;
+			i = *shoes;
+			da_append(&entity->inventory, (i));
+			da_append(&entity->inventory, (*shoes));
+			}
+		//player
+		//if(ch == '@') {
+
+		//	}
+		}
 	return entity;
 	}
 void free_entity(Entitiy* ent) {
@@ -522,7 +560,7 @@ void monster_definitions_export() {
 
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RUNING] = 0.05f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
-	monsters[ACOLAYT_MONSTER].stateChance[STATE_HUNTING] = 0.3f;
+	monsters[ACOLAYT_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_WANDERING] = 0.5f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
@@ -620,7 +658,7 @@ void monster_definitions_export() {
 
 	monsters[BANSHIE_MONSTER].stateChance[STATE_RUNING] = 0.03f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.5f;
-	monsters[BANSHIE_MONSTER].stateChance[STATE_HUNTING] = 0.4f;
+	monsters[BANSHIE_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_RESTING] = 0.05f;
 	monsters[BANSHIE_MONSTER].stateChance[STATE_BESERK] = 0.01f;
@@ -657,7 +695,7 @@ void monster_definitions_export() {
 	monsters[SPIDER_MONSTER].state = STATE_WANDERING;
 
 	monsters[SPIDER_MONSTER].stateChance[STATE_RUNING] = 0.05f;
-	monsters[SPIDER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.1f;
+	monsters[SPIDER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
@@ -869,7 +907,7 @@ void monster_definitions_export() {
 
 	monsters[RAT_MONSTER].stateChance[STATE_RUNING] = 0.6f;
 	monsters[RAT_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
-	monsters[RAT_MONSTER].stateChance[STATE_HUNTING] = 0.05f;
+	monsters[RAT_MONSTER].stateChance[STATE_HUNTING] = 0.6f;
 	monsters[RAT_MONSTER].stateChance[STATE_WANDERING] = 0.5f;
 	monsters[RAT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[RAT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
@@ -1800,6 +1838,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				summon->spell.passedTurns = 0;
 				summon->spell.cooldown = 255;
 				summon->stateChance[STATE_SUMMON] = 0.00f;
+				summon->stateChance[STATE_SPELL] = 0.00f;
 				summon->state = STATE_HUNTING;
 				make_run_move(player, &entity, map);
 				entity.state = STATE_RUNING;
@@ -2111,6 +2150,10 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 				da_remove_unordered(items, numItem);
 				break;
 				}
+		case GOLD_ITEM: {
+				da_append(&MESSAGES, "Use it for what");
+				break;
+				}
 		default: {
 				ASSERT("UNRECHABLE");
 				break;
@@ -2133,14 +2176,63 @@ void export_generators() {
 	generators[GENERATOR_CAVE].type = GENERATOR_CAVE;
 	memset(generators[GENERATOR_CAVE].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_CAVE].chanceToSpawn[GOBLIN_MOSNTER] = 0.9f;
-	generators[GENERATOR_CAVE].chanceToSpawn[RAT_MONSTER] = 0.4f;
+	generators[GENERATOR_CAVE].chanceToSpawn[RAT_MONSTER] = 0.04f;
 	generators[GENERATOR_CAVE].chanceToSpawn[ARCHER_MONSTER] = 0.5f;
 	generators[GENERATOR_CAVE].chanceToSpawn[WITCH_MONSTER] = 0.01f;
 	generators[GENERATOR_CAVE].levelDungon = 1;
 	generators[GENERATOR_CAVE].monsterNumber = 1;
-
 	generators[GENERATOR_CAVE].maxDistanceDikstra = 10;
 	generators[GENERATOR_CAVE].typeOfTile = TILE_RUINS;
+
+	//ORC
+	generators[GENERATOR_ORC].type = GENERATOR_ORC;
+	memset(generators[GENERATOR_ORC].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_ORC].chanceToSpawn[GRUNT_MONSTER] = 0.9f;
+	generators[GENERATOR_ORC].chanceToSpawn[RAT_MONSTER] = 0.04f;
+	generators[GENERATOR_ORC].chanceToSpawn[ARCHER_MONSTER] = 0.1f;
+	generators[GENERATOR_ORC].chanceToSpawn[WITCH_MONSTER] = 0.1f;
+	generators[GENERATOR_ORC].chanceToSpawn[BERSERKER_MONSTER] = 0.9f;
+	generators[GENERATOR_ORC].levelDungon = 2;
+	generators[GENERATOR_ORC].monsterNumber = 1;
+	generators[GENERATOR_ORC].maxDistanceDikstra = 20;
+	generators[GENERATOR_ORC].typeOfTile = TILE_GRASS;
+
+	//FIEND
+	generators[GENERATOR_FIEND].type = GENERATOR_FIEND;
+	memset(generators[GENERATOR_FIEND].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_FIEND].chanceToSpawn[SPIDER_MONSTER] = 0.9f;
+	generators[GENERATOR_FIEND].chanceToSpawn[NECROMANCER_MONSTER] = 0.04f;
+	generators[GENERATOR_FIEND].chanceToSpawn[GHOUL_MONSTER] = 0.1f;
+	generators[GENERATOR_FIEND].levelDungon = 2;
+	generators[GENERATOR_FIEND].monsterNumber = 1;
+	generators[GENERATOR_FIEND].maxDistanceDikstra = 20;
+	generators[GENERATOR_FIEND].typeOfTile = TILE_BLIGHT;
+
+	//NECRO
+	generators[GENERATOR_NECRO].type = GENERATOR_NECRO;
+	memset(generators[GENERATOR_NECRO].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_NECRO].chanceToSpawn[BANSHIE_MONSTER] = 0.4f;
+	generators[GENERATOR_NECRO].chanceToSpawn[NECROMANCER_MONSTER] = 0.4f;
+	generators[GENERATOR_NECRO].chanceToSpawn[GHOUL_MONSTER] = 0.9f;
+	generators[GENERATOR_NECRO].levelDungon = 2;
+	generators[GENERATOR_NECRO].monsterNumber = 1;
+	generators[GENERATOR_NECRO].maxDistanceDikstra = 20;
+	generators[GENERATOR_NECRO].typeOfTile = TILE_BLIGHT;
+	
+	//NECRO
+	generators[GENERATOR_DRAGON].type = GENERATOR_DRAGON;
+	memset(generators[GENERATOR_DRAGON].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_DRAGON].chanceToSpawn[DRAGON_MONSTER] = 1.0f;
+	generators[GENERATOR_DRAGON].levelDungon = 4;
+	generators[GENERATOR_DRAGON].monsterNumber = 0;
+	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
+	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
+	
+	
+
+
+
+
 	}
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room) {
 	i32 stopY = room.pos.y + room.height;
@@ -2250,7 +2342,10 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 					}, WHITE);
 				LOG("Monster cordinates (%d %d)\n", x, y);
 				temp->state = STATE_WANDERING;
-				da_append(monsters, (*temp));
+				//items on monsters probobly when are created
+
+				Entitiy ent = *temp;
+				da_append(monsters, (ent));
 				gen.monsterNumber--;
 				//system("pause");
 				}

@@ -553,7 +553,7 @@ void caved_part_generator(Tile_Type type, Tile *map, i32 maxDistanceD) {
 					chance = 1.0f / (f64)(MAP_DIJKSTRA(map, x, y) + 1.0f);
 					}
 
-				if(rand_f64() < chance) {
+				if(rand_f64() < chance && MAP_CH(map, x, y) != TILE_STAIRS) {
 					//LOG("chance %f\n", chance);
 					MAP_CH(map, x, y) = (char)type;
 					if(type == TILE_RUINS) {
@@ -699,9 +699,32 @@ Tile* init_map(Room_DA* rooms) {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
-	//add_room_drunkard_walk(map, allMap, 10000);
-	generete_dungons(rooms, map, 200, 600); //LEVEL 1
+	i32 maxRoom = 10, minRoom = 5;
+	if(DEPTH % 3 == 0){
+		generete_dungons(rooms, map, 200, 600);	
+	}
+	else if(DEPTH % 3 == 1){
+		generete_dungons(rooms, map, 5, 6);
+	}
+	else{
+		Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
+		add_room_drunkard_walk(map, allMap, 10000);
+		da_append(rooms, allMap);	
+	}
+	
+	SDL_bool isGenerateDown  = SDL_FALSE;
+	while(!isGenerateDown){
+		i32 x = rand()%(MAP_X - 4) + 2;
+		i32 y = rand()%(MAP_X - 4) + 2;
+		CLAMP(x, 4, MAP_X - 4);
+		CLAMP(y, 4, MAP_Y - 4);
+		if(MAP_CH(map, x, y) == TILE_FLOOR){
+			MAP_CH(map, x, y) = TILE_STAIRS;
+			isGenerateDown = SDL_TRUE;
+			break;
+		}
+	}
+	 //LEVEL 1
 
 	return map;
 	}

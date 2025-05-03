@@ -571,11 +571,19 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
 					}
+
+
 				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX-1, .y = startY-1, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+					}
+				else if(ch == TILE_STAIRS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "<", WHITE);
 					}
 				else if(ch == TILE_BLIGHT) {
 					//SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
@@ -597,6 +605,7 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
 					}
+
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
