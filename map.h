@@ -10,6 +10,7 @@ typedef enum {
 	TILE_ROAD       = ',',
 	TILE_WALL       = '/',
 	TILE_RUINS      = '+',
+	TILE_STAIRS     = '<',
 	TILE_BLIGHT     = ':',
 	TILE_TREE       = ';',
 	TILE_GRASS      = 'G',
