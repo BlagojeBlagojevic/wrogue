@@ -7,18 +7,71 @@
 #include<time.h>
 
 
-Graphics_State mainGraphics;
+Graphics_State    mainGraphics;
+static Tile*      map;
+static Entitiy_DA monster;
+static Entitiy*   player;
+static Item_DA    items;
+
+
+void generate_level() {
+
+	Room_DA rooms = {0};
+	DEPTH = rand()%7 + 1;
+	LEVEL++;
+	map = init_map(&rooms);
+	if(rooms.count <= 2) {
+		Room room;
+		room.pos.x  = 0;
+		room.pos.y  = 0;
+		room.width  = 20;
+		room.height = 38;
+		for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
+			room.pos.y=y;
+			for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
+				room.pos.x=x;
+				genereate_monsters_generator(player, &monster, map, LEVEL, room);
+				}
+			}
+		}
+	else {
+		for(u64 i = 1; i < rooms.count; i++) {
+			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i]);
+			}
+		}
+
+	calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
+	caved_part_generator(TILE_TREE, map, 5);
+	calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
+	caved_part_generator(TILE_GRASS, map, 100);
+	MOVMENT = 0;
+	COUNTMOVES = 0;
+	player->pos.x = rooms.items[0].center.x;
+	player->pos.y = rooms.items[0].center.y;
+	if(rooms.items != NULL) {
+		free(rooms.items);
+		}
+	}
+
 
 int main() {
 
 	DROP(damageStr);
 	DROP(monsterName);
 	DROP(monsters);
+
+	//INIT
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
 
 	u64 seed = (u64)time(0);
 	srand(seed);
+	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
+		da_append(&MESSAGES, "   ");
+		}
+	char* msg = calloc(30, sizeof(char));
+	snprintf(msg, 30, "Your seed is %ld", seed);
+	da_append(&MESSAGES, msg);
 
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
 	(void)P_SDL_ERR(WINDOW);
@@ -30,10 +83,10 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
-	Entitiy* player = create_entity('@', "Some Name", 5, 10, (Position) {
+	player = create_entity('@', "Some Name", 5, 10, (Position) {
 		40, 40
 		}, WHITE);
-	
+
 	player->attack[0]  = 2;
 	player->defence[0] = 2;
 	player->attack[1]  = 2;
@@ -42,24 +95,16 @@ int main() {
 	player->defence[2] = 2;
 	player->attack[3]  = 2;
 	player->defence[3] = 2;
-
-	//player->invertory = {0};
-	monster_definitions_export();
-	export_generators();
-
-	Room_DA rooms = {0};
-	Tile *map = init_map(&rooms);
-	MAP_CH(map, 41, 41) = TILE_RUINS_TRAP;
-	Entitiy_DA monsters = {0};
-	Item_DA items = {0};
-	Item* sword = create_item(36, 36, SWORD_CREATE());
+	Item* sword = create_item(0, 0, SWORD_CREATE());
 	sword->attack[DAMAGE_BASIC] = 2;
 	sword->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*sword));
-	Item* armor = create_item(38, 38, ARMOR_CREATE());
+	Item* armor = create_item(0, 0, ARMOR_CREATE());
 	armor->defence[DAMAGE_BASIC] = 1;
 	armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
+	//LOG("Plateer");
+	//exit(-1);
 	/*
 	Item* helmet = create_item(40, 38, HELMET_CREATE());
 	helmet->isEquiped = SDL_TRUE;
@@ -74,59 +119,45 @@ int main() {
 	Item* healing = create_item(37, 38, HEALING_CREATE());
 	da_append(&player->inventory, (*healing));
 
-	//Item* dart = create_item(14, 14, DART_CREATE());
-	//da_append(&items, (*dart));
-	//Item* potion = create_item(16, 16, POTION_CREATE());
-	//da_append(&items, (*potion));
-	//da_append(&items, (*item));
-	//da_append(&items, (*item));
-	//da_append(&items, (*item));
-	//da_append(&items, (*item));
-	//da_append(&items, (*item));
-	//LOG("char %c\n", items.items[0].ch);
-	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
-		da_append(&MESSAGES, "   ");
-		}
-	char* msg = calloc(30, sizeof(char));
-	snprintf(msg, 30, "Your seed is %ld", seed);
-	da_append(&MESSAGES, msg);
-	//genereate_monsters(&monsters, map);
-	/*
-	Room room;
-	room.pos.x  = 0;
-	room.pos.y  = 0;
-	room.width  = 20;
-	room.height = 38;
-	for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
-		room.pos.y=y;
-		for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
-			room.pos.x=x;
-			genereate_monsters_generator(player, &monsters, map, 1, room);
-			}
-		}
-	//*/
-	for(u64 i = 1; i < rooms.count; i++) {
-		genereate_monsters_generator(player, &monsters, map, 1, rooms.items[i]);
-
-		}
-	//calculate_diakstra_map(player, map, &monsters, rooms.items[0].pos.x, rooms.items[0].pos.y);
-	//caved_part_generator(TILE_TREE, map, 5);	
-	//calculate_diakstra_map(player, map, &monsters,  rooms.items[0].pos.x, rooms.items[0].pos.y);
-	//caved_part_generator(TILE_GRASS, map, 100);	
-	MOVMENT = 0;
-	COUNTMOVES = 0;
-
-
+	//player->invertory = {0};
+	monster_definitions_export();
+	export_generators();
+	//Entitiy_DA monsters = {0};
+	LEVEL = 0;
+	generate_level();
 	//MAP_STDOUT();
 	while(!QUIT) {
-		if(EQUITEM == SDL_FALSE) {
-			main_renderer(player,  &monsters, &items, map);
-			update_entity(player, &monsters, map, &items);
+		//monster.count < 1 &&
+		if( MAP_CH(map, player->pos.x, player->pos.y) == TILE_STAIRS) {
+			player->attack[0]  += 1;
+			player->defence[0] += 1;
+			player->attack[1]  += 1;
+			player->defence[1] += 1;
+			player->attack[2]  += 1;
+			player->defence[2] += 1;
+			player->attack[3]  += 1;
+			player->defence[3] += 1;
+			player->maxHealth +=10;
+			player->health = player->maxHealth;
+			//LEVEL +=1;
+			generate_level();
+			DEPTH--;
+			if(DEPTH == -1){
+				LOG("You win\n");
+				system("cls");
+				exit(-1);
 			}
-		main_renderer(player,  &monsters, &items, map);
-		event_user(player, &monsters, &items, map);
+			//INCREMENT PLAYER
+			
+			}
+		if(EQUITEM == SDL_FALSE) {
+			main_renderer(player,  &monster, &items, map);
+			update_entity(player, &monster, map, &items);
+			}
+		main_renderer(player,  &monster, &items, map);
+		event_user(player, &monster, &items, map);
 		if(EQUITEM == SDL_TRUE) {
-			main_renderer(player,  &monsters, &items, map);
+			main_renderer(player,  &monster, &items, map);
 			LOG("Items:\n");
 			for(u64 i = 0; i < player->inventory.count; i++) {
 				Item item = player->inventory.items[i];
