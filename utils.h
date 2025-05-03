@@ -27,6 +27,7 @@
 #define RED        (SDL_Color){255, 0, 0, 0}
 #define GREEN      (SDL_Color){0, 255, 0, 0}
 #define BLUE       (SDL_Color){30, 0, 255, 0}
+#define YELLOW     (SDL_Color){255, 255, 0, 0}
 #define BLACK      (SDL_Color){0, 0, 0, 0}
 #define UNDE_COL   (SDL_Color){252, 3, 177, 0}
 #define BLIGHT_COL (SDL_Color){32, 43, 34, 0}
@@ -153,6 +154,9 @@ typedef struct Graphics_State {
 	SDL_bool      isOpeningDoor;
 	SDL_bool      isEquItem;
 	u64           countMoves;
+	u8            depth;
+	u8            levelPlayer;
+	u8            isTimeToGenerateMap;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -181,6 +185,9 @@ extern Graphics_State mainGraphics;
 #define OPENDOOR   mainGraphics.isOpeningDoor
 #define COUNTMOVES mainGraphics.countMoves
 #define EQUITEM    mainGraphics.isEquItem
+#define DEPTH      mainGraphics.depth
+#define LEVEL      mainGraphics.levelPlayer
+#define GENMAP     mainGraphics.isTimeToGenerateMap
 typedef struct {
 	i32 x;
 	i32 y;
@@ -220,5 +227,5 @@ typedef struct {
 #define CHANCE_NEGATIVE_DAMAGE 0.05f
 #define CHANCE_ITEM_PER_LEVEL 0.02f
 #define CHANCE_DROP_SELING_CAUSE_DAMAGE 0.8f
-
+#define CHANCE_MONSTER_HAVE_ITEM 0.05f
 #endif
