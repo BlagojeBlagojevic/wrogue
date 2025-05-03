@@ -117,6 +117,17 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				free(text);
 				break;
 				}
+		case GOLD_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				//i//tem->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = GOLD_ITEM;
+				item->itemValue =  rand()%50 + 10;
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "Baga of gold %s %d", item->name, item->itemValue);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+				break;
+				}
 
 		default: {
 				ASSERT("UNRECHABLE");
