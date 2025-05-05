@@ -31,7 +31,25 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 		memcpy(entity->name, name, len);
 		}
 	if(ch != '@') {
-		Item *GOLD = create_item(0, 0, GOLD_CREATE());
+
+		Item *GOLD;
+
+		i32 chance = rand()%NUM_ITEM;
+		CLAMP(chance, HEALING_ITEM, GOLD_ITEM);
+		switch(chance) {
+			case HEALING_ITEM: {
+					GOLD = create_item(37, 38, HEALING_CREATE());
+					break;
+					}
+			case GOLD_ITEM: {
+					GOLD = create_item(0, 0, GOLD_CREATE());
+					break;
+					}
+			default: {
+					ASSERT("UNRECHABLE");
+					break;
+					}
+			}
 		Item i = *GOLD;
 		da_append(&entity->inventory, (i));
 		LOG("Gold\n");
@@ -182,7 +200,14 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 		}
 	//LOG("player att %d decOrInc %d\n", player->attack[0] ,iPl );
 	//LOG("entity def %d decOrInc %d\n", entity->attack[0] ,iEnt );
-	i32 damage = roll_the_dice(player->attack[0] + iPl, entity->defence[0] + iEnt);
+	i32 damage;
+	if(rand_f64() < CHANCE_PLAYER_LEVEL) {
+		damage = roll_the_dice(player->attack[0] + iPl, entity->defence[0] + iEnt + rand()%LEVEL);
+		}
+	else {
+		damage = roll_the_dice(player->attack[0] + iPl, entity->defence[0] + iEnt);
+		}
+
 	if(damage < 0) {
 		player->health+=damage;
 		}
@@ -232,10 +257,17 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 					item.pos.x = x;
 					item.pos.y = y;
 					//LOG("Droped(%d %d)\n\n", x, y);
-					if(rand_f64() < CHANCE_DROP_ITEM) {
-						da_append(items, item);
+					//FOR DROPING WHAT
+					if(item.type <= SHOES_ITEM) {
+						if(rand_f64() < CHANCE_DROP_ITEM) {
+							da_append(items, item);
+							}
 						}
-
+					else {
+						if(rand_f64() < CHANCE_DROP_ITEM_CONS) {
+							da_append(items, item);
+							}
+						}
 					}
 				}
 			}
@@ -252,6 +284,12 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//DROP(entity);
 	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
+	//LEVEL SCALING
+	if(rand_f64() < CHANCE_PLAYER_LEVEL) {
+		for(i32 i = 0; i < DAMAGE_NUM; i++) {
+			iA[i] += rand()%LEVEL;
+			}
+		}
 	i32 lf = 0;
 	f64 lfC = 0.0f;
 	for(u64 i = 0; i < player->inventory.count; i++) {
@@ -311,7 +349,14 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 			}
 		}
 	if(damage > 0) {
-		player->health-=damage;
+		if(rand_f64() < CHANCE_CRITICAL_PLAYER) {
+			da_append(&MESSAGES, "You are criticly injured");
+			player->health-=player->maxHealth / 2;
+			}
+		else {
+			player->health-=damage;
+			}
+
 		}
 	else {
 		entity->health+=damage;
@@ -331,7 +376,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 
 	//system("pause");
 	//Text_Renderer_C(RENDERER, FONT, )
-	if(player->health == 0) {
+	if(player->health <= 0) {
 
 		//(void)system("cls");
 		LOG("You loose");
@@ -567,9 +612,14 @@ void monster_definitions_export() {
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RESURECT] = 0.30f;
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
 
+
 	monsters[ACOLAYT_MONSTER].lifeStealChance = 0.0f;
 	monsters[ACOLAYT_MONSTER].lifeStealValue = 0.0f;
 	monsters[ACOLAYT_MONSTER].color = UNDE_COL;
+
+	monsters[ACOLAYT_MONSTER].maxStamina = 8;
+	monsters[ACOLAYT_MONSTER].stamina    = 8;
+	monsters[ACOLAYT_MONSTER].chanceToDecressStaminaMove = 0.1;
 	//GHOUL
 	monsters[GHOUL_MONSTER].radius = 14;
 	monsters[GHOUL_MONSTER].ch = 'G';
@@ -597,6 +647,10 @@ void monster_definitions_export() {
 	monsters[GHOUL_MONSTER].stateChance[STATE_BESERK] = 0.2f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[GHOUL_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+
+	monsters[GHOUL_MONSTER].maxStamina = 8;
+	monsters[GHOUL_MONSTER].stamina    = 8;
+	monsters[GHOUL_MONSTER].chanceToDecressStaminaMove = 0.2;
 
 	monsters[GHOUL_MONSTER].lifeStealChance = 0.1f;
 	monsters[GHOUL_MONSTER].lifeStealValue  = 1.0f;
@@ -629,6 +683,10 @@ void monster_definitions_export() {
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_BESERK] = 0.00f;
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[NECROMANCER_MONSTER].stateChance[STATE_SUMMON] = 0.6f;
+
+	monsters[NECROMANCER_MONSTER].maxStamina = 8;
+	monsters[NECROMANCER_MONSTER].stamina    = 8;
+	monsters[NECROMANCER_MONSTER].chanceToDecressStaminaMove = 0.1;
 
 	monsters[NECROMANCER_MONSTER].lifeStealChance = 0.0f;
 	monsters[NECROMANCER_MONSTER].lifeStealValue  = 0.0f;
@@ -667,6 +725,9 @@ void monster_definitions_export() {
 	monsters[BANSHIE_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
 
 
+	monsters[BANSHIE_MONSTER].maxStamina = 8;
+	monsters[BANSHIE_MONSTER].stamina    = 8;
+	monsters[BANSHIE_MONSTER].chanceToDecressStaminaMove = 0.1;
 
 
 	monsters[BANSHIE_MONSTER].lifeStealChance = 0.0f;
@@ -681,7 +742,7 @@ void monster_definitions_export() {
 	monsters[SPIDER_MONSTER].attack[DAMAGE_BASIC]  = 0;
 	monsters[SPIDER_MONSTER].attack[DAMAGE_POISON] = 3;
 	monsters[SPIDER_MONSTER].attack[DAMAGE_RANGE]  = 3;
-	monsters[BANSHIE_MONSTER].attack[DAMAGE_SPELL] = 0;
+	monsters[SPIDER_MONSTER].attack[DAMAGE_SPELL] = 0;
 	//DEF  light
 	monsters[SPIDER_MONSTER].defence[DAMAGE_BASIC]  = 2;
 	monsters[SPIDER_MONSTER].defence[DAMAGE_POISON] = 2;
@@ -703,6 +764,10 @@ void monster_definitions_export() {
 	monsters[SPIDER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
 	monsters[SPIDER_MONSTER].stateChance[STATE_SPELL]  = 0.8f;
+
+	monsters[SPIDER_MONSTER].maxStamina = 8;
+	monsters[SPIDER_MONSTER].stamina    = 8;
+	monsters[SPIDER_MONSTER].chanceToDecressStaminaMove = 0.1;
 
 
 
@@ -744,6 +809,11 @@ void monster_definitions_export() {
 	monsters[DRAGON_MONSTER].stateChance[STATE_SPELL]  = 0.99f;
 	monsters[DRAGON_MONSTER].color = BLUE;
 
+	monsters[DRAGON_MONSTER].maxStamina = 10;
+	monsters[DRAGON_MONSTER].stamina    = 8;
+	monsters[DRAGON_MONSTER].chanceToDecressStaminaMove = 0.3;
+
+
 	monsters[DRAGON_MONSTER].lifeStealChance = 0.1f;
 	monsters[DRAGON_MONSTER].lifeStealValue  = 1.0f;
 
@@ -778,6 +848,12 @@ void monster_definitions_export() {
 	monsters[GRUNT_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[GRUNT_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
 
+	monsters[GRUNT_MONSTER].maxStamina = 10;
+	monsters[GRUNT_MONSTER].stamina    = 8;
+	monsters[GRUNT_MONSTER].chanceToDecressStaminaMove = 0.3;
+
+
+
 	monsters[GRUNT_MONSTER].lifeStealChance = 0.3f;
 	monsters[GRUNT_MONSTER].lifeStealValue  = 1.0f;
 	monsters[GRUNT_MONSTER].color = GREEN;
@@ -809,6 +885,10 @@ void monster_definitions_export() {
 	monsters[BERSERKER_MONSTER].stateChance[STATE_BESERK] = 0.99f;
 	monsters[BERSERKER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[BERSERKER_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+
+	monsters[BERSERKER_MONSTER].maxStamina = 10;
+	monsters[BERSERKER_MONSTER].stamina    = 8;
+	monsters[BERSERKER_MONSTER].chanceToDecressStaminaMove = 0.1;
 
 
 	monsters[BERSERKER_MONSTER].lifeStealChance = 0.01f;
@@ -847,6 +927,11 @@ void monster_definitions_export() {
 	monsters[ARCHER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
 	monsters[ARCHER_MONSTER].stateChance[STATE_SPELL]  = 0.0f;
 
+	monsters[ARCHER_MONSTER].maxStamina = 10;
+	monsters[ARCHER_MONSTER].stamina    = 4;
+	monsters[ARCHER_MONSTER].chanceToDecressStaminaMove = 0.1;
+
+
 	monsters[ARCHER_MONSTER].lifeStealChance = 0.01f;
 	monsters[ARCHER_MONSTER].lifeStealValue  = 1.0f;
 
@@ -880,6 +965,12 @@ void monster_definitions_export() {
 	monsters[WITCH_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
 	monsters[WITCH_MONSTER].stateChance[STATE_SPELL] = 0.8f;
 
+
+	monsters[WITCH_MONSTER].maxStamina = 10;
+	monsters[WITCH_MONSTER].stamina    = 4;
+	monsters[WITCH_MONSTER].chanceToDecressStaminaMove = 0.1;
+
+
 	monsters[WITCH_MONSTER].lifeStealChance = 0.0f;
 	monsters[WITCH_MONSTER].lifeStealValue  = 0.0f;
 
@@ -912,6 +1003,12 @@ void monster_definitions_export() {
 	monsters[RAT_MONSTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[RAT_MONSTER].stateChance[STATE_BESERK] = 0.01f;
 	monsters[RAT_MONSTER].stateChance[STATE_SUMMON] = 0.8f;
+
+	monsters[RAT_MONSTER].maxStamina = 10;
+	monsters[RAT_MONSTER].stamina    = 4;
+	monsters[RAT_MONSTER].chanceToDecressStaminaMove = 0.1;
+
+
 	SPELL_SUMONM_RAT_EXPORT(monsters[RAT_MONSTER]);
 
 //GOBLIN
@@ -940,6 +1037,12 @@ void monster_definitions_export() {
 	monsters[GOBLIN_MOSNTER].stateChance[STATE_RESTING] = 0.3f;
 	monsters[GOBLIN_MOSNTER].stateChance[STATE_BESERK] = 0.01f;
 	monsters[GOBLIN_MOSNTER].stateChance[STATE_SPELL] = 0.3f;
+
+	monsters[GOBLIN_MOSNTER].maxStamina = 10;
+	monsters[GOBLIN_MOSNTER].stamina    = 4;
+	monsters[GOBLIN_MOSNTER].chanceToDecressStaminaMove = 0.1;
+
+
 	SPELL_GOBLIN_EXPORT(monsters[GOBLIN_MOSNTER]);
 
 
@@ -1674,11 +1777,15 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	DROP(player);
 	for(u64 i = 0; i < entitys->count; i++) {
 		Entitiy entity = entitys->items[i];
-
+	
 		//IF HEALTH IS A LOW RUNING MONSTER
 		//ELSE GO BESERK
 		if(Is_Monster(entity.ch)) {
 			entity.spell.passedTurns++;
+			if(rand_f64() < entity.chanceToDecressStaminaMove){
+				entity.stamina--;
+				CLAMP(entity.stamina, 0, entity.maxStamina);
+			}
 			if(entity.health == 0) {
 				if(rand_f64() < entity.stateChance[STATE_RESURECT]) {
 					i32 health = rand()%2 + 1;
@@ -1702,19 +1809,20 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			else if(entity.health == 1) {
 				if(rand_f64() < entity.stateChance[STATE_RUNING]) {
 					entity.state = STATE_RUNING;
-
 					}
 				else if(rand_f64() < CHANCE_INCREMENT_HEALTH) {
 					entity.health++;
 					entity.state = STATE_HUNTING;
 					}
 				else {
-
 					entity.state = STATE_BESERK;
 					}
 				}
+			else if(entity.stamina <= 0){
+				entity.state = STATE_RESTING;
+			}	
 			//else if(player->health <= 3 || rand_f64() < ((player->maxHealth - player->health) / 100)) {
-			else if(player->health <= 3) {
+			else if(player->health <= 0.3*player->maxHealth) {
 				entity.state = STATE_HUNTING;
 
 				}
@@ -1737,7 +1845,6 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				if(is_monster_visible(map, &entity) == SDL_TRUE) {
 					if(rand_f64() < entity.stateChance[STATE_HUNTING]) {
 						entity.state  = STATE_HUNTING;
-
 						}
 					}
 				else if(rand_f64() < entity.stateChance[STATE_RESTING]) {
@@ -1745,29 +1852,30 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 
 					}
 				}
-			else if(entity.state == STATE_HUNTING) {
-				if(rand_f64() < entity.stateChance[STATE_RESTING]) {
+			else if(entity.state == STATE_HUNTING && rand_f64() < entity.stateChance[STATE_RESTING]) {
+					{
 					entity.state  = STATE_RESTING;
 					da_append(&MESSAGES, "You stop hearing noices");
 					}
 				}
 
-			else if(entity.state == STATE_RESTING) {
-				if(rand_f64() < entity.stateChance[STATE_WANDERING]) {
+			else if(entity.state == STATE_RESTING && rand_f64() < entity.stateChance[STATE_WANDERING]) {
+					{
 					entity.state  = STATE_WANDERING;
 
 					}
 				}
-			else if(is_monster_visible(map, &entity) == SDL_TRUE) {
-				if(rand_f64() < entity.stateChance[STATE_HUNTING]) {
-					entity.state = STATE_HUNTING;
-					}
-				else if(rand_f64() < entity.stateChance[STATE_MOVING_AWAY_RANGE]) {
-					entity.state = STATE_MOVING_AWAY_RANGE;
-					}
-				else if(rand_f64() < entity.stateChance[STATE_RUNING]) {
-					entity.state = STATE_RUNING;
-					}
+			else if(is_monster_visible(map, &entity) == SDL_TRUE && rand_f64() < entity.stateChance[STATE_HUNTING]) {
+				entity.state = STATE_HUNTING;
+				}
+			else if(rand_f64() < entity.stateChance[STATE_MOVING_AWAY_RANGE]) {
+				entity.state = STATE_MOVING_AWAY_RANGE;
+				}
+			else if(rand_f64() < entity.stateChance[STATE_RUNING]) {
+				entity.state = STATE_RUNING;
+				}
+			else {
+				entity.state = STATE_RESTING;
 				}
 
 			}
@@ -1793,7 +1901,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			entity.spell.passedTurns++;
 			if(entity.state == STATE_RESTING) {
 				//NOTHING
-
+					entity.stamina++;
 				}
 			else if(entity.state == STATE_WANDERING) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
@@ -2218,17 +2326,17 @@ void export_generators() {
 	generators[GENERATOR_NECRO].monsterNumber = 1;
 	generators[GENERATOR_NECRO].maxDistanceDikstra = 20;
 	generators[GENERATOR_NECRO].typeOfTile = TILE_BLIGHT;
-	
+
 	//NECRO
 	generators[GENERATOR_DRAGON].type = GENERATOR_DRAGON;
 	memset(generators[GENERATOR_DRAGON].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_DRAGON].chanceToSpawn[DRAGON_MONSTER] = 1.0f;
-	generators[GENERATOR_DRAGON].levelDungon = 4;
+	generators[GENERATOR_DRAGON].levelDungon = 40;
 	generators[GENERATOR_DRAGON].monsterNumber = 0;
 	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
 	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
-	
-	
+
+
 
 
 
