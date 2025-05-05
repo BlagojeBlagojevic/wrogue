@@ -24,7 +24,7 @@ typedef enum {
 	BERSERKER_MONSTER,
 	ARCHER_MONSTER,
 	WITCH_MONSTER,
-	//NEUTRAL 
+	//NEUTRAL
 	RAT_MONSTER,
 	GOBLIN_MOSNTER,
 
@@ -32,11 +32,11 @@ typedef enum {
 	//UPDATE ARR
 	} Monster_Types;
 
-typedef struct{
+typedef struct {
 	Monster_Types* items;
 	u64 count;
 	u64 capacity;
-}Monster_Types_DA;
+	} Monster_Types_DA;
 
 //DEFINES FOR INITING OF A MONSTER
 
@@ -64,7 +64,7 @@ static const char* monsterName[] = {
 	"Ghost",
 	};
 
-typedef enum{
+typedef enum {
 	STATE_RUNING,
 	STATE_MOVING_AWAY_RANGE,
 	STATE_HUNTING,
@@ -72,12 +72,18 @@ typedef enum{
 	STATE_RESTING,
 	STATE_BESERK,
 	STATE_RESURECT,
-	STATE_SUMMON, 
+	STATE_SUMMON,
 	STATE_SPELL,
 	STATE_NUM
-}State_Entity; 	
+	} State_Entity;
 
-typedef enum{
+typedef struct {
+	Item* items;
+	u64   count;
+	u64   capacity;
+	} State_Entity_DA;
+
+typedef enum {
 	SPELL_SUMONM_GHOUL,
 	SPELL_DECRESE_MAX_HEALTH,
 	SPELL_STUN,
@@ -85,15 +91,15 @@ typedef enum{
 	SPELL_KABUM,
 	SPELL_STATIS_TRAP,
 	SPELL_NUM
-}Spell_Type;
+	} Spell_Type;
 
-typedef struct spell{
+typedef struct spell {
 	Spell_Type type;
 	i32 value;
 	i32 passedTurns;
 	i32 cooldown;
-	
-}Spell;
+
+	} Spell;
 
 #define SPELL_SUMONM_GHOUL_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMONM_GHOUL;entitiy.spell.value = GHOUL_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 30;};
 #define SPELL_DECRESE_MAX_HEALTH_EXPORT(entitiy){entitiy.spell.type = SPELL_DECRESE_MAX_HEALTH;entitiy.spell.value  = -1; entitiy.spell.passedTurns = 30; entitiy.spell.cooldown = 30;};
@@ -129,6 +135,9 @@ typedef struct Entity {
 	i16 isStunded;
 	Spell spell;
 	i32 equiptedItems[EQUIPTED_NUM];
+	i16 stamina;
+	i16 maxStamina;
+	f64 chanceToDecressStaminaMove;
 	} Entitiy;
 
 typedef struct {
@@ -137,24 +146,24 @@ typedef struct {
 	u64 count;
 	} Entitiy_DA;
 
-typedef enum{
+typedef enum {
 	GENERATOR_GRAVEYARD,
 	GENERATOR_CAVE,
 	GENERATOR_ORC,
-	GENERATOR_FIEND, 
+	GENERATOR_FIEND,
 	GENERATOR_NECRO,
 	GENERATOR_DRAGON,
 	GENERATOR_NUM
-}Generator_Type;
+	} Generator_Type;
 
-typedef struct __attribute__((packed)) generator{
+typedef struct __attribute__((packed)) generator {
 	Generator_Type type;
 	f64 chanceToSpawn[NUM_MONSTER];
 	i32 maxDistanceDikstra;
 	i32 levelDungon;
 	i32 monsterNumber;
 	Tile_Type typeOfTile;
-}Generator;
+	} Generator;
 
 static Generator generators[GENERATOR_NUM];
 
@@ -196,7 +205,7 @@ void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32
 
 void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem);
 
-void export_generators(); //TBF FILE 
+void export_generators(); //TBF FILE
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room);
 
 void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters);

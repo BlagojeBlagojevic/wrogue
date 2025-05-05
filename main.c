@@ -17,7 +17,7 @@ static Item_DA    items;
 void generate_level() {
 
 	Room_DA rooms = {0};
-	DEPTH = rand()%7 + 1;
+	
 	LEVEL++;
 	map = init_map(&rooms);
 	if(rooms.count <= 2) {
@@ -95,6 +95,9 @@ int main() {
 	player->defence[2] = 2;
 	player->attack[3]  = 2;
 	player->defence[3] = 2;
+	player->stamina    = 10;
+	player->maxStamina = 10;
+	player->chanceToDecressStaminaMove = 0.1f;
 	Item* sword = create_item(0, 0, SWORD_CREATE());
 	sword->attack[DAMAGE_BASIC] = 2;
 	sword->isEquiped = SDL_TRUE;
@@ -117,13 +120,14 @@ int main() {
 	da_append(&player->inventory, (*shoes));
 	//*/
 	Item* healing = create_item(37, 38, HEALING_CREATE());
-	da_append(&player->inventory, (*healing));
 
 	//player->invertory = {0};
 	monster_definitions_export();
 	export_generators();
 	//Entitiy_DA monsters = {0};
+	
 	LEVEL = 0;
+	DEPTH = rand()%7 + 1;
 	generate_level();
 	//MAP_STDOUT();
 	while(!QUIT) {

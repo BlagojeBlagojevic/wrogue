@@ -109,7 +109,6 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				for(i32 i = 0; i < 10; i++) {
 					text[i] = rand()%(125 - 33) + 33;
 					}
-				item->isCursed = rand()%2;
 				memcpy(item->name, text, MAX_NAME);
 				snprintf(text, MAX_NAME, "Potion named %s", item->name);
 				strncat(item->descripction, text, MAX_DESCRIPTION);
@@ -134,6 +133,12 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				break;
 				}
 		}
+	if(rand_f64() < CHANCE_ITEM_CURSED){
+		item->isCursed = CURSED;
+	}
+	else{
+		item->isCursed = NORMAL;
+	}	
 	return item;
 	}
 

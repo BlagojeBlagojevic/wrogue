@@ -91,12 +91,24 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			}
 		}
 	else if(player->isStunded > 0) {
+
 		MOVMENT = SDL_TRUE;
 		player->isStunded--;
+		player->stamina++;
+		CLAMP(player->stamina, 0, player->maxStamina);
 		//CLAMP(player->isStunded, 0, 255);
+		}
+	else if(player->stamina <= 0) {
+		da_append(&MESSAGES, "You are exhausted");
+		player->stamina++;
+		MOVMENT = SDL_TRUE;
 		}
 	else if(key == UP_ARROW || key == KEY_W) {
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
+			if(rand_f64() < player->chanceToDecressStaminaMove) {
+				player->stamina--;
+				CLAMP(player->stamina, 0, player->maxStamina);
+				}
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y--;
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_FALSE;
@@ -105,6 +117,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y-1, entitis);
 			if(witchIsMonster != -1) {
+				if(player->chanceToDecressStaminaMove < rand_f64())
+					player->stamina-=rand()%2;
+				CLAMP(player->stamina, 0, player->maxStamina);
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
 				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
@@ -117,6 +132,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		}
 	else if(key == DOWN_ARROW || key == KEY_S) {
 		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_TRUE) {
+			if(rand_f64() < player->chanceToDecressStaminaMove)
+				player->stamina--;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.y++;
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_FALSE;
@@ -125,6 +143,8 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		else {
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
+				player->stamina-=rand()%2;
+				CLAMP(player->stamina, 0, player->maxStamina);
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
 				if(isF == SDL_TRUE) {
 					MAP_ISW(map, entitis->items[witchIsMonster].pos.x, entitis->items[witchIsMonster].pos.y) = SDL_TRUE;
@@ -137,6 +157,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 
 		}
 	else if(key == LEFT_ARROW || key == KEY_A) {
+		if(rand_f64() < player->chanceToDecressStaminaMove)
+			player->stamina--;
+		CLAMP(player->stamina, 0, player->maxStamina);
 		if(player->pos.x > 0 && MAP_ISW(map, player->pos.x-1, player->pos.y) == SDL_TRUE) {
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x--;
@@ -144,6 +167,8 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			MOVMENT = SDL_TRUE;
 			}
 		else {
+			player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
@@ -158,13 +183,19 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 
 		}
 	else if(key == RIGHT_ARROW || key == KEY_D) {
+
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y) == SDL_TRUE) {
+			if(rand_f64() < player->chanceToDecressStaminaMove)
+				player->stamina--;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x++;
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			MOVMENT = SDL_TRUE;
 			}
 		else {
+			player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
@@ -178,7 +209,11 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			}
 		}
 	else if(key == KEY_Q) {
+
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y - 1) == SDL_TRUE) {
+			if(rand_f64() < player->chanceToDecressStaminaMove)
+				player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x--;
 			player->pos.y--;
@@ -186,6 +221,8 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			MOVMENT = SDL_TRUE;
 			}
 		else {
+			player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y - 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
@@ -199,7 +236,11 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			}
 		}
 	else if(key == KEY_E) {
+
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y - 1) == SDL_TRUE) {
+			if(rand_f64() < player->chanceToDecressStaminaMove)
+				player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x++;
 			player->pos.y--;
@@ -207,6 +248,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			MOVMENT = SDL_TRUE;
 			}
 		else {
+
+			player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y - 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
@@ -221,6 +265,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		}
 	else if(key == KEY_Z || key == KEY_Y) {
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y + 1) == SDL_TRUE) {
+			if(rand_f64() < player->chanceToDecressStaminaMove)
+				player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x--;
 			player->pos.y++;
@@ -228,6 +275,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			MOVMENT = SDL_TRUE;
 			}
 		else {
+
+			player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x - 1,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
@@ -242,6 +292,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		}
 	else if(key == KEY_C) {
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y + 1) == SDL_TRUE) {
+			if(player->chanceToDecressStaminaMove < rand_f64())
+				player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			MAP_ISW(map, player->pos.x, player->pos.y) = SDL_TRUE;
 			player->pos.x++;
 			player->pos.y++;
@@ -249,6 +302,9 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			MOVMENT = SDL_TRUE;
 			}
 		else {
+
+			player->stamina-=rand()%2;
+			CLAMP(player->stamina, 0, player->maxStamina);
 			i32 witchIsMonster = is_monster_on_entity(player->pos.x + 1,  player->pos.y + 1, entitis);
 			if(witchIsMonster != -1) {
 				SDL_bool isF =  player_attack(player, &entitis->items[witchIsMonster], items, map);
@@ -264,6 +320,8 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 
 	else if(key == SPACE) {
 		//DO NOTHING
+		player->stamina++;
+		CLAMP(player->stamina, 0, player->maxStamina);
 		MOVMENT = SDL_TRUE;
 		}
 	else if(key == KEY_I) {
@@ -310,12 +368,17 @@ void render_stats(Entitiy *player) {
 	SDL_RenderFillRect(RENDERER, &temp);
 	snprintf(stats, 1024, "STATS: Health %d", player->health);
 	Text_Renderer_C(RENDERER, FONT,startX, startY, strlen(stats) * FONT_W, 20, stats, WHITE);
-	for(Damage_Types i = 0; i < DAMAGE_NUM; i++) {
+	Damage_Types i = 0;
+	for(; i < DAMAGE_NUM; i++) {
 		stats[0] = '\0';
 		snprintf(stats, 1024, "STATS: %s att: %d def: %d", damageStr[i], player->attack[i], player->defence[i]);
 		Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), strlen(stats) * FONT_W,
 		                FONT_H_MESSAGES, stats, WHITE);
 		}
+	stats[0] = '\0';
+	snprintf(stats, 1024, "STATS: MAXSTM: %d STM: %d",player->maxStamina, player->stamina);
+	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), strlen(stats) * FONT_W,
+	                FONT_H_MESSAGES, stats, WHITE);
 
 	}
 
