@@ -1,181 +1,104 @@
-//#include"utils.h"
+#ifndef _ITEM_H
+#define _ITEM_H
 
-#include "map.h"
-#include "entity.h"
-#include "app.h"
-#define SEED 12344
-#include<time.h>
+#include "utils.h"
 
+//TBD CURSED ITEMS
+typedef enum{
+	SWORD_ITEM,
+	DART_ITEM,
+	ARMOR_ITEM,
+	HELMET_ITEM,
+	SHIELD_ITEM,
+	SHOES_ITEM,
+	HEALING_ITEM,
+	GOLD_ITEM,
+	NUM_ITEM,
+}Item_Type;
 
-Graphics_State    mainGraphics;
-static Tile*      map;
-static Entitiy_DA monster;
-static Entitiy*   player;
-static Item_DA    items;
+typedef enum{
+	CURSED,
+	NORMAL,
+	BLESED,
+	
+}Item_Status;
 
+typedef enum {
+	DAMAGE_BASIC,
+	DAMAGE_SPELL,
+	DAMAGE_POISON,
+	DAMAGE_RANGE,
+	DAMAGE_NUM,
 
-void generate_level() {
-
-	Room_DA rooms = {0};
-	DEPTH = rand()%7 + 1;
-	LEVEL++;
-	map = init_map(&rooms);
-	if(rooms.count <= 2) {
-		Room room;
-		room.pos.x  = 0;
-		room.pos.y  = 0;
-		room.width  = 20;
-		room.height = 38;
-		for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
-			room.pos.y=y;
-			for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
-				room.pos.x=x;
-				genereate_monsters_generator(player, &monster, map, LEVEL, room);
-				}
-			}
-		}
-	else {
-		for(u64 i = 1; i < rooms.count; i++) {
-			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i]);
-			}
-		}
-
-	calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
-	caved_part_generator(TILE_TREE, map, 5);
-	calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
-	caved_part_generator(TILE_GRASS, map, 100);
-	MOVMENT = 0;
-	COUNTMOVES = 0;
-	player->pos.x = rooms.items[0].center.x;
-	player->pos.y = rooms.items[0].center.y;
-	if(rooms.items != NULL) {
-		free(rooms.items);
-		}
-	}
+	} Damage_Types;
 
 
-int main() {
+static const char* damageStr[] = {
+	"BASIC",
+	"SPELL",
+	"POISON",
+	"RANGE",
+	"NUM",
+	};
 
-	DROP(damageStr);
-	DROP(monsterName);
-	DROP(monsters);
+typedef enum{
+	
+	EQUIPTED_ARMOR,
+	EQUIPTED_WEPON,
+	EQUIPTED_SHIELD,
+	EQUIPTED_LEGS,
+	EQUIPTED_HEAD,
+	EQUIPTED_USE,
+	EQUIPTED_NUM,
+	
+}Item_Equipted;
 
-	//INIT
-	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
-	SDL_ERR(TTF_Init());
+//THIS HAS TO BE CHANGED IF CHANGE AMOUNT OF TYPES OF THE ATTACKS
+#define DAMAGE_NUMi 4 
 
-	u64 seed = (u64)time(0);
-	srand(seed);
-	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
-		da_append(&MESSAGES, "   ");
-		}
-	char* msg = calloc(30, sizeof(char));
-	snprintf(msg, 30, "Your seed is %ld", seed);
-	da_append(&MESSAGES, msg);
 
-	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
-	(void)P_SDL_ERR(WINDOW);
-	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
-	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
-	FONT = TTF_OpenFont(fontLoc, 128);
-	(void)P_SDL_ERR(FONT);
-	(void)P_SDL_ERR(RENDERER);
-	QUIT = 0;
-	MOVMENT = SDL_TRUE;
-	ITEMSREND = SDL_FALSE;
-	player = create_entity('@', "Some Name", 5, 10, (Position) {
-		40, 40
-		}, WHITE);
+#define SWORD_CREATE()     5, "SWORD",  '{', WHITE,  SWORD_ITEM,    NORMAL, SDL_FALSE
+#define ARMOR_CREATE()     5, "ARMOR",  '[', WHITE,  ARMOR_ITEM,    NORMAL, SDL_FALSE 
+#define HELMET_CREATE()    5, "HELMET", '[', WHITE,  HELMET_ITEM,   NORMAL, SDL_FALSE
+#define SHIELD_CREATE()    5, "SHIELD", '[', WHITE,  SHIELD_ITEM,   NORMAL, SDL_FALSE
+#define SHOES_CREATE()     5, "SHOES",  '[', WHITE,  SHOES_ITEM,    NORMAL, SDL_FALSE
+#define HEALING_CREATE()	 5, "",       '!', WHITE,  HEALING_ITEM,  NORMAL, SDL_FALSE
+#define GOLD_CREATE()	     5, "",       'g', YELLOW, GOLD_ITEM,     NORMAL, SDL_FALSE
+//#define DART_CREATE()   5, "DART",   '|', BLUE
+//#define POTION_CREATE() 5, "POTION", '#', BLUE
 
-	player->attack[0]  = 2;
-	player->defence[0] = 2;
-	player->attack[1]  = 2;
-	player->defence[1] = 2;
-	player->attack[2]  = 2;
-	player->defence[2] = 2;
-	player->attack[3]  = 2;
-	player->defence[3] = 2;
-	Item* sword = create_item(0, 0, SWORD_CREATE());
-	sword->attack[DAMAGE_BASIC] = 2;
-	sword->isEquiped = SDL_TRUE;
-	da_append(&player->inventory, (*sword));
-	Item* armor = create_item(0, 0, ARMOR_CREATE());
-	armor->defence[DAMAGE_BASIC] = 1;
-	armor->isEquiped = SDL_TRUE;
-	da_append(&player->inventory, (*armor));
-	//LOG("Plateer");
-	//exit(-1);
-	/*
-	Item* helmet = create_item(40, 38, HELMET_CREATE());
-	helmet->isEquiped = SDL_TRUE;
-	da_append(&player->inventory, (*helmet));
-	Item* shield = create_item(36, 40, SHIELD_CREATE());
-	shield->isEquiped = SDL_TRUE;
-	da_append(&player->inventory, (*shield));
-	Item* shoes = create_item(36, 38, SHOES_CREATE());
-	shoes->isEquiped = SDL_TRUE;
-	da_append(&player->inventory, (*shoes));
-	//*/
-	Item* healing = create_item(37, 38, HEALING_CREATE());
-	da_append(&player->inventory, (*healing));
 
-	//player->invertory = {0};
-	monster_definitions_export();
-	export_generators();
-	//Entitiy_DA monsters = {0};
-	LEVEL = 0;
-	generate_level();
-	//MAP_STDOUT();
-	while(!QUIT) {
-		//monster.count < 1 &&
-		if( MAP_CH(map, player->pos.x, player->pos.y) == TILE_STAIRS) {
-			player->attack[0]  += 1;
-			player->defence[0] += 1;
-			player->attack[1]  += 1;
-			player->defence[1] += 1;
-			player->attack[2]  += 1;
-			player->defence[2] += 1;
-			player->attack[3]  += 1;
-			player->defence[3] += 1;
-			player->maxHealth +=10;
-			player->health = player->maxHealth;
-			//LEVEL +=1;
-			generate_level();
-			DEPTH--;
-			if(DEPTH == -1){
-				LOG("You win\n");
-				system("cls");
-				exit(-1);
-			}
-			//INCREMENT PLAYER
-			
-			}
-		if(EQUITEM == SDL_FALSE) {
-			main_renderer(player,  &monster, &items, map);
-			update_entity(player, &monster, map, &items);
-			}
-		main_renderer(player,  &monster, &items, map);
-		event_user(player, &monster, &items, map);
-		if(EQUITEM == SDL_TRUE) {
-			main_renderer(player,  &monster, &items, map);
-			LOG("Items:\n");
-			for(u64 i = 0; i < player->inventory.count; i++) {
-				Item item = player->inventory.items[i];
-				if(item.isEquiped == SDL_TRUE) {
-					LOG("\t%s\n", item.descripction);
-					da_append(&MESSAGES, item.descripction);
-					}
-				}
-			}
-		//for(u64 count = 0; count < MESSAGES.count; count++) {
-		//	LOG("%s", MESSAGES.items[count]);
-		//	}
+typedef struct{
+	
+	i32 health;  //KINDA HOW MTCH IT COUDE SURVIVE UNTIL BREAKING AND FOR POTION BE USED FOR SOMETHING
+	Position pos;
+	char* name;
+	char* descripction;
+	char ch;
+	SDL_Color color;
+	Item_Type type;
+	i32 attack[DAMAGE_NUMi];
+	i32 defence[DAMAGE_NUMi];
+	u8 isCursed;
+	SDL_bool isEquiped;
+	Item_Equipted equipedTo;
+	i32 lifeSteal;
+	f64 lifeStealChance;
+	i32 itemValue;
+	//LET ALL BE ABLE to be TROW
+	
+}Item;
 
-		//system("pause");
-		//SDL_Delay(1000);
-		//Sleep(1);
-		}
+typedef struct {
+	Item* items;
+	u64   count;
+	u64   capacity;
+}Item_DA;
 
-	return 0;
-	ASSERT("UNREACHABLE");
-	}
+Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color,	Item_Type type, u8 isCursed, SDL_bool isEquipped);
+void pick_item_from_ground(Item* item, Item_DA *inventory);
+void equiped_item(Item_DA *items, u64 numItem);
+
+//ALL LOGIC WILL BE HANDLED IN A player_attack and monster_attack for adjustin the stats
+
+#endif
