@@ -32,7 +32,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					item->attack[i]   = 0;
 					item->defence[i]  = 0;
 					}
-				item->attack[0]  = 2;  //SWORDS ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->attack[0]  = rand()%5 + LEVEL;  //SWORDS ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
 				item->defence[0] = 1;
 				item->equipedTo = EQUIPTED_WEPON;
 				if(rand_f64() < CHANCE_LIFESTEAL) {
@@ -47,10 +47,45 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				break;
 
 				}
-		case ARMOR_ITEM: {
+		case PLAYER_SWORD_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUM; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = 0;
+					}
+				item->attack[0]  = 4;  //SWORDS ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[0] = 1;
+				item->equipedTo = EQUIPTED_WEPON;
+				if(rand_f64() < CHANCE_LIFESTEAL) {
+					item->lifeSteal = 1;
+					item->lifeStealChance = rand_f64();
+					}
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d,%.2f)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal, item->lifeStealChance);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+
+				}
+		case PLAYER_ARMOR_ITEM: {
 				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
 					item->attack[i]   = 0;
 					item->defence[i]  = rand()%5;
+					}
+				item->equipedTo = EQUIPTED_ARMOR;
+				item->defence[0] = 3;
+				char msg[150];
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
+				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+				}
+
+		case ARMOR_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = rand()%5 + LEVEL;
 					}
 				item->equipedTo = EQUIPTED_ARMOR;
 
@@ -133,12 +168,12 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				break;
 				}
 		}
-	if(rand_f64() < CHANCE_ITEM_CURSED){
+	if(rand_f64() < CHANCE_ITEM_CURSED) {
 		item->isCursed = CURSED;
-	}
-	else{
+		}
+	else {
 		item->isCursed = NORMAL;
-	}	
+		}
 	return item;
 	}
 
