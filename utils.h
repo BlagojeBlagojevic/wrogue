@@ -89,7 +89,7 @@ typedef  double   f64;
 #define ERROR_BREAK(...)    fprintf(stderr, __VA_ARGS__); exit(-1)
 #define LOG(...)     			  fprintf(stdout, __VA_ARGS__)
 #define PAUSE()           {char a; fputs(a, stdin);}
-#define CLAMP(X, LOW, HIGH) {if(X < LOW) X = LOW; if(X > HIGH) X = HIGH;}
+#define CLAMP(X, LOW, HIGH) {if((X) < (LOW)) (X) = (LOW); if((X) > (HIGH)) (X) = (HIGH);}
 #define ASSERT(msg) {fprintf(stderr, "aseert in:\n\tFILE %s\n\tLINE %d\n\tmsg: %s" , __FILE__, __LINE__, msg); exit(-1);}
 #define DROP(var) {(void)var;}
 
@@ -135,6 +135,12 @@ typedef struct{
 #define MAP_X 80
 #define MAP_Y 80
 
+typedef struct {
+	i32 x;
+	i32 y;
+	} Position;
+
+
 typedef struct Graphics_State {
 	SDL_Window   *window;
 	SDL_Renderer *renderer;
@@ -146,6 +152,7 @@ typedef struct Graphics_State {
 	i32           height;
 	u8            isQuit;
 	SDL_bool      isMovmentEvent;
+	Position      camera;
 	Str           messages;
 	Num           inputBuffer;
 	SDL_bool      useItem;
@@ -177,6 +184,7 @@ extern Graphics_State mainGraphics;
 #define WIDTH      mainGraphics.width
 #define HEIGHT     mainGraphics.height
 #define MOVMENT    mainGraphics.isMovmentEvent
+#define CAMERA     mainGraphics.camera
 #define MESSAGES   mainGraphics.messages
 #define USEITEM    mainGraphics.useItem
 #define BUFFER     mainGraphics.inputBuffer
@@ -188,10 +196,7 @@ extern Graphics_State mainGraphics;
 #define DEPTH      mainGraphics.depth
 #define LEVEL      mainGraphics.levelPlayer
 #define GENMAP     mainGraphics.isTimeToGenerateMap
-typedef struct {
-	i32 x;
-	i32 y;
-	} Position;
+
 
 
 #define INF (f64)100000.0f
@@ -225,7 +230,7 @@ typedef struct {
 #define CHANCE_DROP_ITEM 0.1f
 #define CHANCE_DROP_ITEM_CONS 0.7
 #define CHANCE_ITEM_CURSED 0.06f
-#define CHANCE_ITEM_USED_IN_COMBAT 0.33f
+#define CHANCE_ITEM_USED_IN_COMBAT 0.80f
 #define CHANCE_USE_DEF 0.8f
 #define CHANCE_NEGATIVE_DAMAGE 0.05f
 #define CHANCE_ITEM_PER_LEVEL 0.02f
@@ -233,5 +238,12 @@ typedef struct {
 #define CHANCE_MONSTER_HAVE_ITEM 0.05f
 #define CHANCE_CRITICAL_PLAYER 0.05f
 #define CHANCE_PLAYER_LEVEL  0.05f
+
+
+//BSP STUFF
+#define MIN_ROOM_SIZE 6
+#define MAX_ROOM_SIZE 16
+#define MAX_SPLIT_RATIO 0.9f
+#define CORRIDOR_WIDTH 2
 
 #endif
