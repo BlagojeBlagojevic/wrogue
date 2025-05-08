@@ -319,12 +319,12 @@ void add_room_drunkard_walk(Tile *map, Room room, i32 maxSteps) {
 
 void add_room_wall_to_map(Tile *map, Room room) {
 	///if(rand()%5 == 0) add_room_wall_arbitray_shape(map, room);
-	
-	
+
+
 	i32 chance = rand()%4;
 	if(chance == 0) add_room_wall_rectangle(map, room);
 	else if(chance == 1) add_room_wall_circle(map, room);
-	else if(chance == 2) add_room_drunkard_walk(map, room, 200);
+	else if(chance == 2) add_room_drunkard_walk(map, room, 600);
 	else {
 		chance = rand()%3;
 		if(chance == 0) {
@@ -597,7 +597,7 @@ void generete_dungons(Room_DA* room, Tile *map, i32 minRooms, i32 maxRooms) {
 					break;
 					}
 				}
-			if(isColided == SDL_FALSE) {
+			if(isColided == SDL_TRUE && rand_f64() < 0.1f) {
 				break;
 				}
 			if(count == 1000) {
@@ -699,37 +699,300 @@ Tile* init_map(Room_DA* rooms) {
 		ASSERT("alloc of map failed!!!");
 		}
 	//RAND_MAP();
-	i32 maxRoom = 10, minRoom = 5;
-	if(DEPTH % 3 == 0){
-		generete_dungons(rooms, map, 200, 600);	
-	}
-	else if(DEPTH % 3 == 1){
-		generete_dungons(rooms, map, 5, 6);
-	}
-	else{
+	i32 maxRoom = 12, minRoom = 10;
+	if(DEPTH % 3 == 0) {
+		generete_dungons(rooms, map, 200, 600);
+		}
+	else if(DEPTH % 3 == 1) {
+		generete_dungons(rooms, map, minRoom, maxRoom);
+		}
+	else {
 		Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
 		add_room_drunkard_walk(map, allMap, 10000);
-		da_append(rooms, allMap);	
-	}
-	
+		da_append(rooms, allMap);
+		}
+
 	SDL_bool isGenerateDown  = SDL_FALSE;
-	while(!isGenerateDown){
+	while(!isGenerateDown) {
 		i32 x = rand()%(MAP_X - 4) + 2;
 		i32 y = rand()%(MAP_X - 4) + 2;
 		CLAMP(x, 4, MAP_X - 4);
 		CLAMP(y, 4, MAP_Y - 4);
-		if(MAP_CH(map, x, y) == TILE_FLOOR){
+		if(MAP_CH(map, x, y) == TILE_FLOOR) {
 			MAP_CH(map, x, y) = TILE_STAIRS;
 			isGenerateDown = SDL_TRUE;
 			break;
+			}
 		}
-	}
-	 //LEVEL 1
+	//LEVEL 1
 
 	return map;
 	}
 
 
+//BRAHEMSTHAN ALGOS
+
+static void plot_4_points (i32 cx, i32 cy, i32 x, i32 y, Tile* map, char ch, SDL_bool isW) {
+	MAP_CH(map, cx + x, cy + y) = ch;
+	if (x != 0) {
+		MAP_CH(map, cx - x, cy + y) = ch;
+		MAP_ISW(map, cx - x, cy + y) = isW;
+		}
+	if (y != 0) {
+		MAP_CH(map,cx + x, cy - y) = ch;
+		MAP_ISW(map,cx + x, cy - y) = isW;
+		}
+	if (x != 0 && y != 0) {
+		MAP_CH(map, cx - x, cy - y) = ch;
+		MAP_ISW(map, cx - x, cy - y) = isW;
+		}
+	}
+static void plot_8_points (i32 cx, i32 cy, i32 x, i32 y, Tile* map, char ch) {
+	plot_4_points (cx, cy, x, y, map,ch, 1);
+	if (x != y) plot_4_points (cx, cy, y, x, map, ch,1);
+	}
+
+static void plot_circle (i32 xm, i32 ym, i32 r, Tile* map, char ch, SDL_bool isW) {
+	i32 x = -r, y = 0, err = 2-2*r; /* II. Quadrant */
+	do {
+		MAP_CH(map, xm-x, ym+y) = ch; /*   I. Quadrant */
+		MAP_CH(map, xm-y, ym-x) = ch; /*  II. Quadrant */
+		MAP_CH(map, xm+x, ym-y) = ch; /* III. Quadrant */
+		MAP_CH(map, xm+y, ym+x) = ch; /*  IV. Quadrant */
+
+		MAP_ISW(map, xm-x, ym+y) = isW; /*   I. Quadrant */
+		MAP_ISW(map, xm-y, ym-x) = isW; /*  II. Quadrant */
+		MAP_ISW(map, xm+x, ym-y) = isW; /* III. Quadrant */
+		MAP_ISW(map, xm+y, ym+x) = isW; /*  IV. Quadrant */
+		r = err;
+		if (r >=  x) err += ++x*2+1; /* e_xy+e_x > 0 */
+		if (r <= y) err += ++y*2+1; /* e_xy+e_y < 0 */
+		}
+	while (x < 0);
+	}
+
+static void plot_fill_circle(i32 xm, i32 ym, i32 r, Tile* map, char ch, SDL_bool isW) {
+	for(i32 i = 0; i < r; i++) {
+		plot_circle(xm, ym, i, map, ch, isW);
+		}
+	}
+static void plot_line (i32 x0, i32 y0, i32 x1, i32 y1,Tile* map,  char ch, SDL_bool isW) {
+	i32 dx =  abs (x1 - x0), sx = x0 < x1 ? 1 : -1;
+	i32 dy = -abs (y1 - y0), sy = y0 < y1 ? 1 : -1;
+	i32 err = dx + dy, e2; /* error value e_xy */
+
+	for (;;) { /* loop */
+		MAP_CH(map, x0, y0) = ch;
+		MAP_ISW(map, x0, y0) = isW;
+		if (x0 == x1 && y0 == y1) break;
+		e2 = 2 * err;
+		if (e2 >= dy) {
+			err += dy;  /* e_xy+e_x > 0 */
+			x0 += sx;
+			}
+		if (e2 <= dx) {
+			err += dx;  /* e_xy+e_y < 0 */
+			y0 += sy;
+			}
+		}
+	}
+
+static void plot_ellipse_rect (i32 x0, i32 y0, i32 x1, i32 y1, Tile* map, char ch) {
+	i32 a = abs (x1 - x0), b = abs (y1 - y0), b1 = b & 1; /* values of diameter */
+	i64 dx = 4 * (1 - a) * b * b, dy = 4 * (b1 + 1) * a * a; /* error increment */
+	i64 err = dx + dy + b1 * a * a, e2; /* error of 1.step */
+
+	if (x0 > x1) {
+		x0 = x1;  /* if called with swapped points */
+		x1 += a;
+		}
+	if (y0 > y1) y0 = y1; /* .. exchange them */
+	y0 += (b + 1) / 2;
+	y1 = y0-b1;   /* starting pixel */
+	a *= 8 * a;
+	b1 = 8 * b * b;
+	do {
+		MAP_CH(map, x1, y0) = ch; /*   I. Quadrant */
+		MAP_CH(map, x0, y0) = ch; /*  II. Quadrant */
+		MAP_CH(map, x0, y1) = ch; /* III. Quadrant */
+		MAP_CH(map, x1, y1) = ch; /*  IV. Quadrant */
+		e2 = 2 * err;
+		if (e2 >= dx) {
+			x0++;
+			x1--;
+			err += dx += b1;
+			} /* x step */
+		if (e2 <= dy) {
+			y0++;
+			y1--;
+			err += dy += a;
+			}  /* y step */
+		}
+	while (x0 <= x1);
+	while (y0-y1 < b) {
+		/* too early stop of flat ellipses a=1 */
+		MAP_CH(map, x0-1, y0) = ch; /* -> finish tip of ellipse */
+		MAP_CH(map, x1+1, y0++) = ch;
+		MAP_CH(map, x0-1, y1) = ch;
+		MAP_CH(map, x1+1, y1--) = ch;
+		}
+	}
+
+void plot_basic_bezier (i32 x0, i32 y0, i32 x1, i32 y1, i32 x2, i32 y2, Tile* map, char ch) {
+	int sx = x0 < x2 ? 1 : -1;
+	int sy = y0 < y2 ? 1 : -1; /* step direction */
+	int cur = sx * sy *((x0 - x1) * (y2 - y1) - (x2 - x1) * (y0 - y1)); /* curvature */
+	int x = x0 - 2 * x1 + x2, y = y0 - 2 * y1 +y2, xy = 2 * x * y * sx * sy;
+	/* compute error increments of P0 */
+	long dx = (1 - 2 * abs (x0 - x1)) * y * y + abs (y0 - y1) * xy - 2 * cur * abs (y0 - y2);
+	long dy = (1 - 2 * abs (y0 - y1)) * x * x + abs (x0 - x1) * xy + 2 * cur * abs (x0 - x2);
+	/* compute error increments of P2 */
+	long ex = (1 - 2 * abs (x2 - x1)) * y * y + abs (y2 - y1) * xy + 2 * cur * abs (y0 - y2);
+	long ey = (1 - 2 * abs (y2 - y1)) * x * x + abs (x2 - x1) * xy - 2 * cur * abs (x0 - x2);
+	/* sign of gradient must not change */
+	//assert ((x0 - x1) * (x2 - x1) <= 0 && (y0 - y1) * (y2 - y1) <= 0);
+	if (cur == 0) {
+		/* straight line */
+		plot_line(x0, y0, x2, y2, map, ch, 0);
+		return;
+		}
+	x *= 2 * x;
+	y *= 2 * y;
+	if (cur < 0) {
+		/* negated curvature */
+		x = -x;
+		dx = -dx;
+		ex = -ex;
+		xy = -xy;
+		y = -y;
+		dy = -dy;
+		ey = -ey;
+		}
+	/* algorithm fails for almost straight line, check error values */
+	if (dx >= -y || dy <= -x || ex <= -y || ey >= -x) {
+		plot_line(x0, y0, x1, y1, map, ch, 1); /* simple approximation */
+		plot_line(x1, y1, x2, y2, map, ch, 1);
+		return;
+		}
+	dx -= xy;
+	ex = dx + dy;
+	dy -= xy; /* error of 1.step */
+	for (;;) {
+		/* plot curve */
+
+		MAP_CH(map, x0, y0) = ch;
+		ey = 2 * ex - dy; /* save value for test of y step */
+		if (2 * ex >= dx) {
+			/* x step */
+			if (x0 == x2) break;
+			x0 += sx;
+			dy -= xy;
+			ex += dx += y;
+			}
+		if (ey <= 0) {
+			/* y step */
+			if (y0 == y2) break;
+			y0 += sy;
+			dx -= xy;
+			ex += dy += x;
+			}
+		}
+	}
+
+
+
+
+Tile* init_map_RA(Room_DA* room) {
+	Tile *map;
+	map = calloc(MAP_Y*MAP_Y + 1, sizeof(Tile));
+	//RAND_MAP();
+	for(i32 y = 0; y < MAP_Y * MAP_Y; y++) {
+		map[y].ch = TILE_BLOCKED;
+		}
+	//memset(map. , TILE_FLOOR, sizeof(Tile) * MAP_Y * MAP_Y);
+	if(map == NULL) {
+		ASSERT("alloc of map failed!!!");
+		}
+	i32 nRooms = 50;
+	//nRooms = 100;
+	//nRooms = 5;
+	Room *rooms = calloc(nRooms+200, sizeof(Room));
+	rooms[0] = create_room(35, 35, 7, 7);
+	add_room_to_map(map, rooms[0]);
+	da_append(room, rooms[0]);
+
+	//plot_fill_circle(rooms[0].center.x, rooms[0].center.y, 10, map, '.');
+	//add_room_wall_to_map(map, rooms[0]);
+	//SDL_bool isColided = SDL_FALSE;
+	i32 count = 0;
+	for(i32 i = 1; i < 10; i++) {
+
+		i32 y = (rand() % (MAP_Y - 13));
+		i32 x = (rand() % (MAP_X - 13));
+		i32 height = (rand() % 15) + 5;
+		i32 width  = (rand() % 15) + 5;
+
+		i32 r = rand()%7 + 5;
+		rooms[i] = create_room(x, y, width, height);
+
+		i32 chance = rand()%4;
+		//CIRCLE
+		if(chance == 0) {
+			plot_fill_circle(rooms[i].center.x, rooms[i].center.y, r, map, '.', SDL_TRUE);
+
+			//plot_circle(rooms[i].center.x, rooms[i].center.y, r, map, TILE_WALL);
+			//plot_circle(rooms[i].center.x, rooms[i].center.y, r+1, map, TILE_WALL);
+			}
+		//REC
+		if(chance == 1) {
+			add_room_to_map(map, rooms[i]);
+			add_room_wall_rectangle(map, rooms[i]);
+			}
+		//4 FILL
+		if(chance == 2) {
+			i32 move = rand()%5;
+			plot_fill_circle(rooms[i].center.x + move, rooms[i].center.y + move, 5, map, '.', SDL_TRUE);
+			plot_fill_circle(rooms[i].center.x - move, rooms[i].center.y + move, 5, map, '.', SDL_TRUE);
+			plot_fill_circle(rooms[i].center.x + move, rooms[i].center.y - move, 5, map, '.', SDL_TRUE);
+			plot_fill_circle(rooms[i].center.x - move, rooms[i].center.y - move, 5, map, '.', SDL_TRUE);
+			}
+		//CIRCLE
+		if(chance == 3) {
+			add_room_to_map(map, rooms[i]);
+			add_room_wall_circle(map, rooms[i]);
+			}
+		//ROAD
+		plot_line(rooms[i].center.x, rooms[i].center.y, rooms[i-1].center.x, rooms[i-1].center.y, map, ',', SDL_TRUE);
+		plot_line(rooms[i-1].center.x-1, rooms[i-1].center.y, rooms[i].center.x, rooms[i].center.y, map, ',', SDL_TRUE);
+		da_append(room, rooms[i]);
+		}
+
+	for(i32 y = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			if(y == 0 || x == 0 || y == MAP_Y-1 || x == MAP_X-1 ) {
+				MAP_CH(map, x, y) = TILE_WALL;
+				MAP_ISW(map, x, y) = SDL_FALSE;
+
+				}
+			}
+		}
+	//DOWN
+	SDL_bool isGenerateDown  = SDL_FALSE;
+	while(!isGenerateDown) {
+		i32 x = rand()%(MAP_X - 4) + 2;
+		i32 y = rand()%(MAP_X - 4) + 2;
+		CLAMP(x, 4, MAP_X - 4);
+		CLAMP(y, 4, MAP_Y - 4);
+		if(MAP_CH(map, x, y) == TILE_FLOOR) {
+			MAP_CH(map, x, y) = TILE_STAIRS;
+			isGenerateDown = SDL_TRUE;
+			break;
+			}
+		}
+
+	return map;
+
+	}
 
 
 
