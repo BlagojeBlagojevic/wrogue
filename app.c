@@ -666,7 +666,7 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					//DROP(textRect);
 					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
 					SDL_RenderDrawRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", YELLOW);
 					}
 
 				else {
@@ -703,6 +703,32 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
 					}
+				else if(ch == TILE_STAIRS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "<", WHITE);
+					}
+				else if(ch == TILE_BLIGHT) {
+					//SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
+					//SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", BLACK);
+					}
+				else if(ch == TILE_TREE) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ":", GREEN);
+					}
+				else if(ch == TILE_GRASS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", YELLOW);
+					}	
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
