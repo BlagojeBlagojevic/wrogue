@@ -6,6 +6,8 @@
 //TBD CURSED ITEMS
 typedef enum{
 	SWORD_ITEM,
+	PLAYER_SWORD_ITEM,
+	PLAYER_ARMOR_ITEM,
 	DART_ITEM,
 	ARMOR_ITEM,
 	HELMET_ITEM,
@@ -57,13 +59,15 @@ typedef enum{
 #define DAMAGE_NUMi 4 
 
 
-#define SWORD_CREATE()     5, "SWORD",  '{', WHITE,  SWORD_ITEM,    NORMAL, SDL_FALSE
-#define ARMOR_CREATE()     5, "ARMOR",  '[', WHITE,  ARMOR_ITEM,    NORMAL, SDL_FALSE 
-#define HELMET_CREATE()    5, "HELMET", '[', WHITE,  HELMET_ITEM,   NORMAL, SDL_FALSE
-#define SHIELD_CREATE()    5, "SHIELD", '[', WHITE,  SHIELD_ITEM,   NORMAL, SDL_FALSE
-#define SHOES_CREATE()     5, "SHOES",  '[', WHITE,  SHOES_ITEM,    NORMAL, SDL_FALSE
-#define HEALING_CREATE()	 5, "",       '!', WHITE,  HEALING_ITEM,  NORMAL, SDL_FALSE
-#define GOLD_CREATE()	     5, "",       'g', YELLOW, GOLD_ITEM,     NORMAL, SDL_FALSE
+#define SWORD_CREATE()            5, "SWORD",  '{', WHITE,  SWORD_ITEM,    NORMAL, SDL_FALSE
+#define PLAYER_SWORD_CREATE()     5, "SWORD",  '{', WHITE,  PLAYER_SWORD_ITEM,    NORMAL, SDL_FALSE
+#define PLAYER_ARMOR_CREATE()     5, "ARMOR",  '[', WHITE,  PLAYER_ARMOR_ITEM,    NORMAL, SDL_FALSE
+#define ARMOR_CREATE()            5, "ARMOR",  '[', WHITE,  ARMOR_ITEM,    NORMAL, SDL_FALSE 
+#define HELMET_CREATE()           5, "HELMET", '[', WHITE,  HELMET_ITEM,   NORMAL, SDL_FALSE
+#define SHIELD_CREATE()           5, "SHIELD", '[', WHITE,  SHIELD_ITEM,   NORMAL, SDL_FALSE
+#define SHOES_CREATE()            5, "SHOES",  '[', WHITE,  SHOES_ITEM,    NORMAL, SDL_FALSE
+#define HEALING_CREATE()	        5, "",       '!', WHITE,  HEALING_ITEM,  NORMAL, SDL_FALSE
+#define GOLD_CREATE()	            5, "",       'g', YELLOW, GOLD_ITEM,     NORMAL, SDL_FALSE
 //#define DART_CREATE()   5, "DART",   '|', BLUE
 //#define POTION_CREATE() 5, "POTION", '#', BLUE
 
