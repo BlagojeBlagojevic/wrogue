@@ -7,6 +7,8 @@
 #include<time.h>
 
 
+//TBD CAMERA
+
 Graphics_State    mainGraphics;
 static Tile*      map;
 static Entitiy_DA monster;
@@ -17,15 +19,17 @@ static Item_DA    items;
 void generate_level() {
 
 	Room_DA rooms = {0};
-	
+
 	LEVEL++;
-	map = init_map(&rooms);
+	//map = init_map(&rooms);
+	map = init_map_RA(&rooms);
 	if(rooms.count <= 2) {
 		Room room;
 		room.pos.x  = 0;
 		room.pos.y  = 0;
 		room.width  = 20;
-		room.height = 38;
+		room.height = 20;
+		exit(-1);
 		for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
 			room.pos.y=y;
 			for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
@@ -83,7 +87,7 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
-	player = create_entity('@', "Some Name", 5, 10, (Position) {
+	player = create_entity('@', "Some Name", 5, 20, (Position) {
 		40, 40
 		}, WHITE);
 
@@ -98,11 +102,10 @@ int main() {
 	player->stamina    = 10;
 	player->maxStamina = 10;
 	player->chanceToDecressStaminaMove = 0.1f;
-	Item* sword = create_item(0, 0, SWORD_CREATE());
-	sword->attack[DAMAGE_BASIC] = 2;
+	Item* sword = create_item(0, 0, PLAYER_SWORD_CREATE());
 	sword->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*sword));
-	Item* armor = create_item(0, 0, ARMOR_CREATE());
+	Item* armor = create_item(0, 0, PLAYER_ARMOR_CREATE());
 	armor->defence[DAMAGE_BASIC] = 1;
 	armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
@@ -125,9 +128,9 @@ int main() {
 	monster_definitions_export();
 	export_generators();
 	//Entitiy_DA monsters = {0};
-	
+
 	LEVEL = 0;
-	DEPTH = rand()%7 + 1;
+	DEPTH = 25;
 	generate_level();
 	//MAP_STDOUT();
 	while(!QUIT) {
@@ -142,17 +145,17 @@ int main() {
 			player->attack[3]  += 1;
 			player->defence[3] += 1;
 			player->maxHealth +=10;
-			player->health = player->maxHealth;
+			//player->health = player->maxHealth;
 			//LEVEL +=1;
 			generate_level();
 			DEPTH--;
-			if(DEPTH == -1){
+			if(DEPTH == -1) {
 				LOG("You win\n");
 				system("cls");
 				exit(-1);
-			}
+				}
 			//INCREMENT PLAYER
-			
+
 			}
 		if(EQUITEM == SDL_FALSE) {
 			main_renderer(player,  &monster, &items, map);
@@ -160,6 +163,15 @@ int main() {
 			}
 		main_renderer(player,  &monster, &items, map);
 		event_user(player, &monster, &items, map);
+		if(player->health <= 0) {;
+			da_append(&MESSAGES, "You loose");
+			exit(-1);
+			player->health = 10;
+			player->maxHealth = 10;
+			LEVEL = 0;
+			DEPTH = rand()%7 + 1;
+			generate_level();
+			}
 		if(EQUITEM == SDL_TRUE) {
 			main_renderer(player,  &monster, &items, map);
 			LOG("Items:\n");
