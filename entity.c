@@ -376,12 +376,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 
 	//system("pause");
 	//Text_Renderer_C(RENDERER, FONT, )
-	if(player->health <= 0) {
 
-		//(void)system("cls");
-		LOG("You loose");
-		exit(-1);
-		}
 	}
 /*
 
@@ -600,7 +595,7 @@ void monster_definitions_export() {
 	monsters[ACOLAYT_MONSTER].maxHealth = 5;
 
 	monsters[ACOLAYT_MONSTER].isRunning = SDL_FALSE;
-	monsters[ACOLAYT_MONSTER].runWoundedPercent = 0.6f;
+	monsters[ACOLAYT_MONSTER].runWoundedPercent = 0.1f;
 	monsters[ACOLAYT_MONSTER].state = STATE_WANDERING;
 
 	monsters[ACOLAYT_MONSTER].stateChance[STATE_RUNING] = 0.05f;
@@ -1777,15 +1772,15 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 	DROP(player);
 	for(u64 i = 0; i < entitys->count; i++) {
 		Entitiy entity = entitys->items[i];
-	
+
 		//IF HEALTH IS A LOW RUNING MONSTER
 		//ELSE GO BESERK
 		if(Is_Monster(entity.ch)) {
 			entity.spell.passedTurns++;
-			if(rand_f64() < entity.chanceToDecressStaminaMove){
+			if(rand_f64() < entity.chanceToDecressStaminaMove) {
 				entity.stamina--;
 				CLAMP(entity.stamina, 0, entity.maxStamina);
-			}
+				}
 			if(entity.health == 0) {
 				if(rand_f64() < entity.stateChance[STATE_RESURECT]) {
 					i32 health = rand()%2 + 1;
@@ -1818,9 +1813,9 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 					entity.state = STATE_BESERK;
 					}
 				}
-			else if(entity.stamina <= 0){
+			else if(entity.stamina <= 0) {
 				entity.state = STATE_RESTING;
-			}	
+				}
 			//else if(player->health <= 3 || rand_f64() < ((player->maxHealth - player->health) / 100)) {
 			else if(player->health <= 0.3*player->maxHealth) {
 				entity.state = STATE_HUNTING;
@@ -1855,7 +1850,9 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			else if(entity.state == STATE_HUNTING && rand_f64() < entity.stateChance[STATE_RESTING]) {
 					{
 					entity.state  = STATE_RESTING;
-					da_append(&MESSAGES, "You stop hearing noices");
+					if(rand_f64() < 0.10f) {
+						da_append(&MESSAGES, "You stop hearing noices");
+						}
 					}
 				}
 
@@ -1901,7 +1898,7 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			entity.spell.passedTurns++;
 			if(entity.state == STATE_RESTING) {
 				//NOTHING
-					entity.stamina++;
+				entity.stamina++;
 				}
 			else if(entity.state == STATE_WANDERING) {
 				MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_TRUE;
