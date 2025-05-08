@@ -45,6 +45,16 @@ typedef struct {
 	} Room_DA;
 
 
+typedef struct BSPNode {
+    SDL_Rect area;          // Area represented by this node
+    struct BSPNode *front;   // Front child
+    struct BSPNode *back;    // Back child
+    Room room;               // Room data if leaf node
+    Position connection;     // Connection point for corridors
+} BSPNode;
+
+
+
 #define MAP(map, x, y)      	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
 #define MAP_CH(map, x, y)   	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
 #define MAP_ISW(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
@@ -76,6 +86,7 @@ void caved_part_generator(Tile_Type type, Tile *map, i32 maxDistanceD);
 SDL_bool is_trap(Tile* map, i32 x, i32 y);
 
 Tile* init_map(Room_DA* rooms);
+Tile* init_map_RA(Room_DA* rooms);
 
 
 
