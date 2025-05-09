@@ -535,6 +535,13 @@ void render_map_fov_vision(Entitiy *player, Tile *map) {
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
 					}
+				else if(ch == TILE_POISION) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", GREEN);
+					}
 				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
@@ -668,6 +675,20 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", YELLOW);
 					}
+				else if(ch == TILE_POISION) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", GREEN);
+					}
+				else if(ch == TILE_GARG_STAT) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "S", GREEN);
+					}
 
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
@@ -728,7 +749,7 @@ void render_map_fov(Entitiy *player, Tile *map) {
 					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
 					SDL_RenderDrawRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", YELLOW);
-					}	
+					}
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = FONT_W, .h = FONT_H};
 					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
@@ -922,7 +943,8 @@ void render_map(Tile *map, Entitiy *player) {
 						}
 					else if(EVENT.type == SDL_KEYDOWN) {
 						player_input(&EVENT, player, entitis, items, map);
-
+						//
+						player_negative_effect(player, map);
 						SDL_Delay(1);
 						}
 					}
