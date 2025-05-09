@@ -238,6 +238,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_MONSTER_HAVE_ITEM 0.05f
 #define CHANCE_CRITICAL_PLAYER 0.05f
 #define CHANCE_PLAYER_LEVEL  0.05f
+#define CHANCE_DISIPATE_POISON 0.1f
 
 
 //BSP STUFF

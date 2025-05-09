@@ -615,6 +615,44 @@ void monster_definitions_export() {
 	monsters[ACOLAYT_MONSTER].maxStamina = 8;
 	monsters[ACOLAYT_MONSTER].stamina    = 8;
 	monsters[ACOLAYT_MONSTER].chanceToDecressStaminaMove = 0.1;
+
+	//ZOMBIE
+	monsters[ZOMBIE_MONSTER].radius = 14;
+	monsters[ZOMBIE_MONSTER].ch = 'Z';
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_BASIC]  = 1;
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[ZOMBIE_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[GHOUL_MONSTER].attack[DAMAGE_SPELL]   = 0;
+	//DEF  unarmord
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_BASIC]  = 1;
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_POISON] = 1;
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_RANGE]  = 1;
+	monsters[ZOMBIE_MONSTER].defence[DAMAGE_SPELL]  = 1;
+	monsters[ZOMBIE_MONSTER].health = 4;
+	monsters[ZOMBIE_MONSTER].maxHealth = 4;
+
+	monsters[ZOMBIE_MONSTER].isRunning = SDL_FALSE;
+	monsters[ZOMBIE_MONSTER].runWoundedPercent = 0.6f;
+	monsters[ZOMBIE_MONSTER].state = STATE_HUNTING;
+
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_HUNTING] = 0.7f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_WANDERING] = 0.03f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_RESTING] = 0.01f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_BESERK] = 0.2f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[ZOMBIE_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+
+	monsters[ZOMBIE_MONSTER].maxStamina = 8;
+	monsters[ZOMBIE_MONSTER].stamina    = 8;
+	monsters[ZOMBIE_MONSTER].chanceToDecressStaminaMove = 0.2;
+
+	monsters[ZOMBIE_MONSTER].lifeStealChance = 0.01f;
+	monsters[ZOMBIE_MONSTER].lifeStealValue  = 1.0f;
+	monsters[ZOMBIE_MONSTER].color = UNDE_COL;
+
+
 	//GHOUL
 	monsters[GHOUL_MONSTER].radius = 14;
 	monsters[GHOUL_MONSTER].ch = 'G';
@@ -650,6 +688,85 @@ void monster_definitions_export() {
 	monsters[GHOUL_MONSTER].lifeStealChance = 0.1f;
 	monsters[GHOUL_MONSTER].lifeStealValue  = 1.0f;
 	monsters[GHOUL_MONSTER].color = UNDE_COL;
+
+//WAGON
+	monsters[WAGON_MONSTER].radius = 14;
+	monsters[WAGON_MONSTER].ch = 'W';
+	monsters[WAGON_MONSTER].attack[DAMAGE_BASIC]  = 0;
+	monsters[WAGON_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[WAGON_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[WAGON_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  unarmord
+	monsters[WAGON_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[WAGON_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[WAGON_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[WAGON_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[WAGON_MONSTER].health = 10;
+	monsters[WAGON_MONSTER].maxHealth = 10;
+
+	monsters[WAGON_MONSTER].isRunning = SDL_FALSE;
+	monsters[WAGON_MONSTER].runWoundedPercent = 0.6f;
+	monsters[WAGON_MONSTER].state = STATE_HUNTING;
+
+	monsters[WAGON_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[WAGON_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[WAGON_MONSTER].stateChance[STATE_HUNTING] = 0.01f;
+	monsters[WAGON_MONSTER].stateChance[STATE_WANDERING] = 0.03f;
+	monsters[WAGON_MONSTER].stateChance[STATE_RESTING] = 0.01f;
+	monsters[WAGON_MONSTER].stateChance[STATE_BESERK] = 0.2f;
+	monsters[WAGON_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[WAGON_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+	monsters[WAGON_MONSTER].stateChance[STATE_SPELL] = 0.8f;
+	monsters[WAGON_MONSTER].maxStamina = 8;
+	monsters[WAGON_MONSTER].stamina    = 8;
+	monsters[WAGON_MONSTER].chanceToDecressStaminaMove = 0.3;
+
+	monsters[WAGON_MONSTER].lifeStealChance = 0.01f;
+	monsters[WAGON_MONSTER].lifeStealValue  = 1.0f;
+	monsters[WAGON_MONSTER].color = UNDE_COL;
+
+	SPELL_WAGON_EXPORT(monsters[WAGON_MONSTER]);
+
+//ABOMINATION
+	monsters[ABOMINATION_MONSTER].radius = 14;
+	monsters[ABOMINATION_MONSTER].ch = 'I';
+	monsters[ABOMINATION_MONSTER].attack[DAMAGE_BASIC]  = 0;
+	monsters[ABOMINATION_MONSTER].attack[DAMAGE_POISON] = 2;
+	monsters[ABOMINATION_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[ABOMINATION_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  unarmord
+	monsters[ABOMINATION_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[ABOMINATION_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[ABOMINATION_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[ABOMINATION_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[ABOMINATION_MONSTER].health = 10;
+	monsters[ABOMINATION_MONSTER].maxHealth = 10;
+
+	monsters[ABOMINATION_MONSTER].isRunning = SDL_FALSE;
+	monsters[ABOMINATION_MONSTER].runWoundedPercent = 0.6f;
+	monsters[ABOMINATION_MONSTER].state = STATE_HUNTING;
+
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_RUNING] = 0.01f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.01f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_HUNTING] = 0.7f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_WANDERING] = 0.03f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_RESTING] = 0.01f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_BESERK] = 0.2f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[ABOMINATION_MONSTER].stateChance[STATE_SUMMON] = 0.0f;
+
+	monsters[ABOMINATION_MONSTER].maxStamina = 8;
+	monsters[ABOMINATION_MONSTER].stamina    = 8;
+	monsters[ABOMINATION_MONSTER].chanceToDecressStaminaMove = 0.3;
+
+	monsters[ABOMINATION_MONSTER].lifeStealChance = 0.01f;
+	monsters[ABOMINATION_MONSTER].lifeStealValue  = 1.0f;
+	monsters[ABOMINATION_MONSTER].color = UNDE_COL;
+
+	SPELL_ABOMINATION_EXPORT(monsters[ABOMINATION_MONSTER]);
+
+
+
 
 	//NECROMANCER_MONSTER
 	monsters[NECROMANCER_MONSTER].radius = 10;
@@ -772,6 +889,91 @@ void monster_definitions_export() {
 
 	monsters[SPIDER_MONSTER].color = UNDE_COL;
 	SPELL_SPIDER_EXPORT(monsters[SPIDER_MONSTER]);
+
+//GARGOYLE_MONSTER
+	monsters[GARGOYLE_MONSTER].radius = 10;
+	monsters[GARGOYLE_MONSTER].ch = 'Y';
+	monsters[GARGOYLE_MONSTER].attack[DAMAGE_BASIC]  = 2;
+	monsters[GARGOYLE_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[GARGOYLE_MONSTER].attack[DAMAGE_RANGE]  = 3;
+	monsters[GARGOYLE_MONSTER].attack[DAMAGE_SPELL]  = 0;
+	//DEF  light
+	monsters[GARGOYLE_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[GARGOYLE_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[GARGOYLE_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[GARGOYLE_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[GARGOYLE_MONSTER].health = 8;
+	monsters[GARGOYLE_MONSTER].maxHealth = 8;
+
+	monsters[GARGOYLE_MONSTER].isRunning = SDL_FALSE;
+	monsters[GARGOYLE_MONSTER].runWoundedPercent = 0.9f;
+	monsters[GARGOYLE_MONSTER].state = STATE_WANDERING;
+
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_RUNING] = 0.05f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[GARGOYLE_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
+
+	monsters[GARGOYLE_MONSTER].maxStamina = 8;
+	monsters[GARGOYLE_MONSTER].stamina    = 8;
+	monsters[GARGOYLE_MONSTER].chanceToDecressStaminaMove = 0.1;
+
+	SPELL_GARGOYLE_EXPORT(monsters[GARGOYLE_MONSTER]);
+
+
+
+	monsters[GARGOYLE_MONSTER].lifeStealChance = 0.01f;
+	monsters[GARGOYLE_MONSTER].lifeStealValue  = 1.0f;
+
+	monsters[GARGOYLE_MONSTER].color = UNDE_COL;
+
+//GARGOYLE_MONSTER
+	monsters[DESTROYER_MONSTER].radius = 10;
+	monsters[DESTROYER_MONSTER].ch = 'E';
+	monsters[DESTROYER_MONSTER].attack[DAMAGE_BASIC]  = 2;
+	monsters[DESTROYER_MONSTER].attack[DAMAGE_POISON] = 0;
+	monsters[DESTROYER_MONSTER].attack[DAMAGE_RANGE]  = 0;
+	monsters[DESTROYER_MONSTER].attack[DAMAGE_SPELL]  = 3;
+	//DEF  light
+	monsters[DESTROYER_MONSTER].defence[DAMAGE_BASIC]  = 2;
+	monsters[DESTROYER_MONSTER].defence[DAMAGE_POISON] = 2;
+	monsters[DESTROYER_MONSTER].defence[DAMAGE_RANGE]  = 2;
+	monsters[DESTROYER_MONSTER].defence[DAMAGE_SPELL]  = 2;
+	monsters[DESTROYER_MONSTER].health = 8;
+	monsters[DESTROYER_MONSTER].maxHealth = 8;
+
+	monsters[DESTROYER_MONSTER].isRunning = SDL_FALSE;
+	monsters[DESTROYER_MONSTER].runWoundedPercent = 0.9f;
+	monsters[DESTROYER_MONSTER].state = STATE_WANDERING;
+
+	monsters[DESTROYER_MONSTER].stateChance[STATE_RUNING] = 0.05f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_MOVING_AWAY_RANGE] = 0.05f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_HUNTING] = 0.9f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_WANDERING] = 0.4f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_RESTING] = 0.2f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_BESERK] = 0.01f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_RESURECT] = 0.00f;
+	monsters[DESTROYER_MONSTER].stateChance[STATE_SUMMON] = 0.00f;
+
+	monsters[DESTROYER_MONSTER].maxStamina = 8;
+	monsters[DESTROYER_MONSTER].stamina    = 8;
+	monsters[DESTROYER_MONSTER].chanceToDecressStaminaMove = 0.1;
+
+	//SPELL_GARGOYLE_EXPORT(monsters[GARGOYLE_MONSTER]);
+	monsters[DESTROYER_MONSTER].stateChance[STATE_SPELL] = 0.9f;
+	SPELL_DESTROYER_EXPORT(monsters[DESTROYER_MONSTER]);
+	monsters[DESTROYER_MONSTER].lifeStealChance = 0.01f;
+	monsters[DESTROYER_MONSTER].lifeStealValue  = 1.0f;
+
+	monsters[DESTROYER_MONSTER].color = UNDE_COL;
+
+
+
+
 
 
 	//DRAGON_MONSTER
@@ -1055,7 +1257,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 			if(MAP_CH(map, x, y) != TILE_BLOCKED) {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%(NUM_MONSTER - 1) + 1;
-					type = WITCH_MONSTER;
+					type = WAGON_MONSTER;
 					i32 vison = rand()%40+1;
 					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
@@ -1653,6 +1855,21 @@ void make_move_diakstra(Entitiy* player, Entitiy*  ent, Tile *map) {
 					break;
 					}
 				}
+		case 'Y': {
+				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, trueDistance);
+					break;
+					}
+				}
+
+		case 'E': {
+				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, trueDistance);
+					break;
+					}
+				}
 
 		case 'D': {
 				if(trueDistance >= DISTANCE_RANGE_ATTACK_MIN && trueDistance <= DISTANCE_RANGE_ATTACK_MAX ) {
@@ -2007,15 +2224,42 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 							CLAMP(tileY, 1, MAP_Y - 1);
 							if(MAP_ISW(map, tileX, tileY) == SDL_TRUE) {
 								MAP_CH(map, tileX, tileY) = TILE_STUN_TRAP;
+
 								//LOG("SetTrap\n");
 								}
-
+							break;
+							}
+					case SPELL_DAMAGE: {
+							entity.spell.passedTurns = 0;
+							da_append(&MESSAGES, "You are hit by a spell");
+							i32 damage = player->health * ((rand()%entity.spell.value) / (f64)100);
+							CLAMP(damage, (0.2f * player->maxHealth), player->maxHealth);
+							player->health-=damage;
+							CLAMP(player->health, 0, player->maxHealth);
+							break;
+							}
+					case SPELL_SUMMON: {
+							for(i32 i = 0; i < 4; i++) {
+								Monster_Types type = entity.spell.value;
+								Entitiy* summon = create_entity(monsterChar[type], monsterName[type], 30, 3, (Position) {
+									.x = entity.pos.x, .y = entity.pos.y
+									}, WHITE);
+								summon->health = 2;
+								summon->spell.passedTurns = 0;
+								summon->spell.cooldown = 255;
+								summon->stateChance[STATE_SUMMON] = 0.00f;
+								summon->stateChance[STATE_SPELL] = 0.00f;
+								summon->state = STATE_HUNTING;
+								make_run_move(player, &entity, map);
+								entity.state = STATE_RUNING;
+								entity.spell.cooldown *=4;
+								da_append(entitys, *summon);
+								}
 
 							break;
 							}
-
 					default:
-						ASSERT("Unrechable\n");
+						ASSERT("Spell not defiend\n");
 						break;
 					}
 				}
@@ -2036,7 +2280,41 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 			MAP_ISW(map, entity.pos.x, entity.pos.y) = SDL_FALSE;
 		}  */
 
-		entitys->items[count] = entity;
+		//UPDATEING TILES DEPENDING ON A MONSTER
+		if(entity.spell.type > SPELL_NUM_ACTIVES && entity.spell.type < SPELL_NUM_PASSIVE) {
+			switch(entity.spell.type) {
+				case SPELL_PASSIVE_POISON: {
+						i32 x  = rand()%2 - 1 + entity.pos.x;
+						i32 y  = rand()%2 - 1 + entity.pos.y;
+						CLAMP(x, 2, MAP_X - 2);
+						CLAMP(y, 2, MAP_Y - 2);
+						MAP_CH(map, x, y)  = TILE_POISION;
+						//LOG("Poison");
+						break;
+						}
+				case SPELL_PASSIVE_STATUE: {
+						if(entity.health < entity.maxHealth / 2) {
+							MAP_CH(map, entity.pos.x, entity.pos.y) = TILE_GARG_STAT;
+							MAP_COUNTER(map, entity.pos.x, entity.pos.y)  = 20;
+							entity.isAlive = SDL_FALSE;
+							//free(entity.name);
+							free_entity(&entity);
+							da_remove_unordered(entitys, count);
+
+							}
+						break;
+						}
+				default: {
+						ASSERT("Spell is not passive");
+						break;
+						}
+				}
+			}
+
+		if(entity.isAlive) {
+			entitys->items[count] = entity;
+			}
+
 		//LOG("Colided entitys %d\n", co);
 		}
 	}
@@ -2112,7 +2390,6 @@ void update_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map, Item_DA *ite
 		picking_item_from_list(player, items);
 		PICKITEM = SDL_FALSE;
 		}
-	calculate_diakstra_map(player, map, entitys, player->pos.x, player->pos.y);
 	}
 
 
@@ -2275,7 +2552,7 @@ void export_generators() {
 	generators[GENERATOR_GRAVEYARD].chanceToSpawn[BANSHIE_MONSTER] = 0.1f;
 	generators[GENERATOR_GRAVEYARD].levelDungon = 1;
 	generators[GENERATOR_GRAVEYARD].monsterNumber = 0;
-	generators[GENERATOR_GRAVEYARD].maxDistanceDikstra = 20;
+	generators[GENERATOR_GRAVEYARD].maxDistanceDikstra = 3;
 	generators[GENERATOR_GRAVEYARD].typeOfTile = TILE_BLIGHT;
 
 	generators[GENERATOR_CAVE].type = GENERATOR_CAVE;
@@ -2286,8 +2563,18 @@ void export_generators() {
 	generators[GENERATOR_CAVE].chanceToSpawn[WITCH_MONSTER] = 0.01f;
 	generators[GENERATOR_CAVE].levelDungon = 1;
 	generators[GENERATOR_CAVE].monsterNumber = 1;
-	generators[GENERATOR_CAVE].maxDistanceDikstra = 10;
+	generators[GENERATOR_CAVE].maxDistanceDikstra = 3;
 	generators[GENERATOR_CAVE].typeOfTile = TILE_RUINS;
+	
+	//INFECTION
+	generators[GENERATOR_INFECTION].type = GENERATOR_INFECTION;
+	memset(generators[GENERATOR_INFECTION].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_INFECTION].chanceToSpawn[WAGON_MONSTER] = 0.9f;
+	generators[GENERATOR_INFECTION].chanceToSpawn[ABOMINATION_MONSTER] = 0.01f;
+	generators[GENERATOR_INFECTION].levelDungon = 1;
+	generators[GENERATOR_INFECTION].monsterNumber = 0;
+	generators[GENERATOR_INFECTION].maxDistanceDikstra = 3;
+	generators[GENERATOR_INFECTION].typeOfTile = TILE_POISION;
 
 	//ORC
 	generators[GENERATOR_ORC].type = GENERATOR_ORC;
@@ -2299,8 +2586,18 @@ void export_generators() {
 	generators[GENERATOR_ORC].chanceToSpawn[BERSERKER_MONSTER] = 0.9f;
 	generators[GENERATOR_ORC].levelDungon = 2;
 	generators[GENERATOR_ORC].monsterNumber = 1;
-	generators[GENERATOR_ORC].maxDistanceDikstra = 20;
+	generators[GENERATOR_ORC].maxDistanceDikstra = 5;
 	generators[GENERATOR_ORC].typeOfTile = TILE_GRASS;
+
+	//ABOMINATION
+	generators[GENERATOR_ABOMINATION].type = GENERATOR_INFECTION;
+	memset(generators[GENERATOR_ABOMINATION].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_ABOMINATION].chanceToSpawn[WAGON_MONSTER] = 0.1f;
+	generators[GENERATOR_ABOMINATION].chanceToSpawn[ABOMINATION_MONSTER] = 0.9f;
+	generators[GENERATOR_ABOMINATION].levelDungon = 2;
+	generators[GENERATOR_ABOMINATION].monsterNumber = 0;
+	generators[GENERATOR_ABOMINATION].maxDistanceDikstra = 5;
+	generators[GENERATOR_ABOMINATION].typeOfTile = TILE_POISION;
 
 	//FIEND
 	generators[GENERATOR_FIEND].type = GENERATOR_FIEND;
@@ -2310,7 +2607,7 @@ void export_generators() {
 	generators[GENERATOR_FIEND].chanceToSpawn[GHOUL_MONSTER] = 0.1f;
 	generators[GENERATOR_FIEND].levelDungon = 2;
 	generators[GENERATOR_FIEND].monsterNumber = 1;
-	generators[GENERATOR_FIEND].maxDistanceDikstra = 20;
+	generators[GENERATOR_FIEND].maxDistanceDikstra = 3;
 	generators[GENERATOR_FIEND].typeOfTile = TILE_BLIGHT;
 
 	//NECRO
@@ -2321,7 +2618,7 @@ void export_generators() {
 	generators[GENERATOR_NECRO].chanceToSpawn[GHOUL_MONSTER] = 0.9f;
 	generators[GENERATOR_NECRO].levelDungon = 2;
 	generators[GENERATOR_NECRO].monsterNumber = 1;
-	generators[GENERATOR_NECRO].maxDistanceDikstra = 20;
+	generators[GENERATOR_NECRO].maxDistanceDikstra = 3;
 	generators[GENERATOR_NECRO].typeOfTile = TILE_BLIGHT;
 
 	//NECRO
@@ -2330,7 +2627,7 @@ void export_generators() {
 	generators[GENERATOR_DRAGON].chanceToSpawn[DRAGON_MONSTER] = 1.0f;
 	generators[GENERATOR_DRAGON].levelDungon = 40;
 	generators[GENERATOR_DRAGON].monsterNumber = 0;
-	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
+	generators[GENERATOR_DRAGON].maxDistanceDikstra = 3;
 	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
 
 
@@ -2518,5 +2815,42 @@ void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters) 
 				}
 		}
 
+	DROP(monsters);
+	}
+
+void player_negative_effect(Entitiy* player, Tile *map) {
+	if(MAP_CH(map, player->pos.x, player->pos.y) == TILE_POISION) {
+		player->health--;
+		CLAMP(player->health, 0, player->maxHealth);
+		}
+	}
+
+//USED FOR LINGERING EFECTS MAYBE BE BETHER SOME OTHER ALGO
+void lingering_map_tile(Tile* map, Entitiy *player, Entitiy_DA *monsters) {
+
+	for(i32 y = 1; y < MAP_Y - 1; y++) {
+		for(i32 x = 1; x < MAP_X - 1; x++) {
+			if(MAP_CH(map, x, y) == TILE_POISION && rand_f64() < CHANCE_DISIPATE_POISON) {
+				MAP_CH(map, x, y) = TILE_FLOOR;
+				}
+			if(MAP_CH(map, x, y) == TILE_GARG_STAT) {
+				if(MAP_COUNTER(map, x, y) == 0) {
+					Monster_Types type = GARGOYLE_MONSTER;
+					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], 3, 3, (Position) {
+						.x = x, .y = y
+						}, WHITE);
+					temp->health = 4;
+					temp->spell.type = SPELL_NUM_PASSIVE;
+					da_append(monsters, (*temp));
+					LOG("Garg");
+					MAP_CH(map, x, y) = TILE_FLOOR;
+					}
+				else {
+					MAP_COUNTER(map, x, y)--;
+					}
+				}
+			}
+		}
+	DROP(player);
 	DROP(monsters);
 	}

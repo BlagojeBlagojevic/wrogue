@@ -29,7 +29,7 @@ void generate_level() {
 		room.pos.y  = 0;
 		room.width  = 20;
 		room.height = 20;
-		exit(-1);
+		//exit(-1);
 		for(i32 y = 0; y < MAP_Y - room.height; y+=room.height) {
 			room.pos.y=y;
 			for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
@@ -43,11 +43,11 @@ void generate_level() {
 			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i]);
 			}
 		}
-
-	calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
-	caved_part_generator(TILE_TREE, map, 5);
-	calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
-	caved_part_generator(TILE_GRASS, map, 100);
+	//genereate_monsters(&monster, map);
+	//calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
+	//caved_part_generator(TILE_TREE, map, 5);
+	//calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
+	//caved_part_generator(TILE_GRASS, map, 100);
 	MOVMENT = 0;
 	COUNTMOVES = 0;
 	player->pos.x = rooms.items[0].center.x;
@@ -163,6 +163,7 @@ int main() {
 			}
 		main_renderer(player,  &monster, &items, map);
 		event_user(player, &monster, &items, map);
+		lingering_map_tile(map, player, &monster);
 		if(player->health <= 0) {;
 			da_append(&MESSAGES, "You loose");
 			exit(-1);
