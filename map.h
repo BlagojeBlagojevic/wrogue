@@ -14,9 +14,13 @@ typedef enum {
 	TILE_BLIGHT     = ':',
 	TILE_TREE       = ';',
 	TILE_GRASS      = 'G',
+	TILE_POISION    = 'P',
+	TILE_GARG_STAT  = 'S',
+	
 	TILE_STUN_TRAP  = 'T',
 	TILE_RUINS_TRAP = 'R', 
 	TILE_NON,
+	
 	TILE_NUM
 	} Tile_Type;
 
@@ -28,6 +32,7 @@ typedef struct {
 	u8   isW;
 	u8   isV;
 	u8   visited;
+	u8   counter;
 	f64  distance;
 	} Tile;
 
@@ -55,12 +60,13 @@ typedef struct BSPNode {
 
 
 
-#define MAP(map, x, y)      	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
-#define MAP_CH(map, x, y)   	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
-#define MAP_ISW(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
-#define MAP_ISV(map, x, y)  	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isV
+#define MAP(map, x, y)      	  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X]
+#define MAP_CH(map, x, y)   	  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].ch
+#define MAP_ISW(map, x, y)  	  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isW
+#define MAP_ISV(map, x, y)  	  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].isV
 #define MAP_VISITED(map, x, y)  map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].visited
 #define MAP_DIJKSTRA(map, x, y) map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].distance
+#define MAP_COUNTER(map, y, x)	map[((x) % (MAP_X - 1)) + ((y) % (MAP_Y - 1)) * MAP_X].counter
 
 #define CLEAR_VISON_FIELD(map){for(u64 i = 0; i < MAP_X * MAP_Y; i++){map[i].isV = SDL_FALSE;}};
 
