@@ -1,3 +1,4 @@
+
 #include "map.h"
 SDL_bool checkCollision(i32 x1, i32 y1, i32 w1, i32 h1, i32 x2, i32 y2, i32 w2, i32 h2) {
 	SDL_Rect A = {.h = h1, .w = w1, .x = x1, .y = y1 };
@@ -913,7 +914,7 @@ Tile* init_map_RA(Room_DA* room) {
 	if(map == NULL) {
 		ASSERT("alloc of map failed!!!");
 		}
-	i32 nRooms = 50;
+	i32 nRooms = 10;
 	//nRooms = 100;
 	//nRooms = 5;
 	Room *rooms = calloc(nRooms+200, sizeof(Room));
@@ -925,7 +926,17 @@ Tile* init_map_RA(Room_DA* room) {
 	//add_room_wall_to_map(map, rooms[0]);
 	//SDL_bool isColided = SDL_FALSE;
 	i32 count = 0;
-	for(i32 i = 1; i < 10; i++) {
+	u8 isDrunc = rand()%2;
+	if(isDrunc) {
+		u8 howStart = rand()%3 + 1;
+		Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
+		add_room_drunkard_walk(map, allMap, 20000);
+		da_append(room, allMap);
+
+		}
+
+
+	for(i32 i = 1; i < nRooms && !isDrunc; i++) {
 
 		i32 y = (rand() % (MAP_Y - 13));
 		i32 x = (rand() % (MAP_X - 13));
@@ -935,7 +946,7 @@ Tile* init_map_RA(Room_DA* room) {
 		i32 r = rand()%7 + 5;
 		rooms[i] = create_room(x, y, width, height);
 
-		i32 chance = rand()%4;
+		i32 chance = rand()%3;
 		//CIRCLE
 		if(chance == 0) {
 			plot_fill_circle(rooms[i].center.x, rooms[i].center.y, r, map, '.', SDL_TRUE);
@@ -962,10 +973,31 @@ Tile* init_map_RA(Room_DA* room) {
 			add_room_wall_circle(map, rooms[i]);
 			}
 		//ROAD
-		plot_line(rooms[i].center.x, rooms[i].center.y, rooms[i-1].center.x, rooms[i-1].center.y, map, ',', SDL_TRUE);
-		plot_line(rooms[i-1].center.x-1, rooms[i-1].center.y, rooms[i].center.x, rooms[i].center.y, map, ',', SDL_TRUE);
+		//plot_line(rooms[i].center.x, rooms[i].center.y, rooms[i-1].center.x, rooms[i-1].center.y, map, ',', SDL_TRUE);
+		//plot_line(rooms[i-1].center.x-1, rooms[i-1].center.y, rooms[i].center.x, rooms[i].center.y, map, ',', SDL_TRUE);
 		da_append(room, rooms[i]);
 		}
+
+	for(i32 i = 0; i < nRooms; i++) {
+		i32 minDistance = INF;
+		i32 minIndex = i;
+		for(i32 j = i + 1; j < nRooms-1; j++) {
+			i32 distance = DISTANCE(rooms[j].center.x, rooms[j].center.y, rooms[i].center.x, rooms[i].center.y);
+			if(distance < minDistance) {
+				minDistance = distance;
+				minIndex = j;
+				}
+			}
+		if(rand()%2) {
+			plot_line(rooms[i].center.x, rooms[i].center.y, rooms[minIndex].center.x, rooms[minIndex].center.y, map, ',', SDL_TRUE);
+			plot_line(rooms[minIndex].center.x, rooms[minIndex].center.y, rooms[i].center.x, rooms[i].center.y, map, ',', SDL_TRUE);
+			}
+		else {
+			connect_room_centers(rooms[i].center, rooms[minIndex].center, map, SDL_FALSE);
+			}
+
+		}
+	connect_room_centers(rooms[0].center, rooms[nRooms - 1].center, map, SDL_FALSE);
 
 	for(i32 y = 0; y < MAP_Y; y++) {
 		for(i32 x = 0; x < MAP_X; x++) {
@@ -989,7 +1021,7 @@ Tile* init_map_RA(Room_DA* room) {
 			break;
 			}
 		}
-
+	LOG("Ma");
 	return map;
 
 	}
