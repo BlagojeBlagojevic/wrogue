@@ -13,10 +13,15 @@ typedef enum {
 	BASIC_MONSTER,
 	//UNDEAD
 	ACOLAYT_MONSTER,
+	ZOMBIE_MONSTER,
 	GHOUL_MONSTER,
+	ABOMINATION_MONSTER,
+	WAGON_MONSTER,
 	NECROMANCER_MONSTER,
 	BANSHIE_MONSTER,
 	SPIDER_MONSTER,
+	GARGOYLE_MONSTER,
+	DESTROYER_MONSTER,
 	DRAGON_MONSTER,
 
 	//ORCS
@@ -43,15 +48,20 @@ typedef struct {
 
 
 
-static const char* monsterChar = "MAGNBFDOVAWRK   ";
+static const char* monsterChar = "MaZGIwNBFYEDOVAWRK   ";
 
 static const char* monsterName[] = {
 	"Monster",
 	"Acolayt",
+	"Zombie",
 	"Ghoul",
+	"Abomination",
+	"Wagon",
 	"Necromancer",
 	"Banshie",
 	"Spider",
+	"Gargoyle",
+	"Destroyer",
 	"Dragon",
 	"Grunt",
 	"Berserker",
@@ -89,7 +99,16 @@ typedef enum {
 	SPELL_STUN,
 	SPELL_DOUBLE_MOVE,
 	SPELL_KABUM,
+	SPELL_DAMAGE,
+	SPELL_SUMMON,
 	SPELL_STATIS_TRAP,
+	SPELL_NUM_ACTIVES,
+	//PASIVES
+	SPELL_PASSIVE_POISON,
+	SPELL_PASSIVE_STATUE,
+	
+	SPELL_NUM_PASSIVE,
+	
 	SPELL_NUM
 	} Spell_Type;
 
@@ -112,6 +131,10 @@ typedef struct spell {
 #define SPELL_WITCH_EXPORT(entitiy){entitiy.spell.type = SPELL_STATIS_TRAP;entitiy.spell.value = 10; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 4;};
 
 
+#define SPELL_ABOMINATION_EXPORT(entitiy){entitiy.spell.type = SPELL_PASSIVE_POISON; entitiy.spell.value = 1;}
+#define SPELL_GARGOYLE_EXPORT(entitiy){entitiy.spell.type = SPELL_PASSIVE_STATUE; entitiy.spell.cooldown = 20; entitiy.spell.passedTurns = 0;}
+#define SPELL_DESTROYER_EXPORT(entitiy){entitiy.spell.type = SPELL_DAMAGE; entitiy.spell.value = 30; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 20;};
+#define SPELL_WAGON_EXPORT(entitiy){entitiy.spell.type = SPELL_SUMMON; entitiy.spell.value = ZOMBIE_MONSTER; entitiy.spell.passedTurns = 0; entitiy.spell.cooldown = 30;};
 typedef struct Entity Entitiy;
 
 typedef struct Entity {
@@ -149,6 +172,8 @@ typedef struct {
 typedef enum {
 	GENERATOR_GRAVEYARD,
 	GENERATOR_CAVE,
+	GENERATOR_INFECTION,
+	GENERATOR_ABOMINATION,
 	GENERATOR_ORC,
 	GENERATOR_FIEND,
 	GENERATOR_NECRO,
@@ -209,5 +234,7 @@ void export_generators(); //TBF FILE
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room);
 
 void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters);
+void player_negative_effect(Entitiy* player, Tile *map);
+void lingering_map_tile(Tile* map, Entitiy *player, Entitiy_DA *monsters);
 
 #endif
