@@ -12,11 +12,17 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 				memcpy(entity, &monsters[m], sizeof(Entitiy));
 				}
 			}
+		for(i32 i = 0; i < DAMAGE_NUM; i++) {
+				if(CHANCE_LEVEL_AD < rand_f64())
+				entity->attack[i]+= LEVEL;
+				entity->defence[i]+= LEVEL;
+			}
 		}
 	else {
 		entity->ch = ch;
 		entity->radius = radius;
 		}
+
 	if(entity->color.r == 0 && entity->color.g == 0 && entity->color.b == 0) {
 		entity->color = color;
 		}
@@ -651,6 +657,8 @@ void monster_definitions_export() {
 	monsters[ZOMBIE_MONSTER].lifeStealChance = 0.01f;
 	monsters[ZOMBIE_MONSTER].lifeStealValue  = 1.0f;
 	monsters[ZOMBIE_MONSTER].color = UNDE_COL;
+	SPELL_ABOMINATION_EXPORT(monsters[ZOMBIE_MONSTER]);
+
 
 
 	//GHOUL
@@ -2284,16 +2292,23 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 		if(entity.spell.type > SPELL_NUM_ACTIVES && entity.spell.type < SPELL_NUM_PASSIVE) {
 			switch(entity.spell.type) {
 				case SPELL_PASSIVE_POISON: {
+
 						i32 x  = rand()%2 - 1 + entity.pos.x;
 						i32 y  = rand()%2 - 1 + entity.pos.y;
 						CLAMP(x, 2, MAP_X - 2);
 						CLAMP(y, 2, MAP_Y - 2);
+						if((MAP_CH(map, x, y) == TILE_STAIRS || MAP_ISW(map, x, y) == SDL_FALSE) && (player->pos.x != x && player->pos.y != y)) {
+							break;
+							}
 						MAP_CH(map, x, y)  = TILE_POISION;
 						//LOG("Poison");
 						break;
 						}
 				case SPELL_PASSIVE_STATUE: {
 						if(entity.health < entity.maxHealth / 2) {
+							if(MAP_CH(map, entity.pos.x, entity.pos.y) == TILE_STAIRS || MAP_ISW(map, entity.pos.x, entity.pos.y) == SDL_TRUE) {
+								break;
+								}
 							MAP_CH(map, entity.pos.x, entity.pos.y) = TILE_GARG_STAT;
 							MAP_COUNTER(map, entity.pos.x, entity.pos.y)  = 20;
 							entity.isAlive = SDL_FALSE;
@@ -2565,11 +2580,13 @@ void export_generators() {
 	generators[GENERATOR_CAVE].monsterNumber = 1;
 	generators[GENERATOR_CAVE].maxDistanceDikstra = 3;
 	generators[GENERATOR_CAVE].typeOfTile = TILE_RUINS;
-	
+
 	//INFECTION
 	generators[GENERATOR_INFECTION].type = GENERATOR_INFECTION;
 	memset(generators[GENERATOR_INFECTION].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
-	generators[GENERATOR_INFECTION].chanceToSpawn[WAGON_MONSTER] = 0.9f;
+	generators[GENERATOR_INFECTION].chanceToSpawn[WAGON_MONSTER] = 0.5f;
+	generators[GENERATOR_INFECTION].chanceToSpawn[ZOMBIE_MONSTER] = 0.7f;
+	generators[GENERATOR_INFECTION].chanceToSpawn[NECROMANCER_MONSTER] = 0.1f;
 	generators[GENERATOR_INFECTION].chanceToSpawn[ABOMINATION_MONSTER] = 0.01f;
 	generators[GENERATOR_INFECTION].levelDungon = 1;
 	generators[GENERATOR_INFECTION].monsterNumber = 0;

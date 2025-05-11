@@ -16,11 +16,13 @@ typedef enum {
 	TILE_GRASS      = 'G',
 	TILE_POISION    = 'P',
 	TILE_GARG_STAT  = 'S',
+
 	
+
 	TILE_STUN_TRAP  = 'T',
-	TILE_RUINS_TRAP = 'R', 
+	TILE_RUINS_TRAP = 'R',
 	TILE_NON,
-	
+
 	TILE_NUM
 	} Tile_Type;
 
@@ -50,13 +52,6 @@ typedef struct {
 	} Room_DA;
 
 
-typedef struct BSPNode {
-    SDL_Rect area;          // Area represented by this node
-    struct BSPNode *front;   // Front child
-    struct BSPNode *back;    // Back child
-    Room room;               // Room data if leaf node
-    Position connection;     // Connection point for corridors
-} BSPNode;
 
 
 
@@ -93,6 +88,19 @@ SDL_bool is_trap(Tile* map, i32 x, i32 y);
 
 Tile* init_map(Room_DA* rooms);
 Tile* init_map_RA(Room_DA* rooms);
+Tile* init_map_BSP(Room_DA* rooms,  int splitDepth);
+
+
+#define MIN_LEAF_SIZE 10
+#define MAX_LEAF_SIZE 70
+
+typedef struct BSPNode {
+	// region bounds
+	i32 x, y, width, height;
+	struct BSPNode *left;
+	struct BSPNode *right;
+	Room room;
+	} BSPNode;
 
 
 

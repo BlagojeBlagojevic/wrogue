@@ -227,6 +227,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_MONSTER_HUTING_WOUND 0.3
 
 #define CHANCE_LIFESTEAL 0.1f
+#define CHANCE_CRIT      0.1f
 #define CHANCE_DROP_ITEM 0.1f
 #define CHANCE_DROP_ITEM_CONS 0.7
 #define CHANCE_ITEM_CURSED 0.06f
@@ -239,7 +240,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_CRITICAL_PLAYER 0.05f
 #define CHANCE_PLAYER_LEVEL  0.05f
 #define CHANCE_DISIPATE_POISON 0.1f
-
+#define CHANCE_LEVEL_AD   0.1f
 
 //BSP STUFF
 #define MIN_ROOM_SIZE 6

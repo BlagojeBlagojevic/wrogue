@@ -21,8 +21,12 @@ void generate_level() {
 	Room_DA rooms = {0};
 
 	LEVEL++;
-	//map = init_map(&rooms);
-	map = init_map_RA(&rooms);
+	i32 whatMap = rand()%4;
+	if(whatMap == 0) map = init_map_BSP(&rooms, 4);
+	//else if(whatMap == 2) map = init_map(&rooms);
+	else map = init_map_RA(&rooms);
+	monster.count = 0;
+	items.count = 0;
 	if(rooms.count <= 2) {
 		Room room;
 		room.pos.x  = 0;
@@ -43,6 +47,9 @@ void generate_level() {
 			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i]);
 			}
 		}
+
+
+	
 	//genereate_monsters(&monster, map);
 	//calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
 	//caved_part_generator(TILE_TREE, map, 5);
@@ -164,7 +171,8 @@ int main() {
 		main_renderer(player,  &monster, &items, map);
 		event_user(player, &monster, &items, map);
 		lingering_map_tile(map, player, &monster);
-		if(player->health <= 0) {;
+		if(player->health <= 0) {
+			;
 			da_append(&MESSAGES, "You loose");
 			exit(-1);
 			player->health = 10;
