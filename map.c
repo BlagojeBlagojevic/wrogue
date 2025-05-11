@@ -64,9 +64,9 @@ Room create_room(i32 x, i32 y, i32 height, i32 width) {
 
 void add_room_to_map(Tile *map, Room room) {
 	i32 stopY = room.pos.y + room.height;
-	CLAMP(stopY, 2, MAP_Y - 2);
+//	CLAMP(stopY, 2, MAP_Y - 2);
 	i32 stopX = room.pos.x + room.width;
-	CLAMP(stopX, 2, MAP_X - 2);
+//	CLAMP(stopX, 2, MAP_X - 2);
 	for(i32 y = room.pos.y; y < stopY; y++) {
 		for(i32 x = room.pos.x; x < stopX; x++) {
 			MAP_CH(map, x, y)  = '.';
@@ -325,7 +325,7 @@ void add_room_wall_to_map(Tile *map, Room room) {
 	i32 chance = rand()%4;
 	if(chance == 0) add_room_wall_rectangle(map, room);
 	else if(chance == 1) add_room_wall_circle(map, room);
-	else if(chance == 2) add_room_drunkard_walk(map, room, 600);
+	//else if(chance == 2) add_room_drunkard_walk(map, room, 600);
 	else {
 		chance = rand()%3;
 		if(chance == 0) {
@@ -701,17 +701,8 @@ Tile* init_map(Room_DA* rooms) {
 		}
 	//RAND_MAP();
 	i32 maxRoom = 12, minRoom = 10;
-	if(DEPTH % 3 == 0) {
-		generete_dungons(rooms, map, 200, 600);
-		}
-	else if(DEPTH % 3 == 1) {
-		generete_dungons(rooms, map, minRoom, maxRoom);
-		}
-	else {
-		Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
-		add_room_drunkard_walk(map, allMap, 10000);
-		da_append(rooms, allMap);
-		}
+	generete_dungons(rooms, map, 200, 600);
+
 
 	SDL_bool isGenerateDown  = SDL_FALSE;
 	while(!isGenerateDown) {
@@ -938,8 +929,8 @@ Tile* init_map_RA(Room_DA* room) {
 
 	for(i32 i = 1; i < nRooms && !isDrunc; i++) {
 
-		i32 y = (rand() % (MAP_Y - 13));
-		i32 x = (rand() % (MAP_X - 13));
+		i32 y = (rand() % (MAP_Y - 25));
+		i32 x = (rand() % (MAP_X - 25));
 		i32 height = (rand() % 15) + 5;
 		i32 width  = (rand() % 15) + 5;
 
@@ -957,7 +948,7 @@ Tile* init_map_RA(Room_DA* room) {
 		//REC
 		if(chance == 1) {
 			add_room_to_map(map, rooms[i]);
-			add_room_wall_rectangle(map, rooms[i]);
+			//add_room_wall_rectangle(map, rooms[i]);
 			}
 		//4 FILL
 		if(chance == 2) {
@@ -1021,10 +1012,161 @@ Tile* init_map_RA(Room_DA* room) {
 			break;
 			}
 		}
-	LOG("Ma");
+	//LOG("Ma");
 	return map;
 
 	}
 
+/* bsp_generator.c
+ */
 
 
+
+// Create a new BSP node
+static BSPNode* bsp_create_node(i32 x, i32 y, i32 width, i32 height) {
+	BSPNode* node = (BSPNode*)malloc(sizeof(BSPNode));
+	node->x = x;
+	node->y = y;
+	node->width = width;
+	node->height = height;
+	node->left = node->right = NULL;
+	node->room = create_room(x, y, height, width);
+	return node;
+	}
+
+// Recursively split a node
+static SDL_bool bsp_split(BSPNode* node) {
+	if (!node) return SDL_FALSE;
+	if (node->left || node->right) return SDL_FALSE; // already split
+
+	// Decide split orientation
+	SDL_bool splitH = rand() & 1;
+	if (node->width > node->height && node->width / node->height >= 1.25) splitH = SDL_FALSE;
+	else if (node->height > node->width && node->height / node->width >= 1.25) splitH = SDL_TRUE;
+
+	i32 max = (splitH ? node->height : node->width) - MIN_LEAF_SIZE;
+	if (max <= MIN_LEAF_SIZE) return SDL_FALSE;
+
+	i32 split = (rand() % (max - MIN_LEAF_SIZE)) + MIN_LEAF_SIZE;
+
+	if (splitH) {
+		node->left = bsp_create_node(node->x, node->y, node->width, split);
+		node->right = bsp_create_node(node->x, node->y + split, node->width, node->height - split);
+		}
+	else {
+		node->left = bsp_create_node(node->x, node->y, split, node->height);
+		node->right = bsp_create_node(node->x + split, node->y, node->width - split, node->height);
+		}
+	return SDL_TRUE;
+	}
+
+// Traverse leaves, splitting until desired depth/count
+static void bsp_generate(BSPNode* root, int depth) {
+	if (depth <= 0) return;
+	if (bsp_split(root)) {
+		bsp_generate(root->left, depth - 1);
+		bsp_generate(root->right, depth - 1);
+		}
+	}
+
+// Add rooms from leaf nodes to map and connect them
+static void bsp_carve(Room_DA* rooms, BSPNode* node, Tile* map) {
+	if (!node) return;
+
+	// Leaf: create and carve a room
+	if (!node->left && !node->right) {
+		i32 rw = (rand() % (node->width - 6)) + 6;
+		i32 rh = (rand() % (node->height - 6)) + 6;
+		i32 rx = node->x + rand() % (node->width - rw);
+		i32 ry = node->y + rand() % (node->height - rh);
+		node->room = create_room(rx, ry, rh, rw);
+		//node->hasRoom = SDL_TRUE;
+		add_room_to_map(map, node->room);
+		add_room_wall_rectangle(map, node->room);
+		da_append(rooms, node->room);
+
+		}
+	else {
+		// Internal: carve children and then connect their rooms
+		bsp_carve(rooms, node->left, map);
+		bsp_carve(rooms, node->right, map);
+
+		}
+	}
+
+// Free BSP tree
+static void bsp_free(BSPNode* node) {
+	if (!node) return;
+	bsp_free(node->left);
+	bsp_free(node->right);
+	free(node);
+	}
+
+// Public API: generate BSP dungeon
+Tile* init_map_BSP(Room_DA* rooms, int splitDepth) {
+	//Room_DA rooms;
+	//da_init(&rooms);
+	Tile*	map = calloc(MAP_Y*MAP_Y + 1, sizeof(Tile));
+	for(i32 y = 0; y < MAP_Y * MAP_Y; y++) {
+		map[y].ch = TILE_BLOCKED;
+		}
+
+	BSPNode* root = bsp_create_node(1, 1, MAP_X - 2, MAP_Y - 2);
+
+	bsp_generate(root, splitDepth);
+	bsp_carve(rooms, root, map);
+	//add_room_wall_rectangle(map, root->room);
+	//add_walls_around_roads(map);
+	//add_doors(map);
+	//ROADS
+	for(u64 i = 0; i < rooms->count; i++) {
+		i32 minDistance = INF;
+		i32 minIndex = i;
+		for(u64 j = i + 1; j < rooms->count; j++) {
+			i32 distance = DISTANCE(rooms->items[j].center.x, rooms->items[j].center.y, rooms->items[i].center.x, rooms->items[i].center.y);
+			if(distance < minDistance) {
+				minDistance = distance;
+				minIndex = j;
+				}
+			}
+		if(rand()%2) {
+			plot_line(rooms->items[i].center.x, rooms->items[i].center.y, rooms->items[minIndex].center.x, rooms->items[minIndex].center.y, map, ',', SDL_TRUE);
+			plot_line(rooms->items[minIndex].center.x, rooms->items[minIndex].center.y, rooms->items[i].center.x, rooms->items[i].center.y, map, ',', SDL_TRUE);
+			}
+		else {
+			connect_room_centers(rooms->items[i].center, rooms->items[minIndex].center, map, SDL_FALSE);
+			}
+
+		}
+	//connect_room_centers(rooms->items[0].center, rooms->items[nRooms - 1].center, map, SDL_FALSE);
+
+	for(i32 y = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			if(y == 0 || x == 0 || y == MAP_Y-1 || x == MAP_X-1 ) {
+				MAP_CH(map, x, y) = TILE_WALL;
+				MAP_ISW(map, x, y) = SDL_FALSE;
+
+				}
+			}
+		}
+	//DOWN
+	SDL_bool isGenerateDown  = SDL_FALSE;
+	while(!isGenerateDown) {
+		i32 x = rand()%(MAP_X - 4) + 2;
+		i32 y = rand()%(MAP_X - 4) + 2;
+		CLAMP(x, 4, MAP_X - 4);
+		CLAMP(y, 4, MAP_Y - 4);
+		if(MAP_CH(map, x, y) == TILE_FLOOR) {
+			MAP_CH(map, x, y) = TILE_STAIRS;
+			isGenerateDown = SDL_TRUE;
+			break;
+			}
+		}
+
+
+
+
+	bsp_free(root);
+
+	return map;
+	}
