@@ -6,6 +6,10 @@
 //TBD CURSED ITEMS
 typedef enum{
 	SWORD_ITEM,
+	AXE_ITEM,
+	DAGER_ITEM,
+	PIKE_ITEM,
+	SABER_ITEM,
 	PLAYER_SWORD_ITEM,
 	PLAYER_ARMOR_ITEM,
 	DART_ITEM,
@@ -59,15 +63,22 @@ typedef enum{
 #define DAMAGE_NUMi 4 
 
 
-#define SWORD_CREATE()            5, "SWORD",  '{', WHITE,  SWORD_ITEM,    NORMAL, SDL_FALSE
+#define SWORD_CREATE()            5, "SWORD",  '{', WHITE,  SWORD_ITEM,           NORMAL, SDL_FALSE
+#define AXE_CREATE()              5, "AXE",    '{', WHITE,  AXE_ITEM,             NORMAL, SDL_FALSE
+#define DAGER_CREATE()            5, "DAGER",  '{', WHITE,  DAGER_ITEM,           NORMAL, SDL_FALSE
+#define PIKE_CREATE()             5, "PIKE",   '{', WHITE,  PIKE_ITEM,            NORMAL, SDL_FALSE
+#define SABER_CREATE()            5, "SABER",  '{', WHITE,  SABER_ITEM,           NORMAL, SDL_FALSE
+
+
 #define PLAYER_SWORD_CREATE()     5, "SWORD",  '{', WHITE,  PLAYER_SWORD_ITEM,    NORMAL, SDL_FALSE
 #define PLAYER_ARMOR_CREATE()     5, "ARMOR",  '[', WHITE,  PLAYER_ARMOR_ITEM,    NORMAL, SDL_FALSE
-#define ARMOR_CREATE()            5, "ARMOR",  '[', WHITE,  ARMOR_ITEM,    NORMAL, SDL_FALSE 
-#define HELMET_CREATE()           5, "HELMET", '[', WHITE,  HELMET_ITEM,   NORMAL, SDL_FALSE
-#define SHIELD_CREATE()           5, "SHIELD", '[', WHITE,  SHIELD_ITEM,   NORMAL, SDL_FALSE
-#define SHOES_CREATE()            5, "SHOES",  '[', WHITE,  SHOES_ITEM,    NORMAL, SDL_FALSE
-#define HEALING_CREATE()	        5, "",       '!', WHITE,  HEALING_ITEM,  NORMAL, SDL_FALSE
-#define GOLD_CREATE()	            5, "",       'g', YELLOW, GOLD_ITEM,     NORMAL, SDL_FALSE
+
+#define ARMOR_CREATE()            5, "ARMOR",  '[', WHITE,  ARMOR_ITEM,           NORMAL, SDL_FALSE 
+#define HELMET_CREATE()           5, "HELMET", '[', WHITE,  HELMET_ITEM,          NORMAL, SDL_FALSE
+#define SHIELD_CREATE()           5, "SHIELD", '[', WHITE,  SHIELD_ITEM,          NORMAL, SDL_FALSE
+#define SHOES_CREATE()            5, "SHOES",  '[', WHITE,  SHOES_ITEM,           NORMAL, SDL_FALSE
+#define HEALING_CREATE()	        5, "",       '!', WHITE,  HEALING_ITEM,         NORMAL, SDL_FALSE
+#define GOLD_CREATE()	            5, "",       'g', YELLOW, GOLD_ITEM,            NORMAL, SDL_FALSE
 //#define DART_CREATE()   5, "DART",   '|', BLUE
 //#define POTION_CREATE() 5, "POTION", '#', BLUE
 
@@ -88,6 +99,9 @@ typedef struct{
 	Item_Equipted equipedTo;
 	i32 lifeSteal;
 	f64 lifeStealChance;
+	i32 critDamage;
+	f64 critDamageChance;
+	
 	i32 itemValue;
 	//LET ALL BE ABLE to be TROW
 	
