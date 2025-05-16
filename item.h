@@ -18,6 +18,12 @@ typedef enum{
 	SHIELD_ITEM,
 	SHOES_ITEM,
 	HEALING_ITEM,
+	
+	//FOOD 
+	APPLE_ITEM,
+	MEAT_ITEM,
+	BERRY_ITEM,
+	
 	GOLD_ITEM,
 	NUM_ITEM,
 }Item_Type;
@@ -78,6 +84,11 @@ typedef enum{
 #define SHIELD_CREATE()           5, "SHIELD", '[', WHITE,  SHIELD_ITEM,          NORMAL, SDL_FALSE
 #define SHOES_CREATE()            5, "SHOES",  '[', WHITE,  SHOES_ITEM,           NORMAL, SDL_FALSE
 #define HEALING_CREATE()	        5, "",       '!', WHITE,  HEALING_ITEM,         NORMAL, SDL_FALSE
+
+#define APPLE_CREATE()	          5, "Apple",  '%',WHITE,  APPLE_ITEM,           NORMAL, SDL_FALSE
+#define MEAT_CREATE()	            5, "Meat",   '%',WHITE,  MEAT_ITEM,            NORMAL, SDL_FALSE
+#define BERRY_CREATE()	          5, "Bery",   '%',WHITE,  BERRY_ITEM,           NORMAL, SDL_FALSE
+
 #define GOLD_CREATE()	            5, "",       'g', YELLOW, GOLD_ITEM,            NORMAL, SDL_FALSE
 //#define DART_CREATE()   5, "DART",   '|', BLUE
 //#define POTION_CREATE() 5, "POTION", '#', BLUE
@@ -101,7 +112,8 @@ typedef struct{
 	f64 lifeStealChance;
 	i32 critDamage;
 	f64 critDamageChance;
-	
+	f64 poisonChance;
+	i32 poisonDamage;
 	i32 itemValue;
 	//LET ALL BE ABLE to be TROW
 	
