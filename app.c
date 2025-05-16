@@ -1,5 +1,15 @@
 #include "app.h"
 
+void init_monster_texture() {
+	SDL_Surface *tempSur = IMG_Load("assets/monsters.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	monstersTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+	}
+
+
 
 void SDL_ERR(int code) {
 
@@ -35,8 +45,8 @@ void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 sta
 
 
 void render_player(Entitiy *player) {
-	i32 startX = player->pos.x * FONT_W;
-	i32 startY = player->pos.y * FONT_H;
+	i32 startX = player->pos.x * FONT_W - CAMERA.x;
+	i32 startY = player->pos.y * FONT_H - CAMERA.y;
 
 	SDL_Color color;
 	if(player->health >= 3) {
@@ -57,6 +67,153 @@ void render_player(Entitiy *player) {
 		}
 	Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	}
+
+
+void render_player_texture(Entitiy *player) {
+	i32 startX = player->pos.x * FONT_W - CAMERA.x;
+	i32 startY = player->pos.y * FONT_H - CAMERA.y;
+
+	SDL_Rect what;
+	switch(player->ch) {
+		case 'a': {
+				what.x = 0;
+				what.y = 0;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'Z': {
+				what.x = 256;
+				what.y = 0;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'G': {
+				what.x = 512;
+				what.y = 0;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'I': {
+				what.x = 768;
+				what.y = 0;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'w': {
+				what.x = 0;
+				what.y = 270;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'W': {
+				what.x = 0;
+				what.y = 280;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'N': {
+				what.x = 256;
+				what.y = 280;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'B': {
+				what.x = 512;
+				what.y = 280;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'F': {
+				what.x = 768;
+				what.y = 280;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'Y': {
+				what.x = 512;
+				what.y = 790;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'D': {
+				what.x = 768;
+				what.y = 790;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		
+		case 'E': {
+				what.x = 768;
+				what.y = 540;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'O': {
+				what.x = 256;
+				what.y = 540;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'V': {
+				what.x = 0;
+				what.y = 530;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'A': {
+				what.x = 512;
+				what.y = 535;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'R': {
+				what.x = 0;
+				what.y = 790;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		case 'K': {
+				what.x = 256;
+				what.y = 790;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+		default: {
+				what.x = 0;
+				what.y = 0;
+				what.h = 256;
+				what.w = 256;
+				break;
+				}
+
+		}
+	SDL_Rect size = {startX, startY, FONT_H, FONT_W};
+	SDL_RenderCopy(RENDERER, monstersTextures, &what, &size);
+
+
+	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
+	}
+
+
+
+
 
 
 
@@ -401,7 +558,8 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 		//    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
 		//f64 distance = DISTANCE(player->pos.x, player->pos.y, monsters->items[count].pos.x, monsters->items[count].pos.y);
 		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
-			render_player(&monsters->items[count]);
+			//render_player(&monsters->items[count]);
+			render_player_texture(&monsters->items[count]);
 			}
 
 		}
@@ -420,8 +578,8 @@ void render_item(Item* item, Tile* map) {
 
 	i32 x = item->pos.x;
 	i32 y = item->pos.y;
-	i32 startX = x * FONT_W;
-	i32 startY = y * FONT_H;
+	i32 startX = x * FONT_W - CAMERA.x;
+	i32 startY = y * FONT_H - CAMERA.y;
 	char ch[2];
 	ch[0] = item->ch;
 	ch[1] = '\0';
@@ -770,6 +928,176 @@ void render_map_fov(Entitiy *player, Tile *map) {
 		}
 	}
 
+static void update_camera(Entitiy* player, i32 map_width, i32 map_height) {
+	// Center camera on player
+	i32 desired_x = player->pos.x * FONT_W - CAMERA.w/2;
+	i32 desired_y = player->pos.y * FONT_H - CAMERA.h/2;
+	//CAMERA.w = 1000;
+	//CAMERA.h = 600;
+	// Clamp to map boundaries
+	CAMERA.x = desired_x;
+	CAMERA.y = desired_y;
+	CLAMP(CAMERA.x, 0, map_width * FONT_W - CAMERA.w);
+	CLAMP(CAMERA.y, 0, map_height * FONT_H - CAMERA.h);
+	}
+
+
+
+void render_map_graphical(Entitiy *player, Tile *map) {
+//field_of_vison(player, map);
+	update_camera(player, MAP_X, MAP_Y);
+	i32 radius = player->radius;
+	i32 startX = (player->pos.x) - radius;
+	i32 startY = ( player->pos.y) - radius;
+	i32 stopX  = ( player->pos.x) + radius;
+	i32 stopY  = ( player->pos.y) + radius;
+	CLAMP(startX, 0, MAP_X-1);
+	CLAMP(stopX,  0, MAP_X-1);
+	CLAMP(startY, 0, MAP_Y-1);
+	CLAMP(stopY,  0, MAP_Y-1);
+	i32 sW  = FONT_W;
+	i32 sH  = FONT_H;
+	i32 ofsetX = player->pos.x;
+	i32 ofsetY = player->pos.y;
+	for(i32 y  = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+
+			f64 distance = DISTANCE(x, y, player->pos.x, player->pos.y);
+			//distance*=distance;
+			if(MAP_ISV(map, x, y) == SDL_TRUE) {
+				i32 startX = x * sW - CAMERA.x;
+				i32 startY = y * sH - CAMERA.y;
+				if(startX + sW < 0 || startX > CAMERA.w ||
+				    startY + sH < 0 || startY > CAMERA.h) continue;
+
+				char ch = MAP_CH(map, x, y);
+				if(ch == TILE_BLOCKED) {
+					SDL_Rect textRect = {.x = startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_WALL ) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 80, 80, 80, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_ROAD || ch == TILE_FLOOR) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					//SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					} // if(ch != TILE_FLOOR)
+				else if(ch == TILE_RUINS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+					}
+				else if(ch == TILE_BLIGHT) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", BLACK);
+					}
+				else if(ch == TILE_TREE) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ":", GREEN);
+					}
+				else if(ch == TILE_GRASS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
+					}
+				else if(ch == TILE_POISION) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", GREEN);
+					}
+				else if(ch == TILE_STAIRS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ">", GREEN);
+					}
+				else if(ch == '-') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, sW, sH, "-", WHITE);
+					}
+
+				else {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					DROP(textRect);
+					}
+
+				}
+			else if (MAP_VISITED(map, x, y) == SDL_TRUE) {
+				i32 startX = x * sW  - CAMERA.x;
+				i32 startY = y * sH  - CAMERA.y;
+				char ch = MAP_CH(map, x, y);
+				if(ch == TILE_BLOCKED) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 60, 60, 60, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_WALL ) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					}
+				else if(ch == TILE_RUINS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+					}
+				else if(ch == TILE_STAIRS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					SDL_RenderDrawRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ">", GREEN);
+					}
+				else if(ch == '-') {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "-", WHITE);
+					}
+				else {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
+					SDL_RenderFillRect(RENDERER, &textRect);
+					DROP(textRect);
+					}
+				}
+			else {
+				i32 startX = x * sW  - CAMERA.x;
+				i32 startY = y * sH  - CAMERA.y;
+				SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+				SDL_SetRenderDrawColor(RENDERER, 0X20, 0X20, 0X20, 0XFF);
+				//SDL_SetRenderDrawColor(RENDERER, 255, 0, 0, 0);
+				SDL_RenderFillRect(RENDERER, &textRect);
+				DROP(textRect);
+				}
+			}
+		}
+
+
+	}
+
 
 
 
@@ -880,8 +1208,9 @@ void render_map(Tile *map, Entitiy *player) {
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
 			//render_map(map, player);
-			render_map_fov(player, map);
+			//render_map_fov(player, map);
 			//render_map_dikstra(player, map);
+			render_map_graphical(player, map);
 			render_player(player);
 			//render_player(&monster->items[0]);
 			if(ITEMSREND == SDL_TRUE) {
@@ -932,8 +1261,10 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 11;
-						FONT_H = 10;
+						FONT_W = 50;
+						FONT_H = 50;
+						CAMERA.w = WIDTH;
+						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
 						//FONT_W = 10;
 						if(WIDTH > 4096 || HEIGHT > 2048) {
@@ -951,3 +1282,6 @@ void render_map(Tile *map, Entitiy *player) {
 				EVENT.type = 0;
 				}
 			}
+
+
+
