@@ -152,7 +152,7 @@ typedef struct Graphics_State {
 	i32           height;
 	u8            isQuit;
 	SDL_bool      isMovmentEvent;
-	Position      camera;
+	SDL_Rect      camera;
 	Str           messages;
 	Num           inputBuffer;
 	SDL_bool      useItem;
@@ -215,7 +215,7 @@ extern Graphics_State mainGraphics;
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
 #define RADIUS 10
-#define CHANCE_INCREMENT_HEALTH 0.00f
+#define CHANCE_INCREMENT_HEALTH 0.01f
 #define CHANCE_SPAWN_DOOR 0.1f
 #define CHANCE_NON_IN_ROOM 0.1f
 #define PERCANTAGE_DISABLE_DOOR 0.50f
@@ -240,7 +240,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_CRITICAL_PLAYER 0.05f
 #define CHANCE_PLAYER_LEVEL  0.05f
 #define CHANCE_DISIPATE_POISON 0.1f
-#define CHANCE_LEVEL_AD   0.1f
+#define CHANCE_LEVEL_AD   0.05f
 
 //BSP STUFF
 #define MIN_ROOM_SIZE 6

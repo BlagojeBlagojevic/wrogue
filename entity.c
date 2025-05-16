@@ -13,9 +13,9 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 				}
 			}
 		for(i32 i = 0; i < DAMAGE_NUM; i++) {
-				if(CHANCE_LEVEL_AD < rand_f64())
+			if(CHANCE_LEVEL_AD < rand_f64())
 				entity->attack[i]+= LEVEL;
-				entity->defence[i]+= LEVEL;
+			entity->defence[i]+= LEVEL;
 			}
 		}
 	else {
@@ -40,11 +40,23 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 
 		Item *GOLD;
 
-		i32 chance = rand()%NUM_ITEM;
+		i32 chance = rand()%(NUM_ITEM - HEALING_ITEM) + HEALING_ITEM ;
 		CLAMP(chance, HEALING_ITEM, GOLD_ITEM);
 		switch(chance) {
 			case HEALING_ITEM: {
 					GOLD = create_item(37, 38, HEALING_CREATE());
+					break;
+					}
+			case APPLE_ITEM: {
+					GOLD = create_item(37, 38, APPLE_CREATE());
+					break;
+					}
+			case MEAT_ITEM: {
+					GOLD = create_item(37, 38, MEAT_CREATE());
+					break;
+					}
+			case BERRY_ITEM: {
+					GOLD = create_item(37, 38, BERRY_CREATE());
 					break;
 					}
 			case GOLD_ITEM: {
@@ -699,7 +711,7 @@ void monster_definitions_export() {
 
 //WAGON
 	monsters[WAGON_MONSTER].radius = 14;
-	monsters[WAGON_MONSTER].ch = 'W';
+	monsters[WAGON_MONSTER].ch = 'w';
 	monsters[WAGON_MONSTER].attack[DAMAGE_BASIC]  = 0;
 	monsters[WAGON_MONSTER].attack[DAMAGE_POISON] = 0;
 	monsters[WAGON_MONSTER].attack[DAMAGE_RANGE]  = 0;
@@ -1265,7 +1277,7 @@ void genereate_monsters(Entitiy_DA *monsters, Tile *map) {
 			if(MAP_CH(map, x, y) != TILE_BLOCKED) {
 				if(rand_f64() < PERCENTAGE_MONSTER_GENERATED) {
 					i32 type = rand()%(NUM_MONSTER - 1) + 1;
-					type = WAGON_MONSTER;
+					type = DRAGON_MONSTER;
 					i32 vison = rand()%40+1;
 					//i32 health = monsters->items[type].health;
 					Entitiy *temp = create_entity(monsterChar[type], monsterName[type], vison, 3, (Position) {
@@ -2542,11 +2554,48 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					player->health-= player->maxHealth * itemToEquipt.health / 100;
 					CLAMP(player->health, 0, player->maxHealth);
 					da_append(&MESSAGES, "This seem to be cursed potion of healing");
-
 					}
 				da_remove_unordered(items, numItem);
 				break;
 				}
+		case BERRY_ITEM: {
+				i32 isCursed = 0;
+					{
+					da_append(&MESSAGES,"You eat a bery");
+					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					CLAMP(player->health, 0, player->maxHealth);
+					//da_append(&MESSAGES, "This seem to be potion of healing");
+					}
+
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case APPLE_ITEM: {
+				i32 isCursed = 0;
+					{
+					da_append(&MESSAGES,"You eat a apple");
+					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					CLAMP(player->health, 0, player->maxHealth);
+					//da_append(&MESSAGES, "This seem to be potion of healing");
+					}
+
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case MEAT_ITEM: {
+				i32 isCursed = 0;
+					{
+					da_append(&MESSAGES,"You eat a piece of meat");
+					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					CLAMP(player->health, 0, player->maxHealth);
+					//da_append(&MESSAGES, "This seem to be potion of healing");
+					}
+
+				da_remove_unordered(items, numItem);
+				break;
+				}
+
+
 		case GOLD_ITEM: {
 				da_append(&MESSAGES, "Use it for what");
 				break;
@@ -2601,7 +2650,7 @@ void export_generators() {
 	generators[GENERATOR_ORC].chanceToSpawn[ARCHER_MONSTER] = 0.1f;
 	generators[GENERATOR_ORC].chanceToSpawn[WITCH_MONSTER] = 0.1f;
 	generators[GENERATOR_ORC].chanceToSpawn[BERSERKER_MONSTER] = 0.9f;
-	generators[GENERATOR_ORC].levelDungon = 2;
+	generators[GENERATOR_ORC].levelDungon = 4;
 	generators[GENERATOR_ORC].monsterNumber = 1;
 	generators[GENERATOR_ORC].maxDistanceDikstra = 5;
 	generators[GENERATOR_ORC].typeOfTile = TILE_GRASS;
@@ -2611,7 +2660,7 @@ void export_generators() {
 	memset(generators[GENERATOR_ABOMINATION].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_ABOMINATION].chanceToSpawn[WAGON_MONSTER] = 0.1f;
 	generators[GENERATOR_ABOMINATION].chanceToSpawn[ABOMINATION_MONSTER] = 0.9f;
-	generators[GENERATOR_ABOMINATION].levelDungon = 2;
+	generators[GENERATOR_ABOMINATION].levelDungon = 3;
 	generators[GENERATOR_ABOMINATION].monsterNumber = 0;
 	generators[GENERATOR_ABOMINATION].maxDistanceDikstra = 5;
 	generators[GENERATOR_ABOMINATION].typeOfTile = TILE_POISION;
@@ -2622,8 +2671,8 @@ void export_generators() {
 	generators[GENERATOR_FIEND].chanceToSpawn[SPIDER_MONSTER] = 0.9f;
 	generators[GENERATOR_FIEND].chanceToSpawn[NECROMANCER_MONSTER] = 0.04f;
 	generators[GENERATOR_FIEND].chanceToSpawn[GHOUL_MONSTER] = 0.1f;
-	generators[GENERATOR_FIEND].levelDungon = 2;
-	generators[GENERATOR_FIEND].monsterNumber = 1;
+	generators[GENERATOR_FIEND].levelDungon = 3;
+	generators[GENERATOR_FIEND].monsterNumber = 0;
 	generators[GENERATOR_FIEND].maxDistanceDikstra = 3;
 	generators[GENERATOR_FIEND].typeOfTile = TILE_BLIGHT;
 
@@ -2633,7 +2682,7 @@ void export_generators() {
 	generators[GENERATOR_NECRO].chanceToSpawn[BANSHIE_MONSTER] = 0.4f;
 	generators[GENERATOR_NECRO].chanceToSpawn[NECROMANCER_MONSTER] = 0.4f;
 	generators[GENERATOR_NECRO].chanceToSpawn[GHOUL_MONSTER] = 0.9f;
-	generators[GENERATOR_NECRO].levelDungon = 2;
+	generators[GENERATOR_NECRO].levelDungon = 1;
 	generators[GENERATOR_NECRO].monsterNumber = 1;
 	generators[GENERATOR_NECRO].maxDistanceDikstra = 3;
 	generators[GENERATOR_NECRO].typeOfTile = TILE_BLIGHT;

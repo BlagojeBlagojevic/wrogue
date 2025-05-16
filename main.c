@@ -10,6 +10,7 @@
 //TBD CAMERA
 
 Graphics_State    mainGraphics;
+SDL_Texture* monstersTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -74,7 +75,7 @@ int main() {
 	//INIT
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
-
+	
 	u64 seed = (u64)time(0);
 	srand(seed);
 	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
@@ -91,6 +92,7 @@ int main() {
 	FONT = TTF_OpenFont(fontLoc, 128);
 	(void)P_SDL_ERR(FONT);
 	(void)P_SDL_ERR(RENDERER);
+	init_monster_texture();
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
@@ -99,13 +101,13 @@ int main() {
 		}, WHITE);
 
 	player->attack[0]  = 2;
-	player->defence[0] = 2;
+	player->defence[0] = 4;
 	player->attack[1]  = 2;
-	player->defence[1] = 2;
+	player->defence[1] = 4;
 	player->attack[2]  = 2;
-	player->defence[2] = 2;
+	player->defence[2] = 4;
 	player->attack[3]  = 2;
-	player->defence[3] = 2;
+	player->defence[3] = 4;
 	player->stamina    = 10;
 	player->maxStamina = 10;
 	player->chanceToDecressStaminaMove = 0.1f;

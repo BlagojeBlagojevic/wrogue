@@ -8,6 +8,10 @@
 
 //#define PLAYER_VISION
 
+extern SDL_Texture* monstersTextures;
+void init_monster_texture();
+ 
+
 void SDL_ERR(int code);
 void *P_SDL_ERR(void *ptr);
 void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 startY, i32 w_c, i32 h_c, const char *c, SDL_Color textColor);
