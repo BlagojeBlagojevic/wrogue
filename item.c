@@ -58,12 +58,70 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					item->critDamageChance = rand_f64();
 					}
 				char msg[150];
+				snprintf(msg, 150, "H(%d),HD(%d) B(%d),BD(%d)", item->attack[DAMAGE_POISON], item->defence[DAMAGE_POISON],
+				         item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+
+				}
+
+		case DAGER_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUM; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = 0;
+					}
+				item->attack[DAMAGE_BASIC]  = rand()%(5 + LEVEL) + 1;  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				//item->defence[DAMAGE_POISON] = 1;
+				item->equipedTo = EQUIPTED_WEPON;
+				if(rand_f64() < CHANCE_CRIT) {
+					item->poisonDamage = 10;  //RAND()%10
+					item->poisonChance = rand_f64();
+					}
+				char msg[150];
+				snprintf(msg, 150, " H(%d),HD(%d),P(%d,%.2f)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]
+				         ,item->poisonDamage, item->poisonChance);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+				}
+
+		case PIKE_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUM; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = 0;
+					}
+				item->attack[DAMAGE_BASIC]  = rand()%(5 + LEVEL);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[DAMAGE_BASIC] = 1;
+				item->attack[DAMAGE_POISON]  = rand()%(5 + LEVEL);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[DAMAGE_POISON] = 1;
+				item->equipedTo = EQUIPTED_WEPON;
+				if(rand_f64() < CHANCE_CRIT) {
+					item->critDamage = 10;  //RAND()%10
+					item->critDamageChance = rand_f64();
+					}
+				char msg[150];
 				snprintf(msg, 150, " H(%d),HD(%d),C(%d,%.2f)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]
 				         ,item->critDamage, item->critDamageChance);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
 
 				}
+
+		case SABER_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUM; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = 0;
+					}
+				item->attack[DAMAGE_BASIC]  = rand()%((5 + LEVEL)/2);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[DAMAGE_BASIC]  = rand()%((5 + LEVEL)/2);
+				item->equipedTo = EQUIPTED_WEPON;
+				char msg[150];
+				snprintf(msg, 150, " B(%d),BD(%d)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]);
+				strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+				}
+
+
+
 
 		case PLAYER_SWORD_ITEM: {
 				for(i32 i = 0; i < DAMAGE_NUM; i++) {
@@ -168,6 +226,46 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				free(text);
 				break;
 				}
+		
+		case APPLE_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
+				item->type = APPLE_ITEM;
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "%s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+		case MEAT_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
+				item->type = MEAT_ITEM;
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "%s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+			
+			case BERRY_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
+				item->type = APPLE_ITEM;
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "%s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
 		case GOLD_ITEM: {
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
