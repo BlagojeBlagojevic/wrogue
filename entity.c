@@ -599,7 +599,7 @@ void monster_definitions_export() {
 
 	//ACOLAYT
 	monsters[ACOLAYT_MONSTER].radius = 5;
-	monsters[ACOLAYT_MONSTER].ch = 'A';
+	monsters[ACOLAYT_MONSTER].ch = 'a';
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_BASIC]  = 1;
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_POISON] = 0;
 	monsters[ACOLAYT_MONSTER].attack[DAMAGE_RANGE]  = 0;
@@ -1655,6 +1655,14 @@ void make_best_move(Entitiy* player, Entitiy*  ent, Tile *map) {
 		}
 	u8 isRangeAttack = SDL_FALSE;
 	switch(ent->ch) {
+		case 'a': {
+				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
+					isRangeAttack = SDL_TRUE;
+					monster_attack(player, ent, distancesMin);
+					break;
+					}
+				break;
+				}
 		case 'A': {
 				if(distancesMin >= DISTANCE_RANGE_ATTACK_MIN && distancesMin <= DISTANCE_RANGE_ATTACK_MAX ) {
 					isRangeAttack = SDL_TRUE;
