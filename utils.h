@@ -215,7 +215,7 @@ extern Graphics_State mainGraphics;
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
 #define RADIUS 10
-#define CHANCE_INCREMENT_HEALTH 0.01f
+#define CHANCE_INCREMENT_HEALTH 0.05f
 #define CHANCE_SPAWN_DOOR 0.1f
 #define CHANCE_NON_IN_ROOM 0.1f
 #define PERCANTAGE_DISABLE_DOOR 0.50f
