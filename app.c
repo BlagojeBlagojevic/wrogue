@@ -43,12 +43,6 @@ void init_texture() {
 	playerTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
 	SDL_FreeSurface(tempSur);
 
-	tempSur = IMG_Load("assets/cloud.png");
-	if(tempSur == NULL) {
-		ASSERT("We have no file");
-		}
-	cloudTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
-	SDL_FreeSurface(tempSur);
 
 
 	}
