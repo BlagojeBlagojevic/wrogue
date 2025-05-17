@@ -10,7 +10,13 @@
 //TBD CAMERA
 
 Graphics_State    mainGraphics;
-SDL_Texture* monstersTextures;
+SDL_Texture*      monstersTextures;
+SDL_Texture*      groundTextures;
+SDL_Texture*      wallTextures;
+SDL_Texture*      poisonTextures;
+SDL_Texture*      blightTextures;
+SDL_Texture*      playerTextures;
+SDL_Texture*      cloudTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -50,7 +56,7 @@ void generate_level() {
 		}
 
 
-	
+
 	//genereate_monsters(&monster, map);
 	//calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
 	//caved_part_generator(TILE_TREE, map, 5);
@@ -75,7 +81,7 @@ int main() {
 	//INIT
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
-	
+
 	u64 seed = (u64)time(0);
 	srand(seed);
 	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
@@ -92,7 +98,7 @@ int main() {
 	FONT = TTF_OpenFont(fontLoc, 128);
 	(void)P_SDL_ERR(FONT);
 	(void)P_SDL_ERR(RENDERER);
-	init_monster_texture();
+	init_texture();
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
