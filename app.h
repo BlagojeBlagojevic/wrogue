@@ -9,7 +9,13 @@
 //#define PLAYER_VISION
 
 extern SDL_Texture* monstersTextures;
-void init_monster_texture();
+extern SDL_Texture* groundTextures;
+extern SDL_Texture* wallTextures;
+extern SDL_Texture* poisonTextures;
+extern SDL_Texture* blightTextures;
+extern SDL_Texture* playerTextures;
+extern SDL_Texture* cloudTextures;
+void init_texture();
  
 
 void SDL_ERR(int code);
