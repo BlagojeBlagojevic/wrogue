@@ -17,6 +17,7 @@ SDL_Texture*      poisonTextures;
 SDL_Texture*      blightTextures;
 SDL_Texture*      playerTextures;
 SDL_Texture*      cloudTextures;
+SDL_Texture*      itemTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -69,6 +70,9 @@ void generate_level() {
 	if(rooms.items != NULL) {
 		free(rooms.items);
 		}
+	//Item* helmet = create_item(player->pos.x, player->pos.y, GOLD_CREATE());
+	//da_append(&items, (*helmet));
+
 	}
 
 
@@ -102,7 +106,7 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_FALSE;
-	player = create_entity('@', "Some Name", 5, 20, (Position) {
+	player = create_entity('@', "Some Name", 10, 20, (Position) {
 		40, 40
 		}, WHITE);
 
@@ -127,6 +131,7 @@ int main() {
 	//LOG("Plateer");
 	//exit(-1);
 	/*
+
 	Item* helmet = create_item(40, 38, HELMET_CREATE());
 	helmet->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*helmet));
@@ -179,6 +184,14 @@ int main() {
 		main_renderer(player,  &monster, &items, map);
 		event_user(player, &monster, &items, map);
 		lingering_map_tile(map, player, &monster);
+		if(monster.count < 12) {
+			Room room;
+			room.pos.x  = 0;
+			room.pos.y  = 0;
+			room.width  = MAP_Y - 1;
+			room.height = MAP_X - 1;
+			genereate_monsters_generator(player, &monster, map, LEVEL, room);
+			}
 		if(player->health <= 0) {
 			;
 			da_append(&MESSAGES, "You loose");

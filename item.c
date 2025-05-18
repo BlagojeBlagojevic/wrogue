@@ -289,6 +289,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 	else {
 		item->isCursed = NORMAL;
 		}
+	item->type = type;	
 	return item;
 	}
 

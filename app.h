@@ -15,6 +15,7 @@ extern SDL_Texture* poisonTextures;
 extern SDL_Texture* blightTextures;
 extern SDL_Texture* playerTextures;
 extern SDL_Texture* cloudTextures;
+extern SDL_Texture*      itemTextures;
 void init_texture();
  
 
