@@ -44,6 +44,15 @@ void init_texture() {
 	SDL_FreeSurface(tempSur);
 
 
+	tempSur = IMG_Load("assets/items.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	itemTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+
+
 
 	}
 
@@ -546,7 +555,7 @@ void render_stats(Entitiy *player) {
 	char stats[1024];
 	i32 startX = 0;
 	i32 startY = HEIGHT - 300;
-	SDL_Rect temp = {startX-3, startY, 600, 150};
+	SDL_Rect temp = {startX + 10, startY, 600, 150};
 	//SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
 	//SDL_RenderFillRect(RENDERER, &temp);
 	snprintf(stats, 1024, "STATS: Health %d", player->health);
@@ -555,12 +564,12 @@ void render_stats(Entitiy *player) {
 	for(; i < DAMAGE_NUM; i++) {
 		stats[0] = '\0';
 		snprintf(stats, 1024, "STATS: %s att: %d def: %d", damageStr[i], player->attack[i], player->defence[i]);
-		Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H*(i+1), 200,
+		Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), 200,
 		                FONT_H_MESSAGES, stats, WHITE);
 		}
 	stats[0] = '\0';
 	snprintf(stats, 1024, "STATS: MAXSTM: %d STM: %d",player->maxStamina, player->stamina);
-	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H*(i+1), 200,
+	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), 200,
 	                FONT_H_MESSAGES, stats, WHITE);
 
 	}
@@ -606,16 +615,128 @@ void render_item(Item* item, Tile* map) {
 	i32 y = item->pos.y;
 	i32 startX = x * FONT_W - CAMERA.x;
 	i32 startY = y * FONT_H - CAMERA.y;
-	char ch[2];
-	ch[0] = item->ch;
-	ch[1] = '\0';
+	//char ch[2];
+	//ch[0] = item->ch;
+	//ch[1] = '\0';
 	//LOG("\nCHAR %c\n", ch);
-	SDL_Rect temp = {startX, startY, FONT_W, FONT_H};
-	DROP(temp);
+
 	if(MAP_ISW(map, x, y) == SDL_TRUE && MAP_ISV(map, x, y) == SDL_TRUE) {
 		//SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 		//SDL_RenderFillRect(RENDERER, &temp);
-		Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, ch, item->color);
+		//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, ch, item->color);
+		SDL_Rect textSize = {startX, startY, FONT_H, FONT_W}, what = {0, 0, 0, 0};
+		switch(item->type) {
+			case SWORD_ITEM: {
+					what.x = 0;
+					what.y = 0;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case PLAYER_SWORD_ITEM: {
+					what.x = 0;
+					what.y = 0;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case AXE_ITEM: {
+					what.x = 768;
+					what.y = 0;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case DAGER_ITEM: {
+					what.x = 580;
+					what.y = 0;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case PIKE_ITEM: {
+					what.x = 400;
+					what.y = 256;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case SABER_ITEM: {
+					what.x = 570;
+					what.y = 0;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case ARMOR_ITEM: {
+					what.x = 160;
+					what.y = 256;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case HELMET_ITEM: {
+					what.x = 540;
+					what.y = 256;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case SHIELD_ITEM: {
+					what.x = 780;
+					what.y = 256;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case SHOES_ITEM: {
+					what.x = 780;
+					what.y = 512;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case HEALING_ITEM: {
+					what.x = 0;
+					what.y = 760;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case APPLE_ITEM: {
+					what.x = 160;
+					what.y = 500;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case MEAT_ITEM: {
+					what.x = 400;
+					what.y = 500;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case BERRY_ITEM: {
+					what.x = 580;
+					what.y = 700;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case GOLD_ITEM: {
+					what.x = 760;
+					what.y = 700;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			default: {
+
+					break;
+					}
+			}
+		SDL_RenderCopy(RENDERER, itemTextures, &what, &textSize);
 		}
 	}
 
@@ -1267,10 +1388,7 @@ void render_map(Tile *map, Entitiy *player) {
 			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
 			SDL_RenderFillRect(RENDERER, &temp);
 			if(EQUITEM == SDL_FALSE) {
-
 				for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
-
-
 					render_messages(0, (0 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
 					}
 				}
@@ -1305,8 +1423,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 50;
-						FONT_H = 50;
+						FONT_W = 100;
+						FONT_H = 100;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
