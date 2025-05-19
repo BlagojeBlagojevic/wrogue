@@ -169,9 +169,20 @@ typedef struct Graphics_State {
 //static const char* title = "Ime kakvo";
 #define title "Ime kakvo"
 
-#define FONT_H_MESSAGES 20
+#define FONT_H_MESSAGES 30
 #define MAX_NAME 30
 #define MAX_DESCRIPTION 200
+
+extern SDL_Texture* monstersTextures;
+extern SDL_Texture* groundTextures;
+extern SDL_Texture* wallTextures;
+extern SDL_Texture* poisonTextures;
+extern SDL_Texture* blightTextures;
+extern SDL_Texture* playerTextures;
+extern SDL_Texture* cloudTextures;
+extern SDL_Texture* itemTextures;
+extern SDL_Texture* swordTextures;
+
 
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
@@ -205,6 +216,10 @@ extern Graphics_State mainGraphics;
 #define DISTANCE_DIKSTRA(x1, y1, x2, y2) sqrt((f64)((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)))
 #define DISTANCE_RANGE_ATTACK_MAX 3.0f
 #define DISTANCE_RANGE_ATTACK_MIN 1.9f
+
+#define STEP_INTERPOL 1
+#define MS_ANIMATION 100
+
 
 #define PERCANTAGE_RUN_CHANCE 0.3f
 #define PERCANTAGE_CROW_RUN_CHANCE 0.5f
@@ -247,5 +262,7 @@ extern Graphics_State mainGraphics;
 #define MAX_ROOM_SIZE 16
 #define MAX_SPLIT_RATIO 0.9f
 #define CORRIDOR_WIDTH 2
+
+
 
 #endif
