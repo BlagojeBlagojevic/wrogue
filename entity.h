@@ -139,6 +139,7 @@ typedef struct Entity Entitiy;
 
 typedef struct Entity {
 	Position pos;
+	Position oldPos;
 	SDL_Color color;
 	i32 radius;
 	i32 health;
