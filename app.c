@@ -52,6 +52,13 @@ void init_texture() {
 	SDL_FreeSurface(tempSur);
 
 
+	tempSur = IMG_Load("assets/sword.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	swordTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
 
 
 	}
@@ -88,6 +95,7 @@ void Text_Renderer_C(SDL_Renderer *renderer, TTF_Font *font, i32 startX, i32 sta
 	SDL_ERR(SDL_RenderCopy(renderer, textTexture, NULL, &textRect));
 	SDL_FreeSurface(textSurface);
 	SDL_DestroyTexture(textTexture);
+
 	}
 
 
@@ -99,10 +107,41 @@ void render_player(Entitiy *player) {
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
 
 	SDL_ERR(SDL_RenderCopy(RENDERER, playerTextures, NULL, &textRect));
-	//SDL_Rect cloudRect = {startX - 400, startY - 50*3, FONT_H*10, FONT_W*3};
-	//SDL_ERR(SDL_RenderCopy(RENDERER, cloudTextures, NULL, &cloudRect));
+
+	//render_interpolated(player);
 	}
 
+void render_interpolated(Entitiy *ent) {
+	i32 startX = ent->oldPos.x * FONT_W - CAMERA.x + 1;
+	i32 startY = ent->oldPos.y * FONT_H - CAMERA.y + 1;
+	i32 stopX  = ent->pos.x * FONT_W - CAMERA.x;
+	i32 stopY  = ent->pos.y * FONT_H - CAMERA.y;
+	i32 xSign  = abs(stopX - startX) / (stopX - startX);
+	i32 ySign  = abs(stopY - startY) / (stopY - startY);
+	i32 count = 0;
+	while(startX != stopX && startY != stopY) {
+		if(count++ == 300) {
+			break;
+			}
+		if(abs(startX - stopX) > 1) {
+			startX+=(xSign*STEP_INTERPOL);
+			CLAMP(startX, stopX - 2*FONT_W,  stopX - 2*FONT_W);
+			}
+		if(abs(startY - stopY) > 1) {
+			startY+=(ySign*STEP_INTERPOL);
+			CLAMP(startY, stopY - 2*FONT_H,  stopY - 2 * FONT_H);
+			}
+
+		SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+
+		SDL_ERR(SDL_RenderCopy(RENDERER, playerTextures, NULL, &textRect));
+		//SDL_RenderPresent(RENDERER);
+		//SDL_Delay(1);
+		}
+
+
+
+	}
 
 void render_player_texture(Entitiy *player) {
 	i32 startX = player->pos.x * FONT_W - CAMERA.x;
@@ -146,7 +185,7 @@ void render_player_texture(Entitiy *player) {
 				break;
 				}
 		case 'W': {
-				what.x = 0;
+				what.x = 256;
 				what.y = 280;
 				what.h = 256;
 				what.w = 256;
@@ -242,7 +281,7 @@ void render_player_texture(Entitiy *player) {
 	SDL_Rect size = {startX, startY, FONT_H, FONT_W};
 	SDL_RenderCopy(RENDERER, monstersTextures, &what, &size);
 
-
+	//main_renderer(player,  &monster, &items, map);
 	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	}
 
@@ -254,6 +293,7 @@ void render_player_texture(Entitiy *player) {
 
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
+	player->oldPos = player->pos;
 	MOVMENT = SDL_FALSE;  //NOT PROB
 	if(EQUITEM == SDL_TRUE) {
 		MOVMENT = SDL_TRUE;
@@ -296,6 +336,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		MOVMENT = SDL_TRUE;
 		}
 	else if(key == UP_ARROW || key == KEY_W) {
+
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
 			if(rand_f64() < player->chanceToDecressStaminaMove) {
 				player->stamina--;
@@ -559,7 +600,7 @@ void render_stats(Entitiy *player) {
 	//SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
 	//SDL_RenderFillRect(RENDERER, &temp);
 	snprintf(stats, 1024, "STATS: Health %d", player->health);
-	Text_Renderer_C(RENDERER, FONT,startX - 3, startY, 200, 20, stats, WHITE);
+	Text_Renderer_C(RENDERER, FONT,startX - 3, startY, 200, FONT_H_MESSAGES, stats, WHITE);
 	Damage_Types i = 0;
 	for(; i < DAMAGE_NUM; i++) {
 		stats[0] = '\0';
@@ -595,6 +636,8 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
 			//render_player(&monsters->items[count]);
 			render_player_texture(&monsters->items[count]);
+			SDL_RenderPresent(RENDERER);
+			SDL_Delay(10);
 			}
 
 		}
@@ -763,7 +806,7 @@ void render_items(Item_DA *items, Tile* map, Entitiy* player) {
 
 void render_inventory(Item_DA *inventory) {
 	i32 startX = 	700;
-	i32 startY = 30; //THIS DEPENS CUZZ HOW MUTCH MESSAGES
+	i32 startY = 300; //THIS DEPENS CUZZ HOW MUTCH MESSAGES
 	//i32 h = 580/2;
 	//i32 w = 600;
 
@@ -1379,23 +1422,20 @@ void render_map(Tile *map, Entitiy *player) {
 			if(ITEMSREND == SDL_TRUE) {
 				render_items(items, map, player);
 				}
-			render_monsters(monster, player, map);
 
 			render_inventory(&player->inventory);
 			render_stats(player);
 			i32 count = 1;
-			SDL_Rect temp = {MAP_X*FONT_W + 10, 30, 600, 150};
-			SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X40, 0X20, 0X20, 0XFF));
-			SDL_RenderFillRect(RENDERER, &temp);
+
 			if(EQUITEM == SDL_FALSE) {
 				for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
-					render_messages(0, (0 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
+					render_messages(400, (0 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
 					}
 				}
 			else {
 				i32 count = 1;
 				for(i32 i = (i32)MESSAGES.count-1; i >= ((i32)MESSAGES.count - NUM_RENDER_MSG); i--) {
-					render_messages(0, (0 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
+					render_messages(400, (0 + FONT_H_MESSAGES*(count++)), MESSAGES.items[i]);
 					}
 				i32 buffer = 0, p = 1;
 				for(i32 i = BUFFER.count - 1; i >= 0; i--) {
@@ -1407,6 +1447,8 @@ void render_map(Tile *map, Entitiy *player) {
 				da_append(&MESSAGES, msg);
 				}
 			//SDL_ERR(SDL_SetRenderDrawColor(RENDERER, 0X20, 0X20, 0X20, 0XFF));
+			render_monsters(monster, player, map);
+
 			SDL_RenderPresent(RENDERER);
 			}
 
@@ -1423,8 +1465,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 100;
-						FONT_H = 100;
+						FONT_W = 150;
+						FONT_H = 150;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
