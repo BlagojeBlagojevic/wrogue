@@ -18,6 +18,7 @@ SDL_Texture*      blightTextures;
 SDL_Texture*      playerTextures;
 SDL_Texture*      cloudTextures;
 SDL_Texture*      itemTextures;
+SDL_Texture*      swordTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -97,7 +98,7 @@ int main() {
 
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
 	(void)P_SDL_ERR(WINDOW);
-	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED);
+	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
 	FONT = TTF_OpenFont(fontLoc, 128);
 	(void)P_SDL_ERR(FONT);
@@ -182,15 +183,24 @@ int main() {
 			update_entity(player, &monster, map, &items);
 			}
 		main_renderer(player,  &monster, &items, map);
+		SDL_Delay(10);
 		event_user(player, &monster, &items, map);
 		lingering_map_tile(map, player, &monster);
-		if(monster.count < 12) {
+		if(monster.count < 5) {
 			Room room;
 			room.pos.x  = 0;
 			room.pos.y  = 0;
 			room.width  = MAP_Y - 1;
 			room.height = MAP_X - 1;
 			genereate_monsters_generator(player, &monster, map, LEVEL, room);
+			}
+		if((COUNTMOVES+1) % 200 == 0) {
+			Room room;
+			room.pos.x  = 0;
+			room.pos.y  = 0;
+			room.width  = MAP_Y - 1;
+			room.height = MAP_X - 1;
+			genereate_monsters_generator(player, &monster, map, LEVEL + 1, room);
 			}
 		if(player->health <= 0) {
 			;
