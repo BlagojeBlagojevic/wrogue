@@ -156,6 +156,7 @@ i32 roll_the_dice(i32 attack, i32 defence) {
 ///TBD reusable
 void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, Damage_Types type) {
 	DROP(player);
+	
 	u64 len = 100;
 	char* attackText = malloc(len*sizeof(char*));
 	memset(attackText, '\0', len);
@@ -195,6 +196,16 @@ void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage) {
 //TBD attack type
 SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
 	DROP(map);
+	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
+	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
+
+	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
+	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	SDL_ERR(SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect));
+	//SDL_SetRenderDrawColor(RENDERER, 0xFF, 0X20, 0X20, 0X00);
+//	SDL_RenderDrawRect(RENDERER, &textRect);
+	SDL_RenderPresent(RENDERER);
+	SDL_Delay(MS_ANIMATION);
 	i32 iPl = 0, iEnt = 0;
 	for(u64 i = 0; i < player->inventory.count; i++) {
 		Item item = player->inventory.items[i];
@@ -289,6 +300,7 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 					}
 				}
 			}
+
 		return SDL_TRUE;
 		}
 	else {
@@ -301,6 +313,16 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 //TBD CURSED ITEMS
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	//DROP(entity);
+	i32 startX = player->pos.x * FONT_W - CAMERA.x;
+	i32 startY = player->pos.y * FONT_H - CAMERA.y;
+
+	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
+	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	SDL_ERR(SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect));
+	//SDL_SetRenderDrawColor(RENDERER, 0x20, 125, 0X20, 125);
+	//SDL_RenderDrawRect(RENDERER, &textRect);
+	SDL_RenderPresent(RENDERER);
+	SDL_Delay(MS_ANIMATION);
 	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
 	//LEVEL SCALING
 	if(rand_f64() < CHANCE_PLAYER_LEVEL) {
@@ -2317,11 +2339,14 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 						i32 y  = rand()%2 - 1 + entity.pos.y;
 						CLAMP(x, 2, MAP_X - 2);
 						CLAMP(y, 2, MAP_Y - 2);
-						if((MAP_CH(map, x, y) == TILE_STAIRS || MAP_ISW(map, x, y) == SDL_FALSE) && (player->pos.x != x && player->pos.y != y)) {
+						if((player->pos.x == x && player->pos.y == y)) {
+							MAP_CH(map, x, y)  = TILE_POISION;
+							break;
+							}
+						else if((MAP_CH(map, x, y) == TILE_STAIRS || MAP_ISW(map, x, y) == SDL_FALSE) ) {
 							break;
 							}
 						MAP_CH(map, x, y)  = TILE_POISION;
-						//LOG("Poison");
 						break;
 						}
 				case SPELL_PASSIVE_STATUE: {
@@ -2664,7 +2689,7 @@ void export_generators() {
 	generators[GENERATOR_ORC].typeOfTile = TILE_GRASS;
 
 	//ABOMINATION
-	generators[GENERATOR_ABOMINATION].type = GENERATOR_INFECTION;
+	generators[GENERATOR_ABOMINATION].type = GENERATOR_ABOMINATION;
 	memset(generators[GENERATOR_ABOMINATION].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_ABOMINATION].chanceToSpawn[WAGON_MONSTER] = 0.1f;
 	generators[GENERATOR_ABOMINATION].chanceToSpawn[ABOMINATION_MONSTER] = 0.9f;
