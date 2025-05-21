@@ -602,15 +602,19 @@ void render_stats(Entitiy *player) {
 	snprintf(stats, 1024, "STATS: Health %d", player->health);
 	Text_Renderer_C(RENDERER, FONT,startX - 3, startY, 200, FONT_H_MESSAGES, stats, WHITE);
 	Damage_Types i = 0;
+	snprintf(stats, 1024, "STATS: %s att: %d", damageStr[i], player->attack[i]);
+	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), 200,
+	                FONT_H_MESSAGES, stats, WHITE);
+	i = 0;
 	for(; i < DAMAGE_NUM; i++) {
 		stats[0] = '\0';
-		snprintf(stats, 1024, "STATS: %s att: %d def: %d", damageStr[i], player->attack[i], player->defence[i]);
-		Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), 200,
+		snprintf(stats, 1024, "STATS: %s def: %d", damageStr[i], player->defence[i]);
+		Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+2), 200,
 		                FONT_H_MESSAGES, stats, WHITE);
 		}
 	stats[0] = '\0';
 	snprintf(stats, 1024, "STATS: MAXSTM: %d STM: %d",player->maxStamina, player->stamina);
-	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+1), 200,
+	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+2), 200,
 	                FONT_H_MESSAGES, stats, WHITE);
 
 	}
@@ -746,6 +750,35 @@ void render_item(Item* item, Tile* map) {
 					what.w = 240;
 					break;
 					}
+			
+			case STRENGTH_POTION: {
+					what.x = 0;
+					what.y = 760;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case AGILITY_POTION: {
+					what.x = 0;
+					what.y = 760;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}		
+			case DEFENCE_POTION: {
+					what.x = 0;
+					what.y = 760;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}
+			case VITALITY_POTION: {
+					what.x = 0;
+					what.y = 760;
+					what.h = 256;
+					what.w = 240;
+					break;
+					}		
 			case APPLE_ITEM: {
 					what.x = 160;
 					what.y = 500;
@@ -813,10 +846,16 @@ void render_inventory(Item_DA *inventory) {
 	//SDL_Rect rec = {startX, startY, w, h};
 	//SDL_SetRenderDrawColor(RENDERER, 0, 30, 10, 0);
 	//SDL_RenderFillRect(RENDERER, &rec);
-	for(u64 i = 0; i < inventory->count && EQUITEM; i++) {
-		;
+	i32 buffer = 0, p = 1, count  = 0;
+	for(i32 i = BUFFER.count - 1; i >= 0; i--) {
+		buffer += ((BUFFER.items[i] - '0') * p);
+		p*=10;
+		}
+	for(u64 i = (u64)buffer; i < inventory->count && EQUITEM; i++) {
 		//LOG("NAME:%s\n", inventory->items[i].name);
-		render_messages(startX, startY + (i*FONT_H_MESSAGES), inventory->items[i].descripction);
+		char msg[256];
+		snprintf(msg, 256, "%d. %s", (i16)i, inventory->items[i].descripction);
+		render_messages(startX, startY + ((count++)*FONT_H_MESSAGES), msg);
 		//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H_MESSAGES, inventory->items[i].name, WHITE);
 		}
 	}
@@ -1465,8 +1504,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 150;
-						FONT_H = 150;
+						FONT_W = 50;
+						FONT_H = 50;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
