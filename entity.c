@@ -40,13 +40,30 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 
 		Item *GOLD;
 
-		i32 chance = rand()%(NUM_ITEM - HEALING_ITEM) + HEALING_ITEM ;
+		i32 chance = rand()%(NUM_ITEM - HEALING_ITEM + 3) + HEALING_ITEM;
 		CLAMP(chance, HEALING_ITEM, GOLD_ITEM);
 		switch(chance) {
 			case HEALING_ITEM: {
 					GOLD = create_item(37, 38, HEALING_CREATE());
 					break;
 					}
+			case STRENGTH_POTION: {
+					GOLD = create_item(37, 38, STRENGHT_CREATE());
+					break;
+					}
+			case AGILITY_POTION: {
+					GOLD = create_item(37, 38, AGILITY_CREATE());
+					break;
+					}
+			case DEFENCE_POTION: {
+					GOLD = create_item(37, 38, DEFENCE_CREATE());
+					break;
+					}
+			case VITALITY_POTION: {
+					GOLD = create_item(37, 38, 	VITALITY_CREATE());
+					break;
+					}
+
 			case APPLE_ITEM: {
 					GOLD = create_item(37, 38, APPLE_CREATE());
 					break;
@@ -156,7 +173,7 @@ i32 roll_the_dice(i32 attack, i32 defence) {
 ///TBD reusable
 void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, Damage_Types type) {
 	DROP(player);
-	
+
 	u64 len = 100;
 	char* attackText = malloc(len*sizeof(char*));
 	memset(attackText, '\0', len);
@@ -2591,6 +2608,83 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 				da_remove_unordered(items, numItem);
 				break;
 				}
+		case STRENGTH_POTION: {
+				i32 isCursed = 0;
+				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
+					da_append(&MESSAGES,"Seems to incresed max health");
+					player->maxHealth+= player->maxHealth * itemToEquipt.health / 100;
+					//CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be potion of strenght");
+					}
+				else {
+					da_append(&MESSAGES,"Seems to decreased the max health");
+					player->maxHealth-= player->maxHealth * itemToEquipt.health / 100;
+					//	CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be cursed potion of strenght");
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+
+		case AGILITY_POTION: {
+				i32 isCursed = 0;
+				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
+					da_append(&MESSAGES,"Seems to incresed attack");
+					player->attack[0]+= itemToEquipt.health;
+					//CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be potion of agility");
+					}
+				else {
+					da_append(&MESSAGES,"Seems to decreased the attack");
+					player->attack[0]-= itemToEquipt.health;
+					CLAMP(player->attack[0], 0, (i32)INF);
+					da_append(&MESSAGES, "This seem to be cursed potion of agility");
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case DEFENCE_POTION: {
+				i32 isCursed = 0;
+				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
+					da_append(&MESSAGES,"Seems to incresed defence");
+					for(i32 i = 0; i < DAMAGE_NUM; i++) {
+						player->defence[i]+=itemToEquipt.defence[i];
+						CLAMP(player->defence[i], 0, (i32)INF);
+						}
+					da_append(&MESSAGES, "This seem to be potion of resistance");
+					}
+				else {
+					da_append(&MESSAGES,"Seems to decreased defence");
+					for(i32 i = 0; i < DAMAGE_NUM; i++) {
+						player->defence[i]-=itemToEquipt.defence[i];
+						CLAMP(player->defence[i], 0, (i32)INF);
+						}
+					//	CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be cursed potion of ressitance");
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case VITALITY_POTION: {
+				i32 isCursed = 0;
+				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
+					da_append(&MESSAGES,"Seems to incresed stamina");
+					player->maxStamina+= itemToEquipt.health;
+					//CLAMP(player->health, 0, player->maxHealth);
+					da_append(&MESSAGES, "This seem to be potion of vitality");
+					}
+				else {
+					da_append(&MESSAGES,"Seems to decreased stamina");
+					//	CLAMP(player->health, 0, player->maxHealth);
+					player->maxStamina-= itemToEquipt.health;
+					da_append(&MESSAGES, "This seem to be cursed potion of vitality");
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+
+
+
 		case BERRY_ITEM: {
 				i32 isCursed = 0;
 					{
