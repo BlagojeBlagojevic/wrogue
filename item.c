@@ -150,8 +150,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				item->equipedTo = EQUIPTED_ARMOR;
 				item->defence[0] = 3;
 				char msg[150];
-				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
-				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),L(%d)",  item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
 				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
@@ -165,8 +164,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				item->equipedTo = EQUIPTED_ARMOR;
 
 				char msg[150];
-				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),B(%d),P(%d),R(%d),S(%d),L(%d)", item->attack[DAMAGE_BASIC], item->attack[DAMAGE_POISON],
-				         item->attack[DAMAGE_RANGE], item->attack[DAMAGE_SPELL], item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				snprintf(msg, 150, "B(%d),P(%d),R(%d),S(%d),L(%d)", item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
 				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
@@ -216,9 +214,15 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				item->equipedTo = EQUIPTED_USE;
 				item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
 				item->type = HEALING_ITEM;
-				for(i32 i = 0; i < 10; i++) {
-					text[i] = rand()%(125 - 33) + 33;
+				if(CHANCE_ITEM_NOT_IDENT > rand_f64()) {
+					for(i32 i = 0; i < 10; i++) {
+						text[i] = rand()%(125 - 33) + 33;
+						}
 					}
+				else {
+					strcpy(text, "life");
+					}
+
 				memcpy(item->name, text, MAX_NAME);
 				snprintf(text, MAX_NAME, "Potion named %s", item->name);
 				strncat(item->descripction, text, MAX_DESCRIPTION);
@@ -226,7 +230,100 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				free(text);
 				break;
 				}
-		
+
+		case STRENGTH_POTION: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%10 + 10;  //PERCENTAGE RESTORE
+				item->type = STRENGTH_POTION;
+				if(CHANCE_ITEM_NOT_IDENT > rand_f64()) {
+					for(i32 i = 0; i < 10; i++) {
+						text[i] = rand()%(125 - 33) + 33;
+						}
+					}
+				else {
+					strcpy(text, "Strength");
+					}
+
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "Potion named %s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+		case AGILITY_POTION: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%LEVEL + 1;  //max
+				item->type = STRENGTH_POTION;
+				if(CHANCE_ITEM_NOT_IDENT > rand_f64()) {
+					for(i32 i = 0; i < 10; i++) {
+						text[i] = rand()%(125 - 33) + 33;
+						}
+					}
+				else {
+					strcpy(text, "Agility");
+					}
+
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "Potion named %s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+		case DEFENCE_POTION: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%LEVEL + 1;  //max
+				item->type = DEFENCE_POTION;
+				i32 what = rand()%DAMAGE_NUM;
+				item->defence[what] = item->health;
+				if(CHANCE_ITEM_NOT_IDENT > rand_f64()) {
+					for(i32 i = 0; i < 10; i++) {
+						text[i] = rand()%(125 - 33) + 33;
+						}
+					}
+				else {
+					strcpy(text, "Resistance");
+					}
+
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "Potion named %s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+		case VITALITY_POTION: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%3 + 1;  //max
+				item->type = DEFENCE_POTION;
+				i32 what = rand()%DAMAGE_NUM;
+				item->defence[what] = item->health;
+				if(CHANCE_ITEM_NOT_IDENT > rand_f64()) {
+					for(i32 i = 0; i < 10; i++) {
+						text[i] = rand()%(125 - 33) + 33;
+						}
+					}
+				else {
+					strcpy(text, "Vitality");
+					}
+
+				memcpy(item->name, text, MAX_NAME);
+				snprintf(text, MAX_NAME, "Potion named %s", item->name);
+				strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+
+
 		case APPLE_ITEM: {
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
@@ -252,8 +349,8 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				free(text);
 				break;
 				}
-			
-			case BERRY_ITEM: {
+
+		case BERRY_ITEM: {
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
 				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
@@ -289,7 +386,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 	else {
 		item->isCursed = NORMAL;
 		}
-	item->type = type;	
+	item->type = type;
 	return item;
 	}
 
