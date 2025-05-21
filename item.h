@@ -17,8 +17,12 @@ typedef enum{
 	HELMET_ITEM,
 	SHIELD_ITEM,
 	SHOES_ITEM,
-	HEALING_ITEM,
 	
+	HEALING_ITEM,
+	STRENGTH_POTION,
+	AGILITY_POTION,
+	DEFENCE_POTION,
+	VITALITY_POTION,
 	//FOOD 
 	APPLE_ITEM,
 	MEAT_ITEM,
@@ -83,7 +87,13 @@ typedef enum{
 #define HELMET_CREATE()           5, "HELMET", '[', WHITE,  HELMET_ITEM,          NORMAL, SDL_FALSE
 #define SHIELD_CREATE()           5, "SHIELD", '[', WHITE,  SHIELD_ITEM,          NORMAL, SDL_FALSE
 #define SHOES_CREATE()            5, "SHOES",  '[', WHITE,  SHOES_ITEM,           NORMAL, SDL_FALSE
+
 #define HEALING_CREATE()	        5, "",       '!', WHITE,  HEALING_ITEM,         NORMAL, SDL_FALSE
+#define STRENGHT_CREATE()	        5, "",       '!', WHITE,  STRENGTH_POTION,      NORMAL, SDL_FALSE
+#define AGILITY_CREATE()	        5, "",       '!', WHITE,  AGILITY_POTION,       NORMAL, SDL_FALSE
+#define DEFENCE_CREATE()	        5, "",       '!', WHITE,  DEFENCE_POTION,       NORMAL, SDL_FALSE
+#define VITALITY_CREATE()					5, "",       '!', WHITE,  VITALITY_POTION,      NORMAL, SDL_FALSE
+
 
 #define APPLE_CREATE()	          5, "Apple",  '%',WHITE,  APPLE_ITEM,           NORMAL, SDL_FALSE
 #define MEAT_CREATE()	            5, "Meat",   '%',WHITE,  MEAT_ITEM,            NORMAL, SDL_FALSE
