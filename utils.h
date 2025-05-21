@@ -229,7 +229,7 @@ extern Graphics_State mainGraphics;
 
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
-#define RADIUS 5
+#define RADIUS 10
 #define CHANCE_INCREMENT_HEALTH 0.05f
 #define CHANCE_SPAWN_DOOR 0.1f
 #define CHANCE_NON_IN_ROOM 0.1f
@@ -242,7 +242,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_MONSTER_HUTING_WOUND 0.3
 
 #define CHANCE_LIFESTEAL 0.1f
-#define CHANCE_CRIT      0.1f
+#define CHANCE_CRIT      0.05f
 #define CHANCE_DROP_ITEM 0.1f
 #define CHANCE_DROP_ITEM_CONS 0.7
 #define CHANCE_ITEM_CURSED 0.06f
@@ -256,10 +256,12 @@ extern Graphics_State mainGraphics;
 #define CHANCE_PLAYER_LEVEL  0.05f
 #define CHANCE_DISIPATE_POISON 0.1f
 #define CHANCE_LEVEL_AD   0.05f
+#define CHANCE_ITEM_NOT_IDENT 0.05f
+
 
 //BSP STUFF
 #define MIN_ROOM_SIZE 6
-#define MAX_ROOM_SIZE 16
+#define MAX_ROOM_SIZE 9
 #define MAX_SPLIT_RATIO 0.9f
 #define CORRIDOR_WIDTH 2
 
