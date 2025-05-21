@@ -47,12 +47,12 @@ void generate_level() {
 			room.pos.y=y;
 			for(i32 x = 0; x < MAP_X - room.width; x+=room.width) {
 				room.pos.x=x;
-				genereate_monsters_generator(player, &monster, map, LEVEL, room);
+				//genereate_monsters_generator(player, &monster, map, LEVEL, room);
 				}
 			}
 		}
 	else {
-		for(u64 i = 1; i < rooms.count; i++) {
+		for(u64 i = 0; i < rooms.count; i++) {
 			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i]);
 			}
 		}
@@ -71,8 +71,8 @@ void generate_level() {
 	if(rooms.items != NULL) {
 		free(rooms.items);
 		}
-	//Item* helmet = create_item(player->pos.x, player->pos.y, GOLD_CREATE());
-	//da_append(&items, (*helmet));
+	Item* helmet = create_item(player->pos.x, player->pos.y, VITALITY_CREATE());
+	da_append(&items, (*helmet));
 
 	}
 
@@ -112,21 +112,21 @@ int main() {
 		}, WHITE);
 
 	player->attack[0]  = 2;
-	player->defence[0] = 4;
+	player->defence[0] = 5;
 	player->attack[1]  = 2;
-	player->defence[1] = 4;
+	player->defence[1] = 5;
 	player->attack[2]  = 2;
-	player->defence[2] = 4;
+	player->defence[2] = 5;
 	player->attack[3]  = 2;
-	player->defence[3] = 4;
-	player->stamina    = 10;
-	player->maxStamina = 10;
+	player->defence[3] = 5;
+	player->stamina    = 15;
+	player->maxStamina = 15;
 	player->chanceToDecressStaminaMove = 0.1f;
 	Item* sword = create_item(0, 0, PLAYER_SWORD_CREATE());
 	sword->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*sword));
 	Item* armor = create_item(0, 0, PLAYER_ARMOR_CREATE());
-	armor->defence[DAMAGE_BASIC] = 1;
+	//armor->defence[DAMAGE_BASIC] = 1;
 	armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
 	//LOG("Plateer");
@@ -186,7 +186,7 @@ int main() {
 		SDL_Delay(10);
 		event_user(player, &monster, &items, map);
 		lingering_map_tile(map, player, &monster);
-		if(monster.count < 5) {
+		if(monster.count < 12) {
 			Room room;
 			room.pos.x  = 0;
 			room.pos.y  = 0;
