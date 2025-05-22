@@ -50,15 +50,15 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					item->attack[i]   = 0;
 					item->defence[i]  = 0;
 					}
-				item->attack[DAMAGE_POISON]  = rand()%(5 + LEVEL);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
-				item->defence[DAMAGE_POISON] = 1;
+				item->attack[0]  = rand()%(5 + LEVEL);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[0] = 1;
 				item->equipedTo = EQUIPTED_WEPON;
 				if(rand_f64() < CHANCE_CRIT) {
-					item->critDamage = 10;  //RAND()%10
-					item->critDamageChance = rand_f64();
+					item->critDamage = rand()%9+1; //10 PERCENT
+					item->critDamageChance = rand_f64() / (f64)2.0f;
 					}
 				char msg[150];
-				snprintf(msg, 150, "H(%d),HD(%d) B(%d),BD(%d)", item->attack[DAMAGE_POISON], item->defence[DAMAGE_POISON],
+				snprintf(msg, 150, " H(%d),HD(%d) B(%d),BD(%d)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC],
 				         item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
@@ -70,12 +70,12 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					item->attack[i]   = 0;
 					item->defence[i]  = 0;
 					}
-				item->attack[DAMAGE_BASIC]  = rand()%(5 + LEVEL) + 1;  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
-				//item->defence[DAMAGE_POISON] = 1;
+				item->attack[DAMAGE_BASIC]  = rand()%(5 + LEVEL) / 2 + 1;  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
+				item->defence[DAMAGE_POISON] = 1;
 				item->equipedTo = EQUIPTED_WEPON;
 				if(rand_f64() < CHANCE_CRIT) {
-					item->poisonDamage = 10;  //RAND()%10
-					item->poisonChance = rand_f64();
+					//item->poisonDamage = 10;  //RAND()%10
+					item->poisonChance = rand_f64() / (f64)3.0f;
 					}
 				char msg[150];
 				snprintf(msg, 150, " H(%d),HD(%d),P(%d,%.2f)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]
@@ -91,19 +91,16 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					}
 				item->attack[DAMAGE_BASIC]  = rand()%(5 + LEVEL);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
 				item->defence[DAMAGE_BASIC] = 1;
-				item->attack[DAMAGE_POISON]  = rand()%(5 + LEVEL);  //AXE ADD +1 FOR BASIC ATTACK AND DEFENCE PROBOBLY EXPORT FOR ALL;
-				item->defence[DAMAGE_POISON] = 1;
-				item->equipedTo = EQUIPTED_WEPON;
+				item->equipedTo = EQUIPTED_WEPON; //WILL BE ABLE TO A DECRESS STAMINA TO 0
 				if(rand_f64() < CHANCE_CRIT) {
 					item->critDamage = 10;  //RAND()%10
-					item->critDamageChance = rand_f64();
+					item->critDamageChance = rand_f64() / (f64)3.0f;
 					}
 				char msg[150];
 				snprintf(msg, 150, " H(%d),HD(%d),C(%d,%.2f)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]
 				         ,item->critDamage, item->critDamageChance);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
-
 				}
 
 		case SABER_ITEM: {
@@ -164,7 +161,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				item->equipedTo = EQUIPTED_ARMOR;
 
 				char msg[150];
-				snprintf(msg, 150, "B(%d),P(%d),R(%d),S(%d),L(%d)", item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
+				snprintf(msg, 150, " B(%d),P(%d),R(%d),S(%d),L(%d)", item->defence[DAMAGE_BASIC], item->defence[DAMAGE_POISON],
 				         item->defence[DAMAGE_RANGE], item->defence[DAMAGE_SPELL], item->lifeSteal);
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
