@@ -59,6 +59,34 @@ void init_texture() {
 	swordTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
 	SDL_FreeSurface(tempSur);
 
+	tempSur = IMG_Load("assets/grass.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	grassTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+	tempSur = IMG_Load("assets/boulder.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	boulderTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+	tempSur = IMG_Load("assets/downst.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	stairTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+	tempSur = IMG_Load("assets/tree.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	treeTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
 
 
 	}
@@ -332,6 +360,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		}
 	else if(player->stamina <= 0) {
 		da_append(&MESSAGES, "You are exhausted");
+		player->isStunded = STAMINA_STUN_DURATION;
 		player->stamina++;
 		MOVMENT = SDL_TRUE;
 		}
@@ -750,7 +779,7 @@ void render_item(Item* item, Tile* map) {
 					what.w = 240;
 					break;
 					}
-			
+
 			case STRENGTH_POTION: {
 					what.x = 0;
 					what.y = 760;
@@ -764,7 +793,7 @@ void render_item(Item* item, Tile* map) {
 					what.h = 256;
 					what.w = 240;
 					break;
-					}		
+					}
 			case DEFENCE_POTION: {
 					what.x = 0;
 					what.y = 760;
@@ -778,7 +807,7 @@ void render_item(Item* item, Tile* map) {
 					what.h = 256;
 					what.w = 240;
 					break;
-					}		
+					}
 			case APPLE_ITEM: {
 					what.x = 160;
 					what.y = 500;
@@ -1223,48 +1252,36 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					} // if(ch != TILE_FLOOR)
 				else if(ch == TILE_RUINS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
-					SDL_RenderFillRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+					SDL_RenderCopy(RENDERER, wallTextures, NULL, &textRect);
+					textRect.w = sW+10;
+					textRect.h = sH+10;
+					SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_BLIGHT) {
-					//SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					//SDL_SetRenderDrawColor(RENDERER, 0, 0, 0, 0);
-					//SDL_RenderFillRect(RENDERER, &textRect);
-					//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", BLACK);
-
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					SDL_RenderCopy(RENDERER, blightTextures, NULL, &textRect);
-
 					}
 				else if(ch == TILE_TREE) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					//DROP(textRect);
-					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
-					SDL_RenderFillRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ":", GREEN);
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+					SDL_RenderCopy(RENDERER, treeTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_GRASS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					//DROP(textRect);
-					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
-					SDL_RenderFillRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "\"", GREEN);
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+					SDL_RenderCopy(RENDERER, grassTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_POISION) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					//DROP(textRect);
-					//SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
-					//SDL_RenderFillRect(RENDERER, &textRect);
-					//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ".", GREEN);
+
 					SDL_RenderCopy(RENDERER, poisonTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_STAIRS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					//DROP(textRect);
-					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
-					SDL_RenderFillRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ">", GREEN);
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+					SDL_RenderCopy(RENDERER, stairTextures, NULL, &textRect);
 					}
 				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
@@ -1303,16 +1320,27 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					}
 				else if(ch == TILE_RUINS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
-					SDL_RenderFillRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, "+", WHITE);
+					SDL_RenderCopy(RENDERER, wallTextures, NULL, &textRect);
+					textRect.w = sW+10;
+					textRect.h = sH+10;
+					SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_STAIRS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					//DROP(textRect);
-					SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
-					SDL_RenderDrawRect(RENDERER, &textRect);
-					Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, ">", GREEN);
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+					SDL_RenderCopy(RENDERER, stairTextures, NULL, &textRect);
+					}
+				else if(ch == TILE_GRASS) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					//DROP(textRect);
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+					SDL_RenderCopy(RENDERER, grassTextures, NULL, &textRect);
+					}
+				else if(ch == TILE_TREE) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+					SDL_RenderCopy(RENDERER, treeTextures, NULL, &textRect);
 					}
 				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
@@ -1504,8 +1532,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 50;
-						FONT_H = 50;
+						FONT_W = 150;
+						FONT_H = 150;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
