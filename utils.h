@@ -182,7 +182,10 @@ extern SDL_Texture* playerTextures;
 extern SDL_Texture* cloudTextures;
 extern SDL_Texture* itemTextures;
 extern SDL_Texture* swordTextures;
-
+extern SDL_Texture* grassTextures;
+extern SDL_Texture* boulderTextures;
+extern SDL_Texture* treeTextures;
+extern SDL_Texture* stairTextures;
 
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
@@ -226,6 +229,7 @@ extern Graphics_State mainGraphics;
 #define PERCENTAGE_MONSTER_GENERATED 0.005f
 #define MAX_STOP_RUN_DISTANCE 10.0f
 #define MAX_CURAGE_CHANCE 0.2f
+#define STAMINA_STUN_DURATION 3
 
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
@@ -247,7 +251,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_DROP_ITEM_CONS 0.7
 #define CHANCE_ITEM_CURSED 0.06f
 #define CHANCE_ITEM_USED_IN_COMBAT 0.80f
-#define CHANCE_USE_DEF 0.8f
+#define CHANCE_USE_DEF 0.5f
 #define CHANCE_NEGATIVE_DAMAGE 0.05f
 #define CHANCE_ITEM_PER_LEVEL 0.02f
 #define CHANCE_DROP_SELING_CAUSE_DAMAGE 0.8f
