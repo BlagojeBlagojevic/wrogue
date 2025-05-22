@@ -232,7 +232,7 @@ void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32
 void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem);
 
 void export_generators(); //TBF FILE
-void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room);
+void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room, SDL_bool isEnv);
 
 void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters);
 void player_negative_effect(Entitiy* player, Tile *map);
