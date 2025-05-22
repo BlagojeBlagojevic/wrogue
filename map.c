@@ -1075,8 +1075,8 @@ static void bsp_carve(Room_DA* rooms, BSPNode* node, Tile* map) {
 
 	// Leaf: create and carve a room
 	if (!node->left && !node->right) {
-		i32 rw = (rand() % (node->width - 6)) + 6;
-		i32 rh = (rand() % (node->height - 6)) + 6;
+		i32 rw = (rand() % (6)) + 6;
+		i32 rh = (rand() % (6)) + 6;
 		i32 rx = node->x + rand() % (node->width - rw);
 		i32 ry = node->y + rand() % (node->height - rh);
 		node->room = create_room(rx, ry, rh, rw);
