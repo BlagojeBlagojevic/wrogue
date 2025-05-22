@@ -216,11 +216,8 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
 	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
 
-	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
 	SDL_ERR(SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect));
-	//SDL_SetRenderDrawColor(RENDERER, 0xFF, 0X20, 0X20, 0X00);
-//	SDL_RenderDrawRect(RENDERER, &textRect);
 	SDL_RenderPresent(RENDERER);
 	SDL_Delay(MS_ANIMATION);
 	i32 iPl = 0, iEnt = 0;
@@ -231,6 +228,52 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
 			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT) {
 				iPl += item.attack[0];
+				switch(item.type) {
+					case SWORD_ITEM: {
+							//LIFESTEAL
+							if(rand_f64() < item.lifeStealChance) {
+								player->health+=item.lifeSteal;
+								da_append(&MESSAGES, "You lifestealed");
+								CLAMP(player->health, 0, player->maxHealth);
+
+								}
+							break;
+							}
+					case PLAYER_SWORD_ITEM: {
+							//LIFESTEAL
+							if(rand_f64() < item.lifeStealChance) {
+								player->health+=item.lifeSteal;
+								da_append(&MESSAGES, "You lifestealed");
+								CLAMP(player->health, 0, player->maxHealth);
+								}
+							break;
+							}
+					case AXE_ITEM: {
+							if(rand_f64() < item.critDamageChance) {
+								entity->health-=item.critDamage;
+								da_append(&MESSAGES, "You crited");
+								CLAMP(entity->health, 0, entity->maxHealth);
+								}
+							break;
+							}
+					case DAGER_ITEM: {
+							if(rand_f64() < item.poisonChance) {
+								entity->maxHealth = 0;
+								}
+							break;
+							}
+
+					case PIKE_ITEM: {
+							if(rand_f64() < item.critDamageChance) {
+								entity->stamina = 0;
+								}
+							break;
+							}
+					default: {
+							break;
+							}
+					}
+
 				}
 			}
 		}
@@ -374,6 +417,52 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 					//LOG("ia %d\n", iA[j]);
 					lfC += item.lifeStealChance;
 					lf  += item.lifeSteal;
+					switch(item.type) {
+					case SWORD_ITEM: {
+							//LIFESTEAL
+							if(rand_f64() < item.lifeStealChance) {
+								entity->health+=item.lifeSteal;
+								CLAMP(entity->health, 0, entity->health);
+
+								}
+							break;
+							}
+					case PLAYER_SWORD_ITEM: {
+							//LIFESTEAL
+							if(rand_f64() < item.lifeStealChance) {
+								entity->health+=item.lifeSteal;
+								CLAMP(entity->health, 0, entity->health);
+								}
+							break;
+							}
+					case AXE_ITEM: {
+							if(rand_f64() < item.critDamageChance) {
+								player->health-=item.critDamage;
+								CLAMP(player->health, 0, player->maxHealth);
+								}
+							break;
+							}
+					case DAGER_ITEM: {
+							if(rand_f64() < item.poisonChance) {
+								player->health--;
+								player->maxHealth--;
+								CLAMP(player->maxHealth, 0, (i32)INF);
+								CLAMP(player->health, 0, player->maxHealth);
+								}
+							break;
+							}
+
+					case PIKE_ITEM: {
+							if(rand_f64() < item.critDamageChance) {
+								entity->stamina = 0;
+								}
+							break;
+							}
+					default: {
+							break;
+							}
+					}
+					
 					}
 				}
 			}
@@ -2180,6 +2269,10 @@ void move_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 		if(Is_Monster(entity.ch)) {
 			calculate_diakstra_map(player, map, entitys, player->pos.x, player->pos.y);
 			entity.spell.passedTurns++;
+			if(entity.maxHealth == 0) {
+				entity.health--;
+				CLAMP(entity.health, 0, (i32)(INF));
+				}
 			if(entity.state == STATE_RESTING) {
 				//NOTHING
 				entity.stamina++;
@@ -2619,7 +2712,8 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 				else {
 					da_append(&MESSAGES,"Seems to decreased the max health");
 					player->maxHealth-= player->maxHealth * itemToEquipt.health / 100;
-					//	CLAMP(player->health, 0, player->maxHealth);
+					CLAMP(player->maxHealth, 0, (i32)(INF));
+					CLAMP(player->health, 0, player->maxHealth);
 					da_append(&MESSAGES, "This seem to be cursed potion of strenght");
 					}
 				da_remove_unordered(items, numItem);
@@ -2677,6 +2771,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					da_append(&MESSAGES,"Seems to decreased stamina");
 					//	CLAMP(player->health, 0, player->maxHealth);
 					player->maxStamina-= itemToEquipt.health;
+					CLAMP(player->maxStamina, 2, (i16)(INF));
 					da_append(&MESSAGES, "This seem to be cursed potion of vitality");
 					}
 				da_remove_unordered(items, numItem);
@@ -2743,7 +2838,7 @@ void export_generators() {
 	generators[GENERATOR_GRAVEYARD].chanceToSpawn[BANSHIE_MONSTER] = 0.1f;
 	generators[GENERATOR_GRAVEYARD].levelDungon = 1;
 	generators[GENERATOR_GRAVEYARD].monsterNumber = 0;
-	generators[GENERATOR_GRAVEYARD].maxDistanceDikstra = 3;
+	generators[GENERATOR_GRAVEYARD].maxDistanceDikstra = 20;
 	generators[GENERATOR_GRAVEYARD].typeOfTile = TILE_BLIGHT;
 
 	generators[GENERATOR_CAVE].type = GENERATOR_CAVE;
@@ -2766,7 +2861,7 @@ void export_generators() {
 	generators[GENERATOR_INFECTION].chanceToSpawn[ABOMINATION_MONSTER] = 0.01f;
 	generators[GENERATOR_INFECTION].levelDungon = 1;
 	generators[GENERATOR_INFECTION].monsterNumber = 0;
-	generators[GENERATOR_INFECTION].maxDistanceDikstra = 3;
+	generators[GENERATOR_INFECTION].maxDistanceDikstra = 20;
 	generators[GENERATOR_INFECTION].typeOfTile = TILE_POISION;
 
 	//ORC
@@ -2779,7 +2874,7 @@ void export_generators() {
 	generators[GENERATOR_ORC].chanceToSpawn[BERSERKER_MONSTER] = 0.9f;
 	generators[GENERATOR_ORC].levelDungon = 4;
 	generators[GENERATOR_ORC].monsterNumber = 1;
-	generators[GENERATOR_ORC].maxDistanceDikstra = 5;
+	generators[GENERATOR_ORC].maxDistanceDikstra = 20;
 	generators[GENERATOR_ORC].typeOfTile = TILE_GRASS;
 
 	//ABOMINATION
@@ -2789,7 +2884,7 @@ void export_generators() {
 	generators[GENERATOR_ABOMINATION].chanceToSpawn[ABOMINATION_MONSTER] = 0.9f;
 	generators[GENERATOR_ABOMINATION].levelDungon = 3;
 	generators[GENERATOR_ABOMINATION].monsterNumber = 0;
-	generators[GENERATOR_ABOMINATION].maxDistanceDikstra = 5;
+	generators[GENERATOR_ABOMINATION].maxDistanceDikstra = 20;
 	generators[GENERATOR_ABOMINATION].typeOfTile = TILE_POISION;
 
 	//FIEND
@@ -2800,7 +2895,7 @@ void export_generators() {
 	generators[GENERATOR_FIEND].chanceToSpawn[GHOUL_MONSTER] = 0.1f;
 	generators[GENERATOR_FIEND].levelDungon = 3;
 	generators[GENERATOR_FIEND].monsterNumber = 0;
-	generators[GENERATOR_FIEND].maxDistanceDikstra = 3;
+	generators[GENERATOR_FIEND].maxDistanceDikstra = 20;
 	generators[GENERATOR_FIEND].typeOfTile = TILE_BLIGHT;
 
 	//NECRO
@@ -2811,7 +2906,7 @@ void export_generators() {
 	generators[GENERATOR_NECRO].chanceToSpawn[GHOUL_MONSTER] = 0.9f;
 	generators[GENERATOR_NECRO].levelDungon = 1;
 	generators[GENERATOR_NECRO].monsterNumber = 1;
-	generators[GENERATOR_NECRO].maxDistanceDikstra = 3;
+	generators[GENERATOR_NECRO].maxDistanceDikstra = 20;
 	generators[GENERATOR_NECRO].typeOfTile = TILE_BLIGHT;
 
 	//NECRO
@@ -2820,7 +2915,7 @@ void export_generators() {
 	generators[GENERATOR_DRAGON].chanceToSpawn[DRAGON_MONSTER] = 1.0f;
 	generators[GENERATOR_DRAGON].levelDungon = 40;
 	generators[GENERATOR_DRAGON].monsterNumber = 0;
-	generators[GENERATOR_DRAGON].maxDistanceDikstra = 3;
+	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
 	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
 
 
@@ -2829,7 +2924,7 @@ void export_generators() {
 
 
 	}
-void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room) {
+void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room, SDL_bool isEnv) {
 	i32 stopY = room.pos.y + room.height;
 	CLAMP(stopY, 3, MAP_Y - 2);
 	i32 stopX = room.pos.x + room.width;
@@ -2897,7 +2992,10 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 			calculate_diakstra_map(player, map, monsters, pos.x, pos.y);
 
 			//GENERATING RANDOM TILES
-			caved_part_generator(gen.typeOfTile, map, gen.maxDistanceDikstra);
+			if(isEnv){
+				caved_part_generator(gen.typeOfTile, map, gen.maxDistanceDikstra);	
+			}
+			
 			//
 			i32 x = 0, y = 0;
 			i32 counter6 = 0;
