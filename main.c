@@ -19,6 +19,10 @@ SDL_Texture*      playerTextures;
 SDL_Texture*      cloudTextures;
 SDL_Texture*      itemTextures;
 SDL_Texture*      swordTextures;
+SDL_Texture*      grassTextures;
+SDL_Texture* 			boulderTextures;
+SDL_Texture* 			treeTextures;
+SDL_Texture*      stairTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -53,17 +57,17 @@ void generate_level() {
 		}
 	else {
 		for(u64 i = 0; i < rooms.count; i++) {
-			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i]);
+			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i], SDL_TRUE);
 			}
 		}
 
 
 
 	//genereate_monsters(&monster, map);
-	//calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
-	//caved_part_generator(TILE_TREE, map, 5);
-	//calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
-	//caved_part_generator(TILE_GRASS, map, 100);
+	calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
+	caved_part_generator(TILE_TREE, map, 2);
+	calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
+	caved_part_generator(TILE_GRASS, map, 100);
 	MOVMENT = 0;
 	COUNTMOVES = 0;
 	player->pos.x = rooms.items[0].center.x;
@@ -112,17 +116,19 @@ int main() {
 		}, WHITE);
 
 	player->attack[0]  = 2;
-	player->defence[0] = 5;
+	player->defence[0] = 2;
 	player->attack[1]  = 2;
-	player->defence[1] = 5;
+	player->defence[1] = 2;
 	player->attack[2]  = 2;
-	player->defence[2] = 5;
+	player->defence[2] = 2;
 	player->attack[3]  = 2;
-	player->defence[3] = 5;
+	player->defence[3] = 2;
 	player->stamina    = 15;
 	player->maxStamina = 15;
 	player->chanceToDecressStaminaMove = 0.1f;
-	Item* sword = create_item(0, 0, PLAYER_SWORD_CREATE());
+	Item* sword = create_item(0, 0, DAGER_CREATE());
+	//sword->poisonChance = 1.0f;
+	//sword->critDamageChance = 1.0f;
 	sword->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*sword));
 	Item* armor = create_item(0, 0, PLAYER_ARMOR_CREATE());
@@ -192,7 +198,7 @@ int main() {
 			room.pos.y  = 0;
 			room.width  = MAP_Y - 1;
 			room.height = MAP_X - 1;
-			genereate_monsters_generator(player, &monster, map, LEVEL, room);
+			genereate_monsters_generator(player, &monster, map, LEVEL, room, SDL_FALSE);
 			}
 		if((COUNTMOVES+1) % 200 == 0) {
 			Room room;
@@ -200,10 +206,9 @@ int main() {
 			room.pos.y  = 0;
 			room.width  = MAP_Y - 1;
 			room.height = MAP_X - 1;
-			genereate_monsters_generator(player, &monster, map, LEVEL + 1, room);
+			genereate_monsters_generator(player, &monster, map, LEVEL + 1, room, SDL_FALSE);
 			}
 		if(player->health <= 0) {
-			;
 			da_append(&MESSAGES, "You loose");
 			exit(-1);
 			player->health = 10;
