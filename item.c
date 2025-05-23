@@ -139,6 +139,30 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				break;
 
 				}
+		//RANGE
+		case BOW_ITEM: {
+				for(i32 i = 0; i < DAMAGE_NUM; i++) {
+					item->attack[i]   = 0;
+					item->defence[i]  = 0;
+					}
+				item->attack[1] = rand()%(5 + LEVEL) + 1;	
+				item->equipedTo = EQUIPTED_RANGE; //WILL BE ABLE TO A DECRESS STAMINA TO 0
+				char msg[150];
+				item->type = BOW_ITEM;
+				//snprintf(msg, 150, " H(%d),HD(%d),C(%d,%.2f)", item->attack[DAMAGE_BASIC], item->defence[DAMAGE_BASIC]
+				//         ,item->critDamage, item->critDamageChance);
+				//strncat(item->descripction, msg, MAX_DESCRIPTION);
+				break;
+				}
+		case ARROW_ITEM: {
+				item->equipedTo = EQUIPTED_USE;
+				//i//tem->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = ARROW_ITEM;
+				item->itemValue =  rand()%5 + 1;
+				snprintf(item->descripction, MAX_NAME, "Baga of arrows %d", item->itemValue);
+				break;
+				}
+
 		case PLAYER_ARMOR_ITEM: {
 				for(i32 i = 0; i < DAMAGE_NUMi; i++) {
 					item->attack[i]   = 0;
@@ -369,6 +393,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				memcpy(item->name, text, MAX_NAME);
 				snprintf(text, MAX_NAME, "Baga of gold %s %d", item->name, item->itemValue);
 				strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
 				break;
 				}
 
@@ -393,7 +418,39 @@ void pick_item_from_ground(Item* item, Item_DA *inventory) {
 	//I SHOUD MAKE LIST BUT WHATEVER
 	item->pos.x = -200;
 	item->pos.y = -200; //JUST HIDE A ITEM
-	da_append(inventory, (*item));
+	//CHECK IF A ITEM IS A GOLD PIECE
+	if(item->type == GOLD_ITEM) {
+		SDL_bool isGoldPiece = SDL_FALSE;
+		for(u64 i = 0; i < inventory->count; i++) {
+			if(inventory->items[i].type == GOLD_ITEM) {
+				inventory->items[i].itemValue += item->itemValue;
+				snprintf(inventory->items[i].descripction, MAX_NAME, "Baga of gold %d", inventory->items[i].itemValue);
+				isGoldPiece = SDL_TRUE;
+				break;
+				}
+			}
+		if(!isGoldPiece) {
+			da_append(inventory, (*item));
+			}
+		}
+	else if(item->type == ARROW_ITEM) {
+		SDL_bool isArrowPiece = SDL_FALSE;
+		for(u64 i = 0; i < inventory->count; i++) {
+			if(inventory->items[i].type == ARROW_ITEM) {
+				inventory->items[i].itemValue += item->itemValue;
+				snprintf(inventory->items[i].descripction, MAX_NAME, "Baga of arrow %d", inventory->items[i].itemValue);
+				isArrowPiece = SDL_TRUE;
+				break;
+				}
+			}
+		if(!isArrowPiece) {
+			da_append(inventory, (*item));
+			}
+		}
+	else {
+		da_append(inventory, (*item));
+		}
+
 	//IF CURSED OR OTHER STUFS
 	}
 
@@ -410,9 +467,10 @@ void equiped_item(Item_DA *items, u64 numItem) {
 
 	Item itemToEquipt = items->items[numItem];
 	Item_Equipted type = itemToEquipt.equipedTo;
+
 	if(type == EQUIPTED_USE) {
 		USEITEM = SDL_TRUE;
-		//da_append(&MESSAGES, "Item is not equipped");
+		da_append(&MESSAGES, "Item is not equipped");
 		return;
 		}
 	itemToEquipt.isEquiped = SDL_TRUE;
