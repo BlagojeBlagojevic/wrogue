@@ -178,6 +178,7 @@ typedef enum {
 	GENERATOR_ORC,
 	GENERATOR_FIEND,
 	GENERATOR_NECRO,
+	GENERATOR_ARIA,
 	GENERATOR_DRAGON,
 	GENERATOR_NUM
 	} Generator_Type;
@@ -203,6 +204,7 @@ i32 roll_the_dice(i32 attack, i32 defence);
 void message_attacked_by_monster(Entitiy* player, Entitiy* entity, i32 damage, Damage_Types type);
 void message_attacked_by_player(Entitiy* player, Entitiy* entity, i32 damage);
 SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map);
+SDL_bool player_attack_range(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map);
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance);
 void monster_definitions_export();
 void item_definitions_export();
