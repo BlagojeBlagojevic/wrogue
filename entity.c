@@ -218,8 +218,8 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
 	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
-	SDL_RenderPresent(RENDERER);
-	SDL_Delay(MS_ANIMATION);
+	//SDL_RenderPresent(RENDERER);
+	//SDL_Delay(MS_ANIMATION);
 	i32 iPl = 0, iEnt = 0;
 	for(u64 i = 0; i < player->inventory.count; i++) {
 		Item item = player->inventory.items[i];
@@ -417,7 +417,7 @@ SDL_bool player_attack_range(Entitiy *player, Entitiy* entity, Item_DA *items, T
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
 	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	SDL_RenderPresent(RENDERER);
-	SDL_Delay(MS_ANIMATION);
+	//SDL_Delay(MS_ANIMATION);
 
 
 
@@ -525,11 +525,11 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 
 	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	SDL_ERR(SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect));
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	//SDL_SetRenderDrawColor(RENDERER, 0x20, 125, 0X20, 125);
 	//SDL_RenderDrawRect(RENDERER, &textRect);
-	SDL_RenderPresent(RENDERER);
-	SDL_Delay(MS_ANIMATION);
+	//SDL_RenderPresent(RENDERER);
+	//SDL_Delay(MS_ANIMATION);
 	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
 	//LEVEL SCALING
 	if(rand_f64() < CHANCE_PLAYER_LEVEL) {

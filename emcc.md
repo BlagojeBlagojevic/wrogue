@@ -14,4 +14,11 @@ Animations are a problem cuzz not like normal game
 Assets in init textures and font to change /assets prob
 Probobly optimaize somehow animations or webgl support
 Also disable vSync maybe
+@BlagojeBlagojevic ➜ /workspaces/wrogue (emcc) $ sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
 
+Emscripten: 
+git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+./emsdk install latest
+./emsdk activate latest
+source ./emsdk_env.sh

@@ -6,20 +6,9 @@
 #include <string.h>
 #include <math.h>
 
-#include<SDL2/SDL_hints.h>
-#include<SDL2/SDL_error.h>
-#include<SDL2/SDL_log.h>
-#include<SDL2/SDL_video.h>
-#include<SDL2/SDL_render.h>
-#include<SDL2/SDL_pixels.h>
-#include<SDL2/SDL_rect.h>
-#include<SDL2/SDL_surface.h>
-#include<SDL2/SDL_clipboard.h>
-#include<SDL2/SDL_events.h>
+#include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
-//#include<SDL2/SDl_timer.h>
-#include<SDL2/SDL_keyboard.h>
-#include<SDL2/SDL_scancode.h>
+#include<SDL2/SDL_ttf.h>
 #undef main
 
 //COLORS

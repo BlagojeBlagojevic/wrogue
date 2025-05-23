@@ -830,7 +830,7 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 			//render_player(&monsters->items[count]);
 			render_player_texture(&monsters->items[count]);
 			SDL_RenderPresent(RENDERER);
-			SDL_Delay(10);
+			//SDL_Delay(10);
 			}
 
 		}
@@ -1731,7 +1731,7 @@ void render_map(Tile *map, Entitiy *player) {
 						player_input(&EVENT, player, entitis, items, map);
 						//
 						player_negative_effect(player, map);
-						SDL_Delay(1);
+						//SDL_Delay(1);
 						}
 					}
 				EVENT.type = 0;
