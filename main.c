@@ -142,7 +142,7 @@ int main() {
     snprintf(msg, 30, "Your seed is %d", (i16)seed);
     da_append(&MESSAGES, msg);
 
-    WINDOW = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1, 800, SDL_WINDOW_OPENGL);
+    WINDOW = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 800, SDL_WINDOW_OPENGL);
     RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetWindowResizable(WINDOW, SDL_TRUE);
     FONT = TTF_OpenFont(fontLoc, 128);
