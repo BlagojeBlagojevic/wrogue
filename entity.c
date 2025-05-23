@@ -217,7 +217,7 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
 
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	SDL_ERR(SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect));
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	SDL_RenderPresent(RENDERER);
 	SDL_Delay(MS_ANIMATION);
 	i32 iPl = 0, iEnt = 0;
@@ -369,6 +369,153 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 
 	}
 
+SDL_bool player_attack_range(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* map) {
+	DROP(map);
+	i32 iPl = 0, iEnt = 0;
+	u8 isBow = SDL_FALSE;
+	u64  arrowI = (u64)INF;
+	for(u64 i = 0; i < player->inventory.count; i++) {
+		Item item = player->inventory.items[i];
+		if(item.type == ARROW_ITEM) {
+			arrowI = i;
+			}
+		if(item.isEquiped == SDL_TRUE) {
+			if(item.type == BOW_ITEM) {
+				isBow = SDL_TRUE;
+				//bowI = i;
+				}
+			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT && isBow) {
+				iPl += item.attack[1];
+				}
+			}
+		}
+
+	if(!isBow) {
+		da_append(&MESSAGES, "You do not have a bow equipted");
+		return SDL_FALSE;
+		}
+	if(arrowI == INF) {
+		da_append(&MESSAGES, "You do not have any arrows");
+		return SDL_FALSE;
+		}
+	else {
+
+		if(player->inventory.items[arrowI].itemValue == 0) {
+			da_append(&MESSAGES, "You do not have any arrows");
+			return SDL_FALSE;
+			}
+		player->inventory.items[arrowI].itemValue--;
+		//LOG("Value %d", player->inventory.items[arrowI].itemValue);
+		//exit(-1);
+		CLAMP(player->inventory.items[arrowI].itemValue, 0, (i32)INF);
+		snprintf(player->inventory.items[arrowI].descripction, MAX_NAME, "Baga of arrows %d", player->inventory.items[arrowI].itemValue);
+		}
+
+	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
+	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
+
+	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+	SDL_RenderPresent(RENDERER);
+	SDL_Delay(MS_ANIMATION);
+
+
+
+	for(u64 i = 0; i < entity->inventory.count; i++) {
+		Item item = entity->inventory.items[i];
+		if(item.isEquiped == SDL_TRUE) {
+			//MAYBE CHANCE TO DO SOMTHING
+			//TBD CHANGE THIS STUFF TO GET ALL TYPES WHEN ADDED
+			if(rand_f64() < CHANCE_ITEM_USED_IN_COMBAT) {
+				iEnt += item.defence[1];
+				}
+			}
+		}
+//LOG("player att %d decOrInc %d\n", player->attack[0] ,iPl );
+//LOG("entity def %d decOrInc %d\n", entity->attack[0] ,iEnt );
+	i32 damage;
+	if(rand_f64() < CHANCE_PLAYER_LEVEL) {
+		damage = roll_the_dice(player->attack[0] + iPl, entity->defence[1] + iEnt + rand()%LEVEL);
+		}
+	else {
+		damage = roll_the_dice(player->attack[0] + iPl, entity->defence[1] + iEnt);
+		}
+
+	if(damage < 0) {
+		player->health+=damage;
+		}
+	else {
+		entity->health-=damage;
+		}
+
+	CLAMP(entity->health, 0, 100);
+	message_attacked_by_player(player, entity, damage);
+//DROP(player);
+//i32 x1 = player->pos.x;
+//i32 y1 = player->pos.y;
+
+//i32 x2 = entity->pos.x;
+//i32 y2 = entity->pos.y;
+//f64 distance = DISTANCE(x1, y1, x2, y2);
+//if(distance == 0.0f) {
+//	}
+	if(entity->health == 0) {
+		entity->isAlive = SDL_FALSE;
+		//entity->ch = 'S';
+		//DROP ITEMS
+		for(u64 i = 0; i < entity->inventory.count; i++) {
+			SDL_bool drop = SDL_FALSE;
+			i32 mod = 3;
+			i32 neg = -1;
+			while(drop == SDL_FALSE) {
+
+				drop = SDL_TRUE;
+				i32 x = rand()%mod + neg;
+				i32 y = rand()%mod + neg;
+				//KINDA WE DO NOT SEE THEM IF IT DROP IN A WALL LIKE IF IT IS LOST
+				//ITS STUPID
+				Item item = entity->inventory.items[i];
+				x+=entity->pos.x;
+				y+=entity->pos.y;
+				for(u64 j = 0; j < items->count; j++) {
+					if(x == items->items[j].pos.x && y == items->items[j].pos.y) {
+
+						drop = SDL_FALSE;
+						mod++;
+						neg--;
+						break;
+						}
+					}
+				if(drop == SDL_TRUE) {
+					item.pos.x = x;
+					item.pos.y = y;
+					//LOG("Droped(%d %d)\n\n", x, y);
+					//FOR DROPING WHAT
+					if(item.type <= SHOES_ITEM) {
+						if(rand_f64() < CHANCE_DROP_ITEM) {
+							da_append(items, item);
+							}
+						}
+					else {
+						if(rand_f64() < CHANCE_DROP_ITEM_CONS) {
+							da_append(items, item);
+							}
+						}
+					}
+				}
+			}
+
+		return SDL_TRUE;
+		}
+	else {
+		return SDL_FALSE;
+		}
+
+	}
+
+
+
+
 
 //TBD CURSED ITEMS
 void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
@@ -418,51 +565,51 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 					lfC += item.lifeStealChance;
 					lf  += item.lifeSteal;
 					switch(item.type) {
-					case SWORD_ITEM: {
-							//LIFESTEAL
-							if(rand_f64() < item.lifeStealChance) {
-								entity->health+=item.lifeSteal;
-								CLAMP(entity->health, 0, entity->health);
+						case SWORD_ITEM: {
+								//LIFESTEAL
+								if(rand_f64() < item.lifeStealChance) {
+									entity->health+=item.lifeSteal;
+									CLAMP(entity->health, 0, entity->health);
 
+									}
+								break;
 								}
-							break;
-							}
-					case PLAYER_SWORD_ITEM: {
-							//LIFESTEAL
-							if(rand_f64() < item.lifeStealChance) {
-								entity->health+=item.lifeSteal;
-								CLAMP(entity->health, 0, entity->health);
+						case PLAYER_SWORD_ITEM: {
+								//LIFESTEAL
+								if(rand_f64() < item.lifeStealChance) {
+									entity->health+=item.lifeSteal;
+									CLAMP(entity->health, 0, entity->health);
+									}
+								break;
 								}
-							break;
-							}
-					case AXE_ITEM: {
-							if(rand_f64() < item.critDamageChance) {
-								player->health-=item.critDamage;
-								CLAMP(player->health, 0, player->maxHealth);
+						case AXE_ITEM: {
+								if(rand_f64() < item.critDamageChance) {
+									player->health-=item.critDamage;
+									CLAMP(player->health, 0, player->maxHealth);
+									}
+								break;
 								}
-							break;
-							}
-					case DAGER_ITEM: {
-							if(rand_f64() < item.poisonChance) {
-								player->health--;
-								player->maxHealth--;
-								CLAMP(player->maxHealth, 0, (i32)INF);
-								CLAMP(player->health, 0, player->maxHealth);
+						case DAGER_ITEM: {
+								if(rand_f64() < item.poisonChance) {
+									player->health--;
+									player->maxHealth--;
+									CLAMP(player->maxHealth, 0, (i32)INF);
+									CLAMP(player->health, 0, player->maxHealth);
+									}
+								break;
 								}
-							break;
-							}
 
-					case PIKE_ITEM: {
-							if(rand_f64() < item.critDamageChance) {
-								entity->stamina = 0;
+						case PIKE_ITEM: {
+								if(rand_f64() < item.critDamageChance) {
+									entity->stamina = 0;
+									}
+								break;
 								}
-							break;
-							}
-					default: {
-							break;
-							}
-					}
-					
+						default: {
+								break;
+								}
+						}
+
 					}
 				}
 			}
@@ -2816,9 +2963,11 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 				da_remove_unordered(items, numItem);
 				break;
 				}
-
-
 		case GOLD_ITEM: {
+				da_append(&MESSAGES, "Use it for what");
+				break;
+				}
+		case ARROW_ITEM: {
 				da_append(&MESSAGES, "Use it for what");
 				break;
 				}
@@ -2909,11 +3058,24 @@ void export_generators() {
 	generators[GENERATOR_NECRO].maxDistanceDikstra = 20;
 	generators[GENERATOR_NECRO].typeOfTile = TILE_BLIGHT;
 
+	//ARIAL
+	generators[GENERATOR_ARIA].type = GENERATOR_ARIA;
+	memset(generators[GENERATOR_ARIA].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
+	generators[GENERATOR_ARIA].chanceToSpawn[GARGOYLE_MONSTER] = 0.6f;
+	generators[GENERATOR_ARIA].chanceToSpawn[DESTROYER_MONSTER] = 0.4f;
+
+	generators[GENERATOR_ARIA].levelDungon = 4;
+	generators[GENERATOR_ARIA].monsterNumber = 1;
+	generators[GENERATOR_ARIA].maxDistanceDikstra = 2;
+	generators[GENERATOR_ARIA].typeOfTile = TILE_GARG_STAT;
+
+
+
 	//NECRO
 	generators[GENERATOR_DRAGON].type = GENERATOR_DRAGON;
 	memset(generators[GENERATOR_DRAGON].chanceToSpawn, 0.0f, NUM_MONSTER * sizeof(f64));
 	generators[GENERATOR_DRAGON].chanceToSpawn[DRAGON_MONSTER] = 1.0f;
-	generators[GENERATOR_DRAGON].levelDungon = 40;
+	generators[GENERATOR_DRAGON].levelDungon = 5;
 	generators[GENERATOR_DRAGON].monsterNumber = 0;
 	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
 	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
@@ -2992,10 +3154,10 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 			calculate_diakstra_map(player, map, monsters, pos.x, pos.y);
 
 			//GENERATING RANDOM TILES
-			if(isEnv){
-				caved_part_generator(gen.typeOfTile, map, gen.maxDistanceDikstra);	
-			}
-			
+			if(isEnv) {
+				caved_part_generator(gen.typeOfTile, map, gen.maxDistanceDikstra);
+				}
+
 			//
 			i32 x = 0, y = 0;
 			i32 counter6 = 0;
