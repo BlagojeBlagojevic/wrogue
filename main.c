@@ -23,6 +23,7 @@ SDL_Texture*      grassTextures;
 SDL_Texture* 			boulderTextures;
 SDL_Texture* 			treeTextures;
 SDL_Texture*      stairTextures;
+SDL_Texture*      rangeItemsTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -75,7 +76,11 @@ void generate_level() {
 	if(rooms.items != NULL) {
 		free(rooms.items);
 		}
-	Item* helmet = create_item(player->pos.x, player->pos.y, VITALITY_CREATE());
+	Item* helmet = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+	da_append(&items, (*helmet));
+	helmet = create_item(player->pos.x+1, player->pos.y, ARROW_CREATE());
+	da_append(&items, (*helmet));
+	helmet = create_item(player->pos.x+2, player->pos.y, ARROW_CREATE());
 	da_append(&items, (*helmet));
 
 	}
@@ -97,7 +102,7 @@ int main() {
 		da_append(&MESSAGES, "   ");
 		}
 	char* msg = calloc(30, sizeof(char));
-	snprintf(msg, 30, "Your seed is %ld", seed);
+	snprintf(msg, 30, "Your seed is %d", (i16)seed);
 	da_append(&MESSAGES, msg);
 
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800,  SDL_WINDOW_OPENGL);
@@ -110,7 +115,8 @@ int main() {
 	init_texture();
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
-	ITEMSREND = SDL_FALSE;
+	ITEMSREND = SDL_TRUE;
+	
 	player = create_entity('@', "Some Name", 10, 20, (Position) {
 		40, 40
 		}, WHITE);
@@ -157,7 +163,7 @@ int main() {
 	//Entitiy_DA monsters = {0};
 
 	LEVEL = 0;
-	DEPTH = 25;
+	DEPTH = 7;
 	generate_level();
 	//MAP_STDOUT();
 	while(!QUIT) {

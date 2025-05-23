@@ -87,6 +87,13 @@ void init_texture() {
 	treeTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
 	SDL_FreeSurface(tempSur);
 
+	tempSur = IMG_Load("assets/rangeitems.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	rangeItemsTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
 
 
 	}
@@ -364,6 +371,152 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		player->stamina++;
 		MOVMENT = SDL_TRUE;
 		}
+	else if(key == KEY_R) {
+		i32 witch_monster = -1;
+		MOVMENT = SDL_TRUE;
+		//RANGE = SDL_TRUE;
+		//LOG("Last %c", LASTKEY);
+		switch(LASTKEY) {
+			case UP_ARROW:
+			case KEY_W: {
+					witch_monster = is_monster_on_entity(player->pos.x, player->pos.y - 1, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x, player->pos.y - 2, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x, player->pos.y - 3, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case DOWN_ARROW:
+			case KEY_S: {
+					witch_monster = is_monster_on_entity(player->pos.x, player->pos.y + 1, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x, player->pos.y + 2, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x, player->pos.y + 3, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case RIGHT_ARROW:
+			case KEY_D: {
+					witch_monster = is_monster_on_entity(player->pos.x + 1, player->pos.y, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x + 2, player->pos.y, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x + 3, player->pos.y, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case LEFT_ARROW:
+			case KEY_A: {
+					witch_monster = is_monster_on_entity(player->pos.x - 1, player->pos.y, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x - 2, player->pos.y, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x - 3, player->pos.y, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case KEY_Q: {
+					witch_monster = is_monster_on_entity(player->pos.x - 1, player->pos.y - 1, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x - 2, player->pos.y - 2, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x - 3, player->pos.y - 3, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case KEY_E: {
+					witch_monster = is_monster_on_entity(player->pos.x + 1, player->pos.y - 1, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x + 2, player->pos.y - 2, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x + 3, player->pos.y - 3, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case KEY_Y:
+			case KEY_Z: {
+					witch_monster = is_monster_on_entity(player->pos.x - 1, player->pos.y + 1, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x - 2, player->pos.y + 2, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x - 3, player->pos.y + 3, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			case KEY_C: {
+					witch_monster = is_monster_on_entity(player->pos.x + 1, player->pos.y + 1, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x + 2, player->pos.y + 2, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					witch_monster = is_monster_on_entity(player->pos.x + 3, player->pos.y + 3, entitis);
+					if(witch_monster != -1) {
+						break;
+						}
+					break;
+					}
+			default: {
+					break;
+					}
+			}
+		//LOG("%d", witch_monster);
+		if(witch_monster != -1) {
+			//exit(-1);
+			SDL_bool isF =  player_attack_range(player, &entitis->items[witch_monster], items, map);
+			}
+		else {
+			//da_append(&MESSAGES, "Noting to attack i that direction");
+			}
+
+		}
+
 	else if(key == UP_ARROW || key == KEY_W) {
 
 		if(player->pos.y > 0 && MAP_ISW(map, player->pos.x, player->pos.y-1) == SDL_TRUE) {
@@ -391,6 +544,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
+		LASTKEY = key;
 		}
 	else if(key == DOWN_ARROW || key == KEY_S) {
 		if(player->pos.y < MAP_Y && MAP_ISW(map, player->pos.x, player->pos.y+1) == SDL_TRUE) {
@@ -416,7 +570,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
-
+		LASTKEY = key;
 		}
 	else if(key == LEFT_ARROW || key == KEY_A) {
 		if(rand_f64() < player->chanceToDecressStaminaMove)
@@ -442,7 +596,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
-
+		LASTKEY = key;
 		}
 	else if(key == RIGHT_ARROW || key == KEY_D) {
 
@@ -469,6 +623,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
+		LASTKEY = key;
 		}
 	else if(key == KEY_Q) {
 
@@ -496,6 +651,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
+		LASTKEY = key;
 		}
 	else if(key == KEY_E) {
 
@@ -524,6 +680,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
+		LASTKEY = key;
 		}
 	else if(key == KEY_Z || key == KEY_Y) {
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x - 1, player->pos.y + 1) == SDL_TRUE) {
@@ -551,6 +708,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
+		LASTKEY = key;
 		}
 	else if(key == KEY_C) {
 		if(player->pos.x < MAP_X && MAP_ISW(map, player->pos.x + 1, player->pos.y + 1) == SDL_TRUE) {
@@ -578,6 +736,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 				MOVMENT = SDL_TRUE;
 				}
 			}
+		LASTKEY = key;
 		}
 
 	else if(key == SPACE) {
@@ -618,6 +777,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		MOVMENT = SDL_TRUE;
 		EQUITEM = SDL_TRUE;
 		}
+
 	}
 
 
@@ -700,6 +860,7 @@ void render_item(Item* item, Tile* map) {
 		//SDL_SetRenderDrawColor(RENDERER, 100, 100, 100, 100);
 		//SDL_RenderFillRect(RENDERER, &temp);
 		//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, ch, item->color);
+		u8 isRange = SDL_FALSE;
 		SDL_Rect textSize = {startX, startY, FONT_H, FONT_W}, what = {0, 0, 0, 0};
 		switch(item->type) {
 			case SWORD_ITEM: {
@@ -744,6 +905,23 @@ void render_item(Item* item, Tile* map) {
 					what.w = 240;
 					break;
 					}
+			case BOW_ITEM: {
+					what.x = 341;
+					what.y = 0;
+					what.h = 1100;
+					what.w = 300;
+					isRange = SDL_TRUE;
+					break;
+					}
+			case ARROW_ITEM: {
+					what.x = 641;
+					what.y = 0;
+					what.h = 1024;
+					what.w = 341;
+					isRange = SDL_TRUE;
+					break;
+					}
+
 			case ARMOR_ITEM: {
 					what.x = 160;
 					what.y = 256;
@@ -841,7 +1019,13 @@ void render_item(Item* item, Tile* map) {
 					break;
 					}
 			}
-		SDL_RenderCopy(RENDERER, itemTextures, &what, &textSize);
+		if(!isRange) {
+			SDL_RenderCopy(RENDERER, itemTextures, &what, &textSize);
+			}
+		else {
+			SDL_RenderCopy(RENDERER, rangeItemsTextures, &what, &textSize);
+			}
+
 		}
 	}
 
@@ -1532,8 +1716,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 150;
-						FONT_H = 150;
+						FONT_W = 50;
+						FONT_H = 50;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;

@@ -18,6 +18,10 @@ typedef enum{
 	SHIELD_ITEM,
 	SHOES_ITEM,
 	
+	//RANGE ITEMS
+	BOW_ITEM,
+	ARROW_ITEM,
+	
 	HEALING_ITEM,
 	STRENGTH_POTION,
 	AGILITY_POTION,
@@ -61,6 +65,7 @@ typedef enum{
 	
 	EQUIPTED_ARMOR,
 	EQUIPTED_WEPON,
+	EQUIPTED_RANGE,
 	EQUIPTED_SHIELD,
 	EQUIPTED_LEGS,
 	EQUIPTED_HEAD,
@@ -72,7 +77,7 @@ typedef enum{
 //THIS HAS TO BE CHANGED IF CHANGE AMOUNT OF TYPES OF THE ATTACKS
 #define DAMAGE_NUMi 4 
 
-
+//MELE
 #define SWORD_CREATE()            5, "SWORD",  '{', WHITE,  SWORD_ITEM,           NORMAL, SDL_FALSE
 #define AXE_CREATE()              5, "AXE",    '{', WHITE,  AXE_ITEM,             NORMAL, SDL_FALSE
 #define DAGER_CREATE()            5, "DAGER",  '{', WHITE,  DAGER_ITEM,           NORMAL, SDL_FALSE
@@ -82,11 +87,14 @@ typedef enum{
 
 #define PLAYER_SWORD_CREATE()     5, "SWORD",  '{', WHITE,  PLAYER_SWORD_ITEM,    NORMAL, SDL_FALSE
 #define PLAYER_ARMOR_CREATE()     5, "ARMOR",  '[', WHITE,  PLAYER_ARMOR_ITEM,    NORMAL, SDL_FALSE
-
+//DEF
 #define ARMOR_CREATE()            5, "ARMOR",  '[', WHITE,  ARMOR_ITEM,           NORMAL, SDL_FALSE 
 #define HELMET_CREATE()           5, "HELMET", '[', WHITE,  HELMET_ITEM,          NORMAL, SDL_FALSE
 #define SHIELD_CREATE()           5, "SHIELD", '[', WHITE,  SHIELD_ITEM,          NORMAL, SDL_FALSE
 #define SHOES_CREATE()            5, "SHOES",  '[', WHITE,  SHOES_ITEM,           NORMAL, SDL_FALSE
+//RANGE
+#define BOW_CREATE()              5, "BOW",    '|', WHITE,  BOW_ITEM,             NORMAL, SDL_FALSE
+#define ARROW_CREATE()            5, "ARROW",  '|', WHITE,  ARROW_ITEM,           NORMAL, SDL_FALSE
 
 #define HEALING_CREATE()	        5, "",       '!', WHITE,  HEALING_ITEM,         NORMAL, SDL_FALSE
 #define STRENGHT_CREATE()	        5, "",       '!', WHITE,  STRENGTH_POTION,      NORMAL, SDL_FALSE
@@ -99,7 +107,7 @@ typedef enum{
 #define MEAT_CREATE()	            5, "Meat",   '%',WHITE,  MEAT_ITEM,            NORMAL, SDL_FALSE
 #define BERRY_CREATE()	          5, "Bery",   '%',WHITE,  BERRY_ITEM,           NORMAL, SDL_FALSE
 
-#define GOLD_CREATE()	            5, "",       'g', YELLOW, GOLD_ITEM,            NORMAL, SDL_FALSE
+#define GOLD_CREATE()	            5, "",       'g', YELLOW, GOLD_ITEM,           NORMAL, SDL_FALSE
 //#define DART_CREATE()   5, "DART",   '|', BLUE
 //#define POTION_CREATE() 5, "POTION", '#', BLUE
 
