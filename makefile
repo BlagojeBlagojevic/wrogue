@@ -1,4 +1,4 @@
-CFLAGS  = -Wall -Wextra -Wno-unused-variable -Wimplicit-fallthrough=0 -Werror -std=c11 -ggdb -lSDL2 -lm -lSDL2_ttf
+CFLAGS  = -Wall -Wextra -Wno-unused-variable -Wimplicit-fallthrough=0 -Werror -std=c11 -ggdb -lSDL2 -lm -lSDL2_ttf -lSDL2_image
 CC = gcc
 
 
