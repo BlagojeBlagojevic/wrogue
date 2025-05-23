@@ -50,6 +50,8 @@
 #define KEY_X 120
 #define KEY_C 99
 
+#define KEY_R 114
+
 #define LEFT_ARROW 1073741904
 #define RIGHT_ARROW 1073741903
 #define UP_ARROW 1073741906
@@ -164,6 +166,8 @@ typedef struct Graphics_State {
 	u8            depth;
 	u8            levelPlayer;
 	u8            isTimeToGenerateMap;
+	u8            isRangeAttack;
+	u32           lastKey;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -186,7 +190,7 @@ extern SDL_Texture* grassTextures;
 extern SDL_Texture* boulderTextures;
 extern SDL_Texture* treeTextures;
 extern SDL_Texture* stairTextures;
-
+extern SDL_Texture* rangeItemsTextures;
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
 #define RENDERER   mainGraphics.renderer
@@ -210,6 +214,8 @@ extern Graphics_State mainGraphics;
 #define DEPTH      mainGraphics.depth
 #define LEVEL      mainGraphics.levelPlayer
 #define GENMAP     mainGraphics.isTimeToGenerateMap
+#define RANGE      mainGraphics.isRangeAttack
+#define LASTKEY		 mainGraphics.lastKey
 
 
 
@@ -224,7 +230,7 @@ extern Graphics_State mainGraphics;
 #define MS_ANIMATION 100
 
 
-#define PERCANTAGE_RUN_CHANCE 0.3f
+#define PERCANTAGE_RUN_CHANCE 0.9f
 #define PERCANTAGE_CROW_RUN_CHANCE 0.5f
 #define PERCENTAGE_MONSTER_GENERATED 0.005f
 #define MAX_STOP_RUN_DISTANCE 10.0f
@@ -251,9 +257,9 @@ extern Graphics_State mainGraphics;
 #define CHANCE_DROP_ITEM_CONS 0.7
 #define CHANCE_ITEM_CURSED 0.06f
 #define CHANCE_ITEM_USED_IN_COMBAT 0.80f
-#define CHANCE_USE_DEF 0.5f
+#define CHANCE_USE_DEF 0.3f
 #define CHANCE_NEGATIVE_DAMAGE 0.05f
-#define CHANCE_ITEM_PER_LEVEL 0.02f
+#define CHANCE_ITEM_PER_LEVEL 0.05f
 #define CHANCE_DROP_SELING_CAUSE_DAMAGE 0.8f
 #define CHANCE_MONSTER_HAVE_ITEM 0.05f
 #define CHANCE_CRITICAL_PLAYER 0.05f
