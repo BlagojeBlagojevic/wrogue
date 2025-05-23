@@ -31,7 +31,7 @@ if (ENVIRONMENT_IS_NODE) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpfc_zpim4.js
+// include: /tmp/tmpro6cpefb.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -216,7 +216,7 @@ Module['FS_createPath']("/assets", "fonts", true, true);
 
   })();
 
-// end include: /tmp/tmpfc_zpim4.js
+// end include: /tmp/tmpro6cpefb.js
 
 
 var arguments_ = [];

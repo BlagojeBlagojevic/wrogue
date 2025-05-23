@@ -829,7 +829,7 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
 			//render_player(&monsters->items[count]);
 			render_player_texture(&monsters->items[count]);
-			SDL_RenderPresent(RENDERER);
+			//SDL_RenderPresent(RENDERER);
 			//SDL_Delay(10);
 			}
 

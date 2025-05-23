@@ -216,8 +216,8 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
 	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
 
-	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+	//SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	//SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	//SDL_RenderPresent(RENDERER);
 	//SDL_Delay(MS_ANIMATION);
 	i32 iPl = 0, iEnt = 0;
@@ -414,9 +414,9 @@ SDL_bool player_attack_range(Entitiy *player, Entitiy* entity, Item_DA *items, T
 	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
 	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
 
-	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
-	SDL_RenderPresent(RENDERER);
+	//SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	//SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+	//SDL_RenderPresent(RENDERER);
 	//SDL_Delay(MS_ANIMATION);
 
 
@@ -524,8 +524,8 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	i32 startY = player->pos.y * FONT_H - CAMERA.y;
 
 	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
-	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+	//SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	//SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	//SDL_SetRenderDrawColor(RENDERER, 0x20, 125, 0X20, 125);
 	//SDL_RenderDrawRect(RENDERER, &textRect);
 	//SDL_RenderPresent(RENDERER);
