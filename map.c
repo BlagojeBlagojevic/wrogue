@@ -739,7 +739,7 @@ static void plot_4_points (i32 cx, i32 cy, i32 x, i32 y, Tile* map, char ch, SDL
 		MAP_ISW(map, cx - x, cy - y) = isW;
 		}
 	}
-static void plot_8_points (i32 cx, i32 cy, i32 x, i32 y, Tile* map, char ch) {
+void plot_8_points (i32 cx, i32 cy, i32 x, i32 y, Tile* map, char ch) {
 	plot_4_points (cx, cy, x, y, map,ch, 1);
 	if (x != y) plot_4_points (cx, cy, y, x, map, ch,1);
 	}
@@ -789,7 +789,7 @@ static void plot_line (i32 x0, i32 y0, i32 x1, i32 y1,Tile* map,  char ch, SDL_b
 		}
 	}
 
-static void plot_ellipse_rect (i32 x0, i32 y0, i32 x1, i32 y1, Tile* map, char ch) {
+void plot_ellipse_rect (i32 x0, i32 y0, i32 x1, i32 y1, Tile* map, char ch) {
 	i32 a = abs (x1 - x0), b = abs (y1 - y0), b1 = b & 1; /* values of diameter */
 	i64 dx = 4 * (1 - a) * b * b, dy = 4 * (b1 + 1) * a * a; /* error increment */
 	i64 err = dx + dy + b1 * a * a, e2; /* error of 1.step */
@@ -1075,8 +1075,8 @@ static void bsp_carve(Room_DA* rooms, BSPNode* node, Tile* map) {
 
 	// Leaf: create and carve a room
 	if (!node->left && !node->right) {
-		i32 rw = (rand() % (6)) + 6;
-		i32 rh = (rand() % (6)) + 6;
+		i32 rw = (rand() % (node->width - 6)) + 6;
+		i32 rh = (rand() % (node->height - 6)) + 6;
 		i32 rx = node->x + rand() % (node->width - rw);
 		i32 ry = node->y + rand() % (node->height - rh);
 		node->room = create_room(rx, ry, rh, rw);
@@ -1084,7 +1084,6 @@ static void bsp_carve(Room_DA* rooms, BSPNode* node, Tile* map) {
 		add_room_to_map(map, node->room);
 		add_room_wall_rectangle(map, node->room);
 		da_append(rooms, node->room);
-
 		}
 	else {
 		// Internal: carve children and then connect their rooms
