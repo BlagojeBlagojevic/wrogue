@@ -525,7 +525,7 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 
 	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	SDL_ERR(SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect));
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	//SDL_SetRenderDrawColor(RENDERER, 0x20, 125, 0X20, 125);
 	//SDL_RenderDrawRect(RENDERER, &textRect);
 	SDL_RenderPresent(RENDERER);
@@ -2833,6 +2833,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 	switch(itemToEquipt.type) {
 		case HEALING_ITEM: {
 				i32 isCursed = 0;
+				player->hunger = 255;
 				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
 					da_append(&MESSAGES,"Seems to restor the health");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
@@ -2932,6 +2933,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					{
 					da_append(&MESSAGES,"You eat a bery");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					player->hunger+=itemToEquipt.eatValue;
 					CLAMP(player->health, 0, player->maxHealth);
 					//da_append(&MESSAGES, "This seem to be potion of healing");
 					}
@@ -2944,6 +2946,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					{
 					da_append(&MESSAGES,"You eat a apple");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					player->hunger+=itemToEquipt.eatValue;
 					CLAMP(player->health, 0, player->maxHealth);
 					//da_append(&MESSAGES, "This seem to be potion of healing");
 					}
@@ -2956,6 +2959,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					{
 					da_append(&MESSAGES,"You eat a piece of meat");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					player->hunger+=itemToEquipt.eatValue;
 					CLAMP(player->health, 0, player->maxHealth);
 					//da_append(&MESSAGES, "This seem to be potion of healing");
 					}

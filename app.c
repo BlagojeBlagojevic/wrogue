@@ -329,6 +329,17 @@ void render_player_texture(Entitiy *player) {
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	player->oldPos = player->pos;
+	if(player->hunger > 0) {
+		if(rand_f64() < CHANCE_HUNGER_DECRESE) {
+			player->hunger--;
+			CLAMP(player->hunger, 0, 255);
+			}
+
+		}
+	else {
+		player->health--;
+		}
+
 	MOVMENT = SDL_FALSE;  //NOT PROB
 	if(EQUITEM == SDL_TRUE) {
 		MOVMENT = SDL_TRUE;
@@ -805,6 +816,19 @@ void render_stats(Entitiy *player) {
 	snprintf(stats, 1024, "STATS: MAXSTM: %d STM: %d",player->maxStamina, player->stamina);
 	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+2), 200,
 	                FONT_H_MESSAGES, stats, WHITE);
+	i++;
+	stats[0] = '\0';
+	if(player->hunger > 10) {
+		snprintf(stats, 1024, "STATS: NOT HUNGRY        ");
+		}
+	else {
+		snprintf(stats, 1024, "STATS: HUNGRY        ");
+		}
+
+
+
+	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+2), 200,
+	                FONT_H_MESSAGES, stats, WHITE);
 
 	}
 
@@ -829,8 +853,8 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
 			//render_player(&monsters->items[count]);
 			render_player_texture(&monsters->items[count]);
-			SDL_RenderPresent(RENDERER);
-			SDL_Delay(10);
+			//SDL_RenderPresent(RENDERER);
+			//SDL_Delay(10);
 			}
 
 		}

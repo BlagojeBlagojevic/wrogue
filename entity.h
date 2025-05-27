@@ -162,6 +162,7 @@ typedef struct Entity {
 	i16 stamina;
 	i16 maxStamina;
 	f64 chanceToDecressStaminaMove;
+	i16  hunger;
 	} Entitiy;
 
 typedef struct {

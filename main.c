@@ -131,6 +131,7 @@ int main() {
 	player->defence[3] = 2;
 	player->stamina    = 15;
 	player->maxStamina = 15;
+	player->hunger     = 255;
 	player->chanceToDecressStaminaMove = 0.1f;
 	Item* sword = create_item(0, 0, DAGER_CREATE());
 	//sword->poisonChance = 1.0f;
@@ -140,6 +141,11 @@ int main() {
 	Item* armor = create_item(0, 0, PLAYER_ARMOR_CREATE());
 	//armor->defence[DAMAGE_BASIC] = 1;
 	armor->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*armor));
+	
+	armor = create_item(0, 0, MEAT_CREATE());
+	//armor->defence[DAMAGE_BASIC] = 1;
+	//armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
 	//LOG("Plateer");
 	//exit(-1);
