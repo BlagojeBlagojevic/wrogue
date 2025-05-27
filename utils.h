@@ -267,6 +267,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_DISIPATE_POISON 0.1f
 #define CHANCE_LEVEL_AD   0.05f
 #define CHANCE_ITEM_NOT_IDENT 0.05f
+#define CHANCE_HUNGER_DECRESE 0.5f
 
 
 //BSP STUFF
