@@ -133,6 +133,7 @@ typedef struct{
 	f64 poisonChance;
 	i32 poisonDamage;
 	i32 itemValue;
+	i32 eatValue;
 	//LET ALL BE ABLE to be TROW
 	
 }Item;
