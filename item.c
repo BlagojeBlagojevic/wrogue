@@ -350,6 +350,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				item->equipedTo = EQUIPTED_USE;
 				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
 				item->type = APPLE_ITEM;
+				item->eatValue = rand()%10 + 100;
 				memcpy(item->name, text, MAX_NAME);
 				snprintf(text, MAX_NAME, "%s", item->name);
 				strncat(item->descripction, text, MAX_DESCRIPTION);
@@ -361,8 +362,9 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 		case MEAT_ITEM: {
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
-				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
+				item->health = rand()%30 + 100;  //PERCENTAGE RESTORE
 				item->type = MEAT_ITEM;
+				item->eatValue = rand()%30 + 50;
 				memcpy(item->name, text, MAX_NAME);
 				snprintf(text, MAX_NAME, "%s", item->name);
 				strncat(item->descripction, text, MAX_DESCRIPTION);
@@ -375,6 +377,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
 				item->health = rand()%30 + 10;  //PERCENTAGE RESTORE
+				item->eatValue = rand()%10 + 100;
 				item->type = APPLE_ITEM;
 				memcpy(item->name, text, MAX_NAME);
 				snprintf(text, MAX_NAME, "%s", item->name);
