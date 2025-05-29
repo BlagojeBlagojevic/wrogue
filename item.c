@@ -145,7 +145,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					item->attack[i]   = 0;
 					item->defence[i]  = 0;
 					}
-				item->attack[1] = rand()%(5 + LEVEL) + 1;	
+				item->attack[1] = rand()%(5 + LEVEL) + 1;
 				item->equipedTo = EQUIPTED_RANGE; //WILL BE ABLE TO A DECRESS STAMINA TO 0
 				char msg[150];
 				item->type = BOW_ITEM;
@@ -230,6 +230,162 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 				strncat(item->descripction, msg, MAX_DESCRIPTION);
 				break;
 				}
+
+
+
+		case SCROL_TELEPORT_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_TELEPORT_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+
+		case SCROL_AGREGATE_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = 1;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_TELEPORT_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+		case SCROL_ENCHANTING_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = 1;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_ENCHANTING_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+
+				free(text);
+				break;
+				}
+
+		case SCROL_RECHARGING_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = 1;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_RECHARGING_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
+				break;
+				}
+
+		case SCROL_REPEL_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = 1;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_REPEL_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
+				break;
+				}
+
+
+
+		case SCROL_SUMMON_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = 1;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_SUMMON_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", item->name);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
+				break;
+				}
+
+
+		case SCROL_SCARE_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = 1;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_SCARE_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", item->name);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
+				break;
+				}
+
+		case SCROL_ACQ_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%6;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_ACQ_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
+				break;
+				}
+
+		case SCROL_IDENT_ITEM: {
+				char* text = calloc(MAX_NAME, sizeof(char));
+				item->equipedTo = EQUIPTED_USE;
+				item->health = rand()%6;
+				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
+				item->type = SCROL_IDENT_ITEM;
+				for(i32 i = 0; i < 10; i++) {
+					text[i] = rand()%(125 - 33) + 33;
+					}
+				//memcpy(item->name, text, MAX_NAME);
+				snprintf(item->descripction, MAX_NAME, "Scrol named identity");
+				//strncat(item->descripction, text, MAX_DESCRIPTION);
+				free(text);
+				break;
+				}
+
+
+
+
 		case HEALING_ITEM: {
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
