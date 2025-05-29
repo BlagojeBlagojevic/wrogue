@@ -168,6 +168,7 @@ typedef struct Graphics_State {
 	u8            isTimeToGenerateMap;
 	u8            isRangeAttack;
 	u32           lastKey;
+	f64           chanceHuntWound;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -191,6 +192,7 @@ extern SDL_Texture* boulderTextures;
 extern SDL_Texture* treeTextures;
 extern SDL_Texture* stairTextures;
 extern SDL_Texture* rangeItemsTextures;
+extern SDL_Texture* glyphTextures;
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
 #define RENDERER   mainGraphics.renderer
@@ -217,6 +219,7 @@ extern Graphics_State mainGraphics;
 #define RANGE      mainGraphics.isRangeAttack
 #define LASTKEY		 mainGraphics.lastKey
 
+#define CHANCE_MONSTER_HUTING_WOUND mainGraphics.chanceHuntWound 
 
 
 #define INF (f64)100000.0f
@@ -249,7 +252,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_CHANGE_DIRECTION 0.05f
 #define CHANCE_CAVE_ROAD 0.05f
 #define CHANCE_SPIRIT_ATTACK 0.01f
-#define CHANCE_MONSTER_HUTING_WOUND 0.3
+//#define CHANCE_MONSTER_HUTING_WOUND 0.3 move to game_state for agregate scrol 
 
 #define CHANCE_LIFESTEAL 0.1f
 #define CHANCE_CRIT      0.05f
@@ -268,7 +271,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_LEVEL_AD   0.05f
 #define CHANCE_ITEM_NOT_IDENT 0.05f
 #define CHANCE_HUNGER_DECRESE 0.5f
-
+#define CHANCE_ENCHANT_ITEM  0.14f
 
 //BSP STUFF
 #define MIN_ROOM_SIZE 6

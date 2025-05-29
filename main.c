@@ -24,6 +24,7 @@ SDL_Texture* 			boulderTextures;
 SDL_Texture* 			treeTextures;
 SDL_Texture*      stairTextures;
 SDL_Texture*      rangeItemsTextures;
+SDL_Texture*      glyphTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -33,7 +34,7 @@ static Item_DA    items;
 void generate_level() {
 
 	Room_DA rooms = {0};
-
+	CHANCE_MONSTER_HUTING_WOUND = 0.3;
 	LEVEL++;
 	i32 whatMap = rand()%4;
 	if(whatMap == 0) map = init_map_BSP(&rooms, 4);
@@ -76,12 +77,16 @@ void generate_level() {
 	if(rooms.items != NULL) {
 		free(rooms.items);
 		}
-	Item* helmet = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+	Item* helmet = create_item(player->pos.x, player->pos.y, SCROL_ACQ_CREATE());
 	da_append(&items, (*helmet));
-	helmet = create_item(player->pos.x+1, player->pos.y, ARROW_CREATE());
+	helmet = create_item(player->pos.x+1, player->pos.y, SCROL_IDENT_CREATE());
 	da_append(&items, (*helmet));
-	helmet = create_item(player->pos.x+2, player->pos.y, ARROW_CREATE());
-	da_append(&items, (*helmet));
+	//Item* helmet = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+	//da_append(&items, (*helmet));
+	//helmet = create_item(player->pos.x+1, player->pos.y, ARROW_CREATE());
+	//da_append(&items, (*helmet));
+	//helmet = create_item(player->pos.x+2, player->pos.y, ARROW_CREATE());
+	//da_append(&items, (*helmet));
 
 	}
 
@@ -116,7 +121,7 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_TRUE;
-	
+
 	player = create_entity('@', "Some Name", 10, 20, (Position) {
 		40, 40
 		}, WHITE);
@@ -142,7 +147,7 @@ int main() {
 	//armor->defence[DAMAGE_BASIC] = 1;
 	armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
-	
+
 	armor = create_item(0, 0, MEAT_CREATE());
 	//armor->defence[DAMAGE_BASIC] = 1;
 	//armor->isEquiped = SDL_TRUE;
@@ -183,7 +188,7 @@ int main() {
 			player->defence[2] += 1;
 			player->attack[3]  += 1;
 			player->defence[3] += 1;
-			player->maxHealth +=10;
+			player->maxHealth  +=10;
 			//player->health = player->maxHealth;
 			//LEVEL +=1;
 			generate_level();

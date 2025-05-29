@@ -16,6 +16,7 @@ typedef enum {
 	TILE_GRASS      = 'G',
 	TILE_POISION    = 'P',
 	TILE_GARG_STAT  = 'S',
+	TILE_REPEL      = 'E',
 
 	
 
