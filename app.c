@@ -95,6 +95,14 @@ void init_texture() {
 	SDL_FreeSurface(tempSur);
 
 
+	tempSur = IMG_Load("assets/glyph.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	glyphTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+
 
 	}
 
@@ -361,7 +369,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			equiped_item(&player->inventory, (u64)buffer);
 			if(USEITEM == SDL_TRUE) {
 
-				use_item(player, entitis, &player->inventory, (u64)buffer);
+				use_item(player, entitis, &player->inventory, map, (u64)buffer);
 				da_append(&MESSAGES, "Use item:");
 				USEITEM = SDL_FALSE;
 				}
@@ -1491,6 +1499,10 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
 					SDL_RenderCopy(RENDERER, stairTextures, NULL, &textRect);
 					}
+				else if(ch == TILE_REPEL) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_RenderCopy(RENDERER, glyphTextures, NULL, &textRect);
+					}
 				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
@@ -1538,6 +1550,10 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					//DROP(textRect);
 					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
 					SDL_RenderCopy(RENDERER, stairTextures, NULL, &textRect);
+					}
+				else if(ch == TILE_REPEL) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_RenderCopy(RENDERER, glyphTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_GRASS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
