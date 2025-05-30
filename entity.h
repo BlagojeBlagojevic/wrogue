@@ -162,6 +162,7 @@ typedef struct Entity {
 	i16 stamina;
 	i16 maxStamina;
 	f64 chanceToDecressStaminaMove;
+	i16  hunger;
 	} Entitiy;
 
 typedef struct {
@@ -231,7 +232,7 @@ void picking_item_from_list(Entitiy* entity, Item_DA *items);
 
 void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32 goalX, i32 goalY);
 
-void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem);
+void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map, u64 numItem);
 
 void export_generators(); //TBF FILE
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room, SDL_bool isEnv);
@@ -240,4 +241,5 @@ void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters);
 void player_negative_effect(Entitiy* player, Tile *map);
 void lingering_map_tile(Tile* map, Entitiy *player, Entitiy_DA *monsters);
 
+void genreate_scrol_items(Item_DA *items, Tile* map);
 #endif

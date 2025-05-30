@@ -6,9 +6,20 @@
 #include <string.h>
 #include <math.h>
 
-#include<SDL2/SDL.h>
+#include<SDL2/SDL_hints.h>
+#include<SDL2/SDL_error.h>
+#include<SDL2/SDL_log.h>
+#include<SDL2/SDL_video.h>
+#include<SDL2/SDL_render.h>
+#include<SDL2/SDL_pixels.h>
+#include<SDL2/SDL_rect.h>
+#include<SDL2/SDL_surface.h>
+#include<SDL2/SDL_clipboard.h>
+#include<SDL2/SDL_events.h>
 #include<SDL2/SDL_image.h>
-#include<SDL2/SDL_ttf.h>
+//#include<SDL2/SDl_timer.h>
+#include<SDL2/SDL_keyboard.h>
+#include<SDL2/SDL_scancode.h>
 #undef main
 
 //COLORS
@@ -152,11 +163,12 @@ typedef struct Graphics_State {
 	SDL_bool      isOpeningDoor;
 	SDL_bool      isEquItem;
 	u64           countMoves;
-	u8            depth;
+	i16           depth;
 	u8            levelPlayer;
 	u8            isTimeToGenerateMap;
 	u8            isRangeAttack;
 	u32           lastKey;
+	f64           chanceHuntWound;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -180,6 +192,8 @@ extern SDL_Texture* boulderTextures;
 extern SDL_Texture* treeTextures;
 extern SDL_Texture* stairTextures;
 extern SDL_Texture* rangeItemsTextures;
+extern SDL_Texture* glyphTextures;
+extern SDL_Texture* scrolTextures;
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
 #define RENDERER   mainGraphics.renderer
@@ -206,6 +220,7 @@ extern Graphics_State mainGraphics;
 #define RANGE      mainGraphics.isRangeAttack
 #define LASTKEY		 mainGraphics.lastKey
 
+#define CHANCE_MONSTER_HUTING_WOUND mainGraphics.chanceHuntWound 
 
 
 #define INF (f64)100000.0f
@@ -216,7 +231,13 @@ extern Graphics_State mainGraphics;
 #define DISTANCE_RANGE_ATTACK_MIN 1.9f
 
 #define STEP_INTERPOL 1
+
+
+#ifdef __EMSCRIPTEN__
+#define MS_ANIMATION 0
+#else
 #define MS_ANIMATION 100
+#endif
 
 
 #define PERCANTAGE_RUN_CHANCE 0.9f
@@ -238,7 +259,8 @@ extern Graphics_State mainGraphics;
 #define CHANCE_CHANGE_DIRECTION 0.05f
 #define CHANCE_CAVE_ROAD 0.05f
 #define CHANCE_SPIRIT_ATTACK 0.01f
-#define CHANCE_MONSTER_HUTING_WOUND 0.3
+#define NUM_SCROLS_LEVEL 3
+//#define CHANCE_MONSTER_HUTING_WOUND 0.3 move to game_state for agregate scrol 
 
 #define CHANCE_LIFESTEAL 0.1f
 #define CHANCE_CRIT      0.05f
@@ -256,7 +278,8 @@ extern Graphics_State mainGraphics;
 #define CHANCE_DISIPATE_POISON 0.1f
 #define CHANCE_LEVEL_AD   0.05f
 #define CHANCE_ITEM_NOT_IDENT 0.05f
-
+#define CHANCE_HUNGER_DECRESE 0.5f
+#define CHANCE_ENCHANT_ITEM  0.14f
 
 //BSP STUFF
 #define MIN_ROOM_SIZE 6

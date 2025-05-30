@@ -121,6 +121,36 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 			da_append(&entity->inventory, (i));
 			da_append(&entity->inventory, (*shoes));
 			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, AXE_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, DAGER_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, SABER_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, BOW_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64()*2 < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, ARROW_CREATE());
+			//item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
 		//player
 		//if(ch == '@') {
 
@@ -216,10 +246,12 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
 	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
 
-	//SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	//SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
-	//SDL_RenderPresent(RENDERER);
-	//SDL_Delay(MS_ANIMATION);
+	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+#ifndef __EMSCRIPTEN__	
+	SDL_RenderPresent(RENDERER);
+	SDL_Delay(MS_ANIMATION);
+#endif
 	i32 iPl = 0, iEnt = 0;
 	for(u64 i = 0; i < player->inventory.count; i++) {
 		Item item = player->inventory.items[i];
@@ -414,11 +446,12 @@ SDL_bool player_attack_range(Entitiy *player, Entitiy* entity, Item_DA *items, T
 	i32 startX = entity->pos.x * FONT_W - CAMERA.x;
 	i32 startY = entity->pos.y * FONT_H - CAMERA.y;
 
-	//SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	//SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
-	//SDL_RenderPresent(RENDERER);
-	//SDL_Delay(MS_ANIMATION);
-
+	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+#ifndef __EMSCRIPTEN__
+	SDL_RenderPresent(RENDERER);
+	SDL_Delay(MS_ANIMATION);
+#endif
 
 
 	for(u64 i = 0; i < entity->inventory.count; i++) {
@@ -524,12 +557,14 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	i32 startY = player->pos.y * FONT_H - CAMERA.y;
 
 	//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, &player->ch, color);
-	//SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
-	//SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
+	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	//SDL_SetRenderDrawColor(RENDERER, 0x20, 125, 0X20, 125);
 	//SDL_RenderDrawRect(RENDERER, &textRect);
-	//SDL_RenderPresent(RENDERER);
-	//SDL_Delay(MS_ANIMATION);
+#ifndef __EMSCRIPTEN__ 	
+	SDL_RenderPresent(RENDERER);
+	SDL_Delay(MS_ANIMATION);
+#endif	
 	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
 	//LEVEL SCALING
 	if(rand_f64() < CHANCE_PLAYER_LEVEL) {
@@ -2337,9 +2372,8 @@ void state_entity(Entitiy* player, Entitiy_DA *entitys, Tile *map) {
 				entity.state = STATE_RESTING;
 				}
 			//else if(player->health <= 3 || rand_f64() < ((player->maxHealth - player->health) / 100)) {
-			else if(player->health <= 0.3*player->maxHealth) {
+			else if(player->health <= (i32)(CHANCE_MONSTER_HUTING_WOUND * player->maxHealth)) {
 				entity.state = STATE_HUNTING;
-
 				}
 			else if(rand_f64() < entity.stateChance[STATE_SUMMON]  && entity.spell.cooldown < entity.spell.passedTurns) {
 				entity.state = STATE_SUMMON;
@@ -2808,9 +2842,9 @@ void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32
 			CLAMP(startX, 2, MAP_X - 2);
 			i32 startY = ent.pos.y - 2;
 			CLAMP(startY, 2, MAP_Y - 2);
-			i32 stopX = ent.pos.x - 2;
+			i32 stopX = ent.pos.x + 2;
 			CLAMP(stopX, 2, MAP_X - 2);
-			i32 stopY = ent.pos.y - 2;
+			i32 stopY = ent.pos.y + 2;
 			CLAMP(stopY, 2, MAP_Y - 2);
 			for (i32 y = startY; y < stopY; y++) {
 				for (i32 x = startX; x < stopX ; x++) {
@@ -2821,18 +2855,296 @@ void calculate_diakstra_map(Entitiy* player, Tile* map, Entitiy_DA* entitys, i32
 
 			}
 		}
+	//GLYPHS
+	if(MAP_CH(map, player->pos.x, player->pos.y) == TILE_REPEL) {
+		i32 startX = player->pos.x - 2;
+		CLAMP(startX, 2, MAP_X - 2);
+		i32 startY = player->pos.y - 2;
+		CLAMP(startY, 2, MAP_Y - 2);
+		i32 stopX = player->pos.x + 2;
+		CLAMP(stopX, 2, MAP_X - 2);
+		i32 stopY = player->pos.y + 2;
+		CLAMP(stopY, 2, MAP_Y - 2);
+		for (i32 y = startY; y < stopY; y++) {
+			for (i32 x = startX; x < stopX ; x++) {
+				MAP_DIJKSTRA(map, x, y) = INF;
+				//CLAMP(MAP_DIJKSTRA(map, x, y), 0, INF);
+				}
+			}
+		}
 	DROP(entitys);
 	DROP(player);
 	}
 
 
 
-void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem) {
+void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map, u64 numItem) {
 	Item itemToEquipt = items->items[numItem];
 	Item_Equipted type = itemToEquipt.equipedTo;
 	switch(itemToEquipt.type) {
+		case SCROL_TELEPORT_ITEM: {
+				SDL_bool isWt = SDL_FALSE;
+				while(!isWt) {
+					i32 x = rand()%MAP_X;
+					i32 y = rand()%MAP_Y;
+					CLAMP(x, 2, MAP_X - 2);
+					CLAMP(y, 2, MAP_Y - 2);
+					if(MAP_ISW(map, x, y) == SDL_TRUE) {
+						player->pos.x = x;
+						player->pos.y = y;
+						da_append(&MESSAGES, "You are telepoted");
+						isWt = SDL_TRUE;
+						}
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case SCROL_AGREGATE_ITEM: {
+				da_append(&MESSAGES, "This seam to be a scrol of agregate monsters");
+				player->maxHealth  += itemToEquipt.health;
+				player->maxStamina += itemToEquipt.health;
+				for(u8 i = 0; i < DAMAGE_NUM; i++) {
+					player->attack[i]  += itemToEquipt.health;
+					player->defence[i] += itemToEquipt.health;
+					}
+				CHANCE_MONSTER_HUTING_WOUND = 1.0f;
+				da_remove_unordered(items, numItem);
+				break;
+				}
+
+		case SCROL_ENCHANTING_ITEM: {
+				SDL_bool isEnchanted = SDL_FALSE;
+				da_append(&MESSAGES, "This seam to be a scrol enchanting");
+				while(!isEnchanted) {
+					for(u64 i = 0; i < player->inventory.count; i++) {
+						if(player->inventory.items[i].isEquiped == SDL_TRUE) {
+							if(rand_f64() < CHANCE_ENCHANT_ITEM) {
+								switch(player->inventory.items[i].type) {
+
+									case AXE_ITEM:
+									case PIKE_ITEM:
+									case PLAYER_SWORD_ITEM:
+									case PLAYER_ARMOR_ITEM:
+									case DAGER_ITEM:
+									case SABER_ITEM:
+									case SWORD_ITEM: {
+											player->inventory.items[i].attack[DAMAGE_BASIC] += itemToEquipt.health;
+											strcat(player->inventory.items[i].descripction, " Enchanted");
+											isEnchanted = SDL_TRUE;
+											break;
+											}
+									case BOW_ITEM: {
+											player->inventory.items[i].attack[DAMAGE_RANGE] += itemToEquipt.health;
+											strcat(player->inventory.items[i].descripction, " Enchanted");
+											isEnchanted = SDL_TRUE;
+											break;
+											}
+									case DART_ITEM:
+									case ARMOR_ITEM:
+									case HELMET_ITEM:
+									case SHIELD_ITEM:
+									case SHOES_ITEM: {
+											i32 rD = rand()%DAMAGE_NUM;
+											player->inventory.items[i].attack[rD] += itemToEquipt.health;
+											strcat(player->inventory.items[i].descripction, " Enchanted");
+											isEnchanted = SDL_TRUE;
+											break;
+											}
+									default: {
+											break;
+											}
+									}
+
+								}
+							}
+						}
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case SCROL_RECHARGING_ITEM: {
+				da_append(&MESSAGES, "You seem fresh");
+				da_append(&MESSAGES, "Your stats are recharged");
+				player->health  = player->maxHealth;
+				player->stamina = player->maxStamina;
+				player->hunger  = 255;
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case SCROL_REPEL_ITEM: {
+				da_append(&MESSAGES, "It seams to draw strenge stufs on flor");
+				MAP_CH(map, player->pos.x, player->pos.y) = TILE_REPEL;
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case SCROL_SUMMON_ITEM: {
+				da_append(&MESSAGES, "It seams to summon mosters around you");
+				type = rand()%NUM_MONSTER;
+				i32 startX = player->pos.x - 2;
+				CLAMP(startX, 2, MAP_X - 2);
+				i32 startY = player->pos.y - 2;
+				CLAMP(startY, 2, MAP_Y - 2);
+				i32 stopX = player->pos.x + 2;
+				CLAMP(stopX, 2, MAP_X - 2);
+				i32 stopY = player->pos.y + 2;
+				CLAMP(stopY, 2, MAP_Y - 2);
+				for (i32 y = startY; y < stopY; y++) {
+					for (i32 x = startX; x < stopX ; x++) {
+						if(player->pos.x != x && player->pos.y != y) {
+							Entitiy *temp = create_entity(monsterChar[type], monsterName[type], 1, 3, (Position) {
+								.x = x, .y = y
+								}, WHITE);
+							da_append(entitis, (*temp));
+							}
+						}
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+		case SCROL_SCARE_ITEM: {
+				da_append(&MESSAGES, "It seams that monsters runing away from you");
+				for(u64 i = 0; i < entitis->count; i++) {
+					if(MAP_ISV(map, entitis->items[i].pos.x, entitis->items[i].pos.y)) {
+						entitis->items[i].stateChance[STATE_RUNING] = 0.99f;
+						entitis->items[i].stateChance[STATE_HUNTING] = 0.01f;
+						entitis->items[i].state = STATE_RUNING;
+						}
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+
+		case SCROL_ACQ_ITEM: {
+				da_append(&MESSAGES, "You got a item in your inventory");
+				switch(itemToEquipt.health) {
+					//SWORD
+					case 0: {
+							Item* sword = create_item(player->pos.x, player->pos.y, SWORD_CREATE());
+							da_append(items, (*sword));
+							break;
+							}
+					//DAGER
+					case 1: {
+							Item* dager = create_item(player->pos.x, player->pos.y, DAGER_CREATE());
+							da_append(items, (*dager));
+							break;
+							}
+					//SABER
+					case 2: {
+							Item* saber = create_item(player->pos.x, player->pos.y, SABER_CREATE());
+							da_append(items, (*saber));
+							break;
+							}
+					//AXE
+					case 3: {
+							Item* axe = create_item(player->pos.x, player->pos.y, AXE_CREATE());
+							da_append(items, (*axe));
+							break;
+							}
+					//HELMET
+					case 4: {
+							Item* helmeth = create_item(player->pos.x, player->pos.y, HELMET_CREATE());
+							da_append(items, (*helmeth));
+							break;
+							}
+
+					//SHOES
+					case 5: {
+							Item* shoes = create_item(player->pos.x, player->pos.y, SHOES_CREATE());
+							da_append(items, (*shoes));
+							break;
+							}
+					//SHILED
+					case 6: {
+							Item* shield = create_item(player->pos.x, player->pos.y, SHIELD_CREATE());
+							da_append(items, (*shield));
+							break;
+							}
+					//BOW
+					case 7: {
+							Item* bow = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+							da_append(items, (*bow));
+							break;
+							}
+					default: {
+							ASSERT("Unrechable");
+							break;
+							}
+
+					}
+				da_remove_unordered(items, numItem);
+				break;
+				}
+
+		case SCROL_IDENT_ITEM: {
+				SDL_bool isE = SDL_FALSE;
+				u8 iter = 0;
+				while(!isE && iter < 100)
+					for(u64 i = 0; i < player->inventory.count; i++) {
+						iter++;
+						if(player->inventory.items[i].type >= SCROL_TELEPORT_ITEM && player->inventory.items[i].type < SCROL_IDENT_ITEM) {
+							if(rand_f64() < CHANCE_ENCHANT_ITEM) {
+								switch(player->inventory.items[i].type) {
+									case SCROL_TELEPORT_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named teleport");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_AGREGATE_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named agregate");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_ENCHANTING_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named enchanting");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_RECHARGING_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named recharging");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_REPEL_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named repel");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_SUMMON_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named summon");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_SCARE_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named scare");
+											isE = SDL_TRUE;
+											break;
+											}
+									case SCROL_ACQ_ITEM: {
+											snprintf(player->inventory.items[i].descripction, MAX_NAME, "Scrol named acquirement");
+											isE = SDL_TRUE;
+											break;
+											}
+									default: {
+											break;
+											}
+									}
+								}
+							}
+						}
+				if(isE) {
+					da_remove_unordered(items, numItem);
+					}
+				else {
+					da_append(&MESSAGES, "Ther is no item for identification");
+					}
+				break;
+				}
+
+
 		case HEALING_ITEM: {
 				i32 isCursed = 0;
+				player->hunger = 255;
 				if(itemToEquipt.isCursed == NORMAL || itemToEquipt.isCursed == BLESED) {
 					da_append(&MESSAGES,"Seems to restor the health");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
@@ -2932,6 +3244,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					{
 					da_append(&MESSAGES,"You eat a bery");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					player->hunger+=itemToEquipt.eatValue;
 					CLAMP(player->health, 0, player->maxHealth);
 					//da_append(&MESSAGES, "This seem to be potion of healing");
 					}
@@ -2944,6 +3257,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					{
 					da_append(&MESSAGES,"You eat a apple");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					player->hunger+=itemToEquipt.eatValue;
 					CLAMP(player->health, 0, player->maxHealth);
 					//da_append(&MESSAGES, "This seem to be potion of healing");
 					}
@@ -2956,6 +3270,7 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, u64 numItem)
 					{
 					da_append(&MESSAGES,"You eat a piece of meat");
 					player->health+= player->maxHealth * itemToEquipt.health / 100;
+					player->hunger+=itemToEquipt.eatValue;
 					CLAMP(player->health, 0, player->maxHealth);
 					//da_append(&MESSAGES, "This seem to be potion of healing");
 					}
@@ -3079,12 +3394,6 @@ void export_generators() {
 	generators[GENERATOR_DRAGON].monsterNumber = 0;
 	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
 	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
-
-
-
-
-
-
 	}
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room, SDL_bool isEnv) {
 	i32 stopY = room.pos.y + room.height;
@@ -3195,7 +3504,6 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 				Entitiy *temp = create_entity(monsterChar[type], monsterName[type], 1, 3, (Position) {
 					.x = x, .y = y
 					}, WHITE);
-				LOG("Monster cordinates (%d %d)\n", x, y);
 				temp->state = STATE_WANDERING;
 				//items on monsters probobly when are created
 
@@ -3212,7 +3520,7 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 		//TBD TILES TYPES
 		generatedGenerators--;
 		}
-//ITEMS
+
 	}
 
 void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters) {
@@ -3306,4 +3614,76 @@ void lingering_map_tile(Tile* map, Entitiy *player, Entitiy_DA *monsters) {
 		}
 	DROP(player);
 	DROP(monsters);
+	}
+
+void genreate_scrol_items(Item_DA *items, Tile* map) {
+	i32 numScrols = 1 + rand()%NUM_SCROLS_LEVEL;
+	for(i32 i = 0; i < numScrols; i++) {
+		u8 isGen = SDL_FALSE;
+		i32 x = 0;
+		i32 y = 0;
+		while(!isGen) {
+			x = rand()%MAP_X;
+			y = rand()%MAP_Y;
+			if(MAP_ISW(map, x, y) == SDL_TRUE) {
+				break;
+				}
+			}
+		i32 whatScrol = rand()%((SCROL_IDENT_ITEM - SCROL_TELEPORT_ITEM) + 3) + SCROL_TELEPORT_ITEM;
+		switch (whatScrol) {
+			case SCROL_TELEPORT_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_TELEPORT_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_AGREGATE_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_AGREGATE_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_ENCHANTING_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_ENCHANTING_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_RECHARGING_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_RECHARGING_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_REPEL_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_RECHARGING_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_SUMMON_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_SUMMON_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_SCARE_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_SCARE_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_ACQ_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_ACQ_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_IDENT_ITEM: {
+					//LAST
+					Item* scrol = create_item(x, y, SCROL_IDENT_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			default: {
+					Item* scrol = create_item(x, y, SCROL_IDENT_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+
+			}
+
+		}
 	}

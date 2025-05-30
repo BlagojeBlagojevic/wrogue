@@ -1,2 +1,5 @@
 emsdk/
 app
+main.exe
+gmon.out
+

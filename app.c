@@ -95,6 +95,21 @@ void init_texture() {
 	SDL_FreeSurface(tempSur);
 
 
+	tempSur = IMG_Load("assets/glyph.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	glyphTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+	tempSur = IMG_Load("assets/scrol.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	scrolTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
+
 
 	}
 
@@ -329,6 +344,17 @@ void render_player_texture(Entitiy *player) {
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	player->oldPos = player->pos;
+	if(player->hunger > 0) {
+		if(rand_f64() < CHANCE_HUNGER_DECRESE) {
+			player->hunger--;
+			CLAMP(player->hunger, 0, 255);
+			}
+
+		}
+	else {
+		player->health--;
+		}
+
 	MOVMENT = SDL_FALSE;  //NOT PROB
 	if(EQUITEM == SDL_TRUE) {
 		MOVMENT = SDL_TRUE;
@@ -350,7 +376,7 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			equiped_item(&player->inventory, (u64)buffer);
 			if(USEITEM == SDL_TRUE) {
 
-				use_item(player, entitis, &player->inventory, (u64)buffer);
+				use_item(player, entitis, &player->inventory, map, (u64)buffer);
 				da_append(&MESSAGES, "Use item:");
 				USEITEM = SDL_FALSE;
 				}
@@ -805,6 +831,19 @@ void render_stats(Entitiy *player) {
 	snprintf(stats, 1024, "STATS: MAXSTM: %d STM: %d",player->maxStamina, player->stamina);
 	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+2), 200,
 	                FONT_H_MESSAGES, stats, WHITE);
+	i++;
+	stats[0] = '\0';
+	if(player->hunger > 10) {
+		snprintf(stats, 1024, "STATS: NOT HUNGRY        ");
+		}
+	else {
+		snprintf(stats, 1024, "STATS: HUNGRY        ");
+		}
+
+
+
+	Text_Renderer_C(RENDERER, FONT, startX, startY + FONT_H_MESSAGES*(i+2), 200,
+	                FONT_H_MESSAGES, stats, WHITE);
 
 	}
 
@@ -861,6 +900,7 @@ void render_item(Item* item, Tile* map) {
 		//SDL_RenderFillRect(RENDERER, &temp);
 		//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, ch, item->color);
 		u8 isRange = SDL_FALSE;
+		u8 isScrol = SDL_FALSE;
 		SDL_Rect textSize = {startX, startY, FONT_H, FONT_W}, what = {0, 0, 0, 0};
 		switch(item->type) {
 			case SWORD_ITEM: {
@@ -950,6 +990,25 @@ void render_item(Item* item, Tile* map) {
 					what.w = 240;
 					break;
 					}
+
+			case 		SCROL_TELEPORT_ITEM:  //FIRST
+			case 		SCROL_AGREGATE_ITEM:
+			case 		SCROL_ENCHANTING_ITEM:
+			case 		SCROL_RECHARGING_ITEM:
+			case 		SCROL_REPEL_ITEM:
+			case 		SCROL_SUMMON_ITEM:
+			case 		SCROL_SCARE_ITEM:
+			case 		SCROL_ACQ_ITEM:
+			case 		SCROL_IDENT_ITEM: {
+					what.x = 0;
+					what.y = 0;
+					what.h = 1024;
+					what.w = 1024;
+					isScrol = SDL_TRUE;
+					isRange = SDL_TRUE;
+					break;
+					}
+
 			case HEALING_ITEM: {
 					what.x = 0;
 					what.y = 760;
@@ -1021,6 +1080,10 @@ void render_item(Item* item, Tile* map) {
 			}
 		if(!isRange) {
 			SDL_RenderCopy(RENDERER, itemTextures, &what, &textSize);
+			}
+		else if(isScrol) {
+			SDL_RenderCopy(RENDERER, scrolTextures, &what, &textSize);
+			//exit(-1);
 			}
 		else {
 			SDL_RenderCopy(RENDERER, rangeItemsTextures, &what, &textSize);
@@ -1467,6 +1530,10 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
 					SDL_RenderCopy(RENDERER, stairTextures, NULL, &textRect);
 					}
+				else if(ch == TILE_REPEL) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_RenderCopy(RENDERER, glyphTextures, NULL, &textRect);
+					}
 				else if(ch == '-') {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					SDL_SetRenderDrawColor(RENDERER, 0x40, 0x15, 0x15, 100);
@@ -1514,6 +1581,10 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					//DROP(textRect);
 					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
 					SDL_RenderCopy(RENDERER, stairTextures, NULL, &textRect);
+					}
+				else if(ch == TILE_REPEL) {
+					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
+					SDL_RenderCopy(RENDERER, glyphTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_GRASS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
@@ -1716,8 +1787,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 50;
-						FONT_H = 50;
+						FONT_W = 70;
+						FONT_H = 70;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
