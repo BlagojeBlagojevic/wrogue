@@ -163,7 +163,7 @@ typedef struct Graphics_State {
 	SDL_bool      isOpeningDoor;
 	SDL_bool      isEquItem;
 	u64           countMoves;
-	u8            depth;
+	i16           depth;
 	u8            levelPlayer;
 	u8            isTimeToGenerateMap;
 	u8            isRangeAttack;
@@ -231,7 +231,13 @@ extern Graphics_State mainGraphics;
 #define DISTANCE_RANGE_ATTACK_MIN 1.9f
 
 #define STEP_INTERPOL 1
+
+
+#ifdef __EMSCRIPTEN__
+#define MS_ANIMATION 0
+#else
 #define MS_ANIMATION 100
+#endif
 
 
 #define PERCANTAGE_RUN_CHANCE 0.9f
