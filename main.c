@@ -25,6 +25,7 @@ SDL_Texture* 			treeTextures;
 SDL_Texture*      stairTextures;
 SDL_Texture*      rangeItemsTextures;
 SDL_Texture*      glyphTextures;
+SDL_Texture*      scrolTextures;
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -77,10 +78,12 @@ void generate_level() {
 	if(rooms.items != NULL) {
 		free(rooms.items);
 		}
-	Item* helmet = create_item(player->pos.x, player->pos.y, SCROL_ACQ_CREATE());
-	da_append(&items, (*helmet));
-	helmet = create_item(player->pos.x+1, player->pos.y, SCROL_IDENT_CREATE());
-	da_append(&items, (*helmet));
+	//Item* helmet = create_item(player->pos.x, player->pos.y, SCROL_ACQ_CREATE());
+	//da_append(&items, (*helmet));
+	//helmet = create_item(player->pos.x+1, player->pos.y, SCROL_IDENT_CREATE());
+	//da_append(&items, (*helmet));
+	
+   genreate_scrol_items(&items, map);
 	//Item* helmet = create_item(player->pos.x, player->pos.y, BOW_CREATE());
 	//da_append(&items, (*helmet));
 	//helmet = create_item(player->pos.x+1, player->pos.y, ARROW_CREATE());
@@ -154,8 +157,13 @@ int main() {
 	da_append(&player->inventory, (*armor));
 	//LOG("Plateer");
 	//exit(-1);
+	Item* bow = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+	bow->isEquiped = SDL_TRUE;
+	da_append(&player->inventory, (*bow));
+	Item* arrow = create_item(player->pos.x, player->pos.y, ARROW_CREATE());
+	da_append(&player->inventory, (*arrow));
 	/*
-
+	
 	Item* helmet = create_item(40, 38, HELMET_CREATE());
 	helmet->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*helmet));
@@ -166,7 +174,7 @@ int main() {
 	shoes->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*shoes));
 	//*/
-	Item* healing = create_item(37, 38, HEALING_CREATE());
+	//Item* healing = create_item(37, 38, HEALING_CREATE());
 
 	//player->invertory = {0};
 	monster_definitions_export();

@@ -121,6 +121,36 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 			da_append(&entity->inventory, (i));
 			da_append(&entity->inventory, (*shoes));
 			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, AXE_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, DAGER_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, SABER_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64() < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, BOW_CREATE());
+			item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
+		if(rand_f64()*2 < CHANCE_MONSTER_HAVE_ITEM * LEVEL) {
+			Item *item1  = create_item(0, 0, ARROW_CREATE());
+			//item1->isEquiped = SDL_TRUE;
+			i = *item1;
+			da_append(&entity->inventory, (i));
+			}
 		//player
 		//if(ch == '@') {
 
@@ -3025,6 +3055,12 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map, u
 							da_append(items, (*shield));
 							break;
 							}
+					//BOW
+					case 7: {
+							Item* bow = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+							da_append(items, (*bow));
+							break;
+							}
 					default: {
 							ASSERT("Unrechable");
 							break;
@@ -3091,12 +3127,12 @@ void use_item(Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map, u
 								}
 							}
 						}
-				if(isE){
+				if(isE) {
 					da_remove_unordered(items, numItem);
-				}
-				else{
+					}
+				else {
 					da_append(&MESSAGES, "Ther is no item for identification");
-				}		
+					}
 				break;
 				}
 
@@ -3353,12 +3389,6 @@ void export_generators() {
 	generators[GENERATOR_DRAGON].monsterNumber = 0;
 	generators[GENERATOR_DRAGON].maxDistanceDikstra = 20;
 	generators[GENERATOR_DRAGON].typeOfTile = TILE_ROAD;
-
-
-
-
-
-
 	}
 void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *map, i32 level, Room room, SDL_bool isEnv) {
 	i32 stopY = room.pos.y + room.height;
@@ -3485,7 +3515,7 @@ void genereate_monsters_generator(Entitiy* player, Entitiy_DA *monsters, Tile *m
 		//TBD TILES TYPES
 		generatedGenerators--;
 		}
-//ITEMS
+
 	}
 
 void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters) {
@@ -3579,4 +3609,76 @@ void lingering_map_tile(Tile* map, Entitiy *player, Entitiy_DA *monsters) {
 		}
 	DROP(player);
 	DROP(monsters);
+	}
+
+void genreate_scrol_items(Item_DA *items, Tile* map) {
+	i32 numScrols = 1 + rand()%NUM_SCROLS_LEVEL;
+	for(i32 i = 0; i < numScrols; i++) {
+		u8 isGen = SDL_FALSE;
+		i32 x = 0;
+		i32 y = 0;
+		while(!isGen) {
+			x = rand()%MAP_X;
+			y = rand()%MAP_Y;
+			if(MAP_ISW(map, x, y) == SDL_TRUE) {
+				break;
+				}
+			}
+		i32 whatScrol = rand()%((SCROL_IDENT_ITEM - SCROL_TELEPORT_ITEM) + 3) + SCROL_TELEPORT_ITEM;
+		switch (whatScrol) {
+			case SCROL_TELEPORT_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_TELEPORT_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_AGREGATE_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_AGREGATE_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_ENCHANTING_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_ENCHANTING_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_RECHARGING_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_RECHARGING_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_REPEL_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_RECHARGING_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_SUMMON_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_SUMMON_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_SCARE_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_SCARE_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_ACQ_ITEM: {
+					Item* scrol = create_item(x, y, SCROL_ACQ_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			case SCROL_IDENT_ITEM: {
+					//LAST
+					Item* scrol = create_item(x, y, SCROL_IDENT_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+			default: {
+					Item* scrol = create_item(x, y, SCROL_IDENT_CREATE());
+					da_append(items, (*scrol));
+					break;
+					}
+
+			}
+
+		}
 	}

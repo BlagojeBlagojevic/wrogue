@@ -193,6 +193,7 @@ extern SDL_Texture* treeTextures;
 extern SDL_Texture* stairTextures;
 extern SDL_Texture* rangeItemsTextures;
 extern SDL_Texture* glyphTextures;
+extern SDL_Texture* scrolTextures;
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
 #define RENDERER   mainGraphics.renderer
@@ -252,6 +253,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_CHANGE_DIRECTION 0.05f
 #define CHANCE_CAVE_ROAD 0.05f
 #define CHANCE_SPIRIT_ATTACK 0.01f
+#define NUM_SCROLS_LEVEL 3
 //#define CHANCE_MONSTER_HUTING_WOUND 0.3 move to game_state for agregate scrol 
 
 #define CHANCE_LIFESTEAL 0.1f

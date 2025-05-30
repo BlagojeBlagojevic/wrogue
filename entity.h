@@ -241,4 +241,5 @@ void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters);
 void player_negative_effect(Entitiy* player, Tile *map);
 void lingering_map_tile(Tile* map, Entitiy *player, Entitiy_DA *monsters);
 
+void genreate_scrol_items(Item_DA *items, Tile* map);
 #endif
