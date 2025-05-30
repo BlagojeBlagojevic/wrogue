@@ -102,6 +102,13 @@ void init_texture() {
 	glyphTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
 	SDL_FreeSurface(tempSur);
 
+	tempSur = IMG_Load("assets/scrol.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	scrolTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
+
 
 
 	}
@@ -893,6 +900,7 @@ void render_item(Item* item, Tile* map) {
 		//SDL_RenderFillRect(RENDERER, &temp);
 		//Text_Renderer_C(RENDERER, FONT, startX, startY, 10, 15, ch, item->color);
 		u8 isRange = SDL_FALSE;
+		u8 isScrol = SDL_FALSE;
 		SDL_Rect textSize = {startX, startY, FONT_H, FONT_W}, what = {0, 0, 0, 0};
 		switch(item->type) {
 			case SWORD_ITEM: {
@@ -982,6 +990,25 @@ void render_item(Item* item, Tile* map) {
 					what.w = 240;
 					break;
 					}
+
+			case 		SCROL_TELEPORT_ITEM:  //FIRST
+			case 		SCROL_AGREGATE_ITEM:
+			case 		SCROL_ENCHANTING_ITEM:
+			case 		SCROL_RECHARGING_ITEM:
+			case 		SCROL_REPEL_ITEM:
+			case 		SCROL_SUMMON_ITEM:
+			case 		SCROL_SCARE_ITEM:
+			case 		SCROL_ACQ_ITEM:
+			case 		SCROL_IDENT_ITEM: {
+					what.x = 0;
+					what.y = 0;
+					what.h = 1024;
+					what.w = 1024;
+					isScrol = SDL_TRUE;
+					isRange = SDL_TRUE;
+					break;
+					}
+
 			case HEALING_ITEM: {
 					what.x = 0;
 					what.y = 760;
@@ -1053,6 +1080,10 @@ void render_item(Item* item, Tile* map) {
 			}
 		if(!isRange) {
 			SDL_RenderCopy(RENDERER, itemTextures, &what, &textSize);
+			}
+		else if(isScrol) {
+			SDL_RenderCopy(RENDERER, scrolTextures, &what, &textSize);
+			//exit(-1);
 			}
 		else {
 			SDL_RenderCopy(RENDERER, rangeItemsTextures, &what, &textSize);
@@ -1756,8 +1787,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 50;
-						FONT_H = 50;
+						FONT_W = 70;
+						FONT_H = 70;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
