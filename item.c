@@ -328,7 +328,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					text[i] = rand()%(125 - 33) + 33;
 					}
 				//memcpy(item->name, text, MAX_NAME);
-				snprintf(item->descripction, MAX_NAME, "Scrol named %s", item->name);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
 				//strncat(item->descripction, text, MAX_DESCRIPTION);
 				free(text);
 				break;
@@ -345,7 +345,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 					text[i] = rand()%(125 - 33) + 33;
 					}
 				//memcpy(item->name, text, MAX_NAME);
-				snprintf(item->descripction, MAX_NAME, "Scrol named %s", item->name);
+				snprintf(item->descripction, MAX_NAME, "Scrol named %s", text);
 				//strncat(item->descripction, text, MAX_DESCRIPTION);
 				free(text);
 				break;
@@ -354,7 +354,7 @@ Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Colo
 		case SCROL_ACQ_ITEM: {
 				char* text = calloc(MAX_NAME, sizeof(char));
 				item->equipedTo = EQUIPTED_USE;
-				item->health = rand()%6;
+				item->health = rand()%8;
 				//item->health = rand()%90 + 10;  //PERCENTAGE RESTORE
 				item->type = SCROL_ACQ_ITEM;
 				for(i32 i = 0; i < 10; i++) {
@@ -646,3 +646,6 @@ void equiped_item(Item_DA *items, u64 numItem) {
 	da_append(&MESSAGES, msg);
 	items->items[numItem] = itemToEquipt;
 	}
+
+
+
