@@ -681,7 +681,8 @@ void generete_dungons(Room_DA* room, Tile *map, i32 minRooms, i32 maxRooms) {
 		}
 
 SDL_bool is_trap(Tile* map, i32 x, i32 y) {
-	if(MAP_CH(map, x, y) == TILE_STUN_TRAP || MAP_CH(map, x, y) == TILE_RUINS_TRAP) {
+	if(MAP_CH(map, x, y) == TILE_STUN_TRAP || MAP_CH(map, x, y) == TILE_RUINS_TRAP || MAP_CH(map, x, y) == TILE_SPIKE ||
+	    MAP_CH(map, x, y) == TILE_POI_TRAP) {
 		return SDL_TRUE;
 		}
 	return SDL_FALSE;
@@ -1168,4 +1169,42 @@ Tile* init_map_BSP(Room_DA* rooms, int splitDepth) {
 	bsp_free(root);
 
 	return map;
+	}
+
+void  generate_traps(Tile* map) {
+
+	i32 whatTile = rand()%(TILE_RUINS_TRAP - TILE_STUN_TRAP);
+	//LOG("what tile %d\n", whatTile);
+	//CLAMP(whatTile, 0, TILE_RUINS_TRAP - TILE_STUN_TRAP());
+	u8 isGen = 0;
+	while(!isGen) {
+		i32 x = rand()%(MAP_X - 1);
+		i32 y = rand()%(MAP_Y - 1);
+		if(MAP_CH(map, x, y) == TILE_FLOOR) {
+			isGen = 1;
+			switch(whatTile) {
+				case 0: {
+						MAP_CH(map, x, y) = TILE_STUN_TRAP;
+						break;
+						}
+				case 1: {
+						MAP_CH(map, x, y) = TILE_RUINS_TRAP;
+						break;
+						}
+				case 2: {
+						MAP_CH(map, x, y) = TILE_SPIKE;
+						break;
+						}
+				case 3:{
+					MAP_CH(map, x, y)   = TILE_POI_TRAP; 
+					break;
+				}		
+				default: {
+						ASSERT("Not defined trap");
+						break;
+						}
+				}
+			}
+		}
+
 	}
