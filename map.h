@@ -19,9 +19,13 @@ typedef enum {
 	TILE_REPEL      = 'E',
 
 	
-
+//DO NOT CHANGE ORDER
 	TILE_STUN_TRAP  = 'T',
+  TILE_SPIKE      = 'X',
+	TILE_POI_TRAP   = 'p', 	
 	TILE_RUINS_TRAP = 'R',
+//DO NOT CHANGE ORDER
+	
 	TILE_NON,
 
 	TILE_NUM
@@ -90,7 +94,7 @@ SDL_bool is_trap(Tile* map, i32 x, i32 y);
 Tile* init_map(Room_DA* rooms);
 Tile* init_map_RA(Room_DA* rooms);
 Tile* init_map_BSP(Room_DA* rooms,  int splitDepth);
-
+void  generate_traps(Tile* map);
 
 #define MIN_LEAF_SIZE 10
 #define MAX_LEAF_SIZE 70

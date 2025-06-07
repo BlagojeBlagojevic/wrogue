@@ -81,6 +81,7 @@ For detailed Emscripten instructions, see [`emcc.md`](emcc.md).
 | Space                 | Wait / Pass turn                              |
 | `p`                   | Pick up item                                  |
 | `u`                   | Open inventory and type what you want to use  |
+| `o`                   | Destroy boulder  |
 
 ## Configuration
 
@@ -115,7 +116,7 @@ There are no external configuration files. To tweak settings (map size, spawn ra
 * [ ] Rings
 * [ ] Balance
 * [ ] More monsters
-* [ ] Traps
+* [X] Traps
 * [ ] Raycaster engine 
 
 ## Monsters

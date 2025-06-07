@@ -248,8 +248,10 @@ SDL_bool player_attack(Entitiy *player, Entitiy* entity, Item_DA *items, Tile* m
 
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
 	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+#ifndef __EMSCRIPTEN__
 	SDL_RenderPresent(RENDERER);
 	SDL_Delay(MS_ANIMATION);
+#endif
 	i32 iPl = 0, iEnt = 0;
 	for(u64 i = 0; i < player->inventory.count; i++) {
 		Item item = player->inventory.items[i];
@@ -446,9 +448,10 @@ SDL_bool player_attack_range(Entitiy *player, Entitiy* entity, Item_DA *items, T
 
 	SDL_Rect textRect = {startX, startY, FONT_H, FONT_W};
 	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
+#ifndef __EMSCRIPTEN__
 	SDL_RenderPresent(RENDERER);
 	SDL_Delay(MS_ANIMATION);
-
+#endif
 
 
 	for(u64 i = 0; i < entity->inventory.count; i++) {
@@ -558,8 +561,10 @@ void monster_attack(Entitiy *player, Entitiy* entity, f64 distance) {
 	SDL_RenderCopy(RENDERER, swordTextures, NULL, &textRect);
 	//SDL_SetRenderDrawColor(RENDERER, 0x20, 125, 0X20, 125);
 	//SDL_RenderDrawRect(RENDERER, &textRect);
+#ifndef __EMSCRIPTEN__
 	SDL_RenderPresent(RENDERER);
 	SDL_Delay(MS_ANIMATION);
+#endif
 	i32 iD[DAMAGE_NUM] = {0}, iA[DAMAGE_NUM] = {0};
 	//LEVEL SCALING
 	if(rand_f64() < CHANCE_PLAYER_LEVEL) {
@@ -2670,7 +2675,7 @@ void increment_player_health(Entitiy* player) {
 		f64 chance = rand_f64();
 		if(chance < CHANCE_INCREMENT_HEALTH) {
 			player->health++;
-			da_append(&MESSAGES, "Good luck strike you health +1\n");
+			da_append(&MESSAGES, "Good luck strike you health +1");
 			}
 		}
 	}
@@ -3525,7 +3530,7 @@ void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters) 
 
 	switch(MAP_CH(map, player->pos.x, player->pos.y)) {
 		case TILE_STUN_TRAP: {
-				da_append(&MESSAGES, "You steped on stun trap\n");
+				da_append(&MESSAGES, "You steped on stun trap");
 				//MAYBE CHANCE
 				player->isStunded +=1;
 				da_append(&MESSAGES, "You are stuned\n");
@@ -3565,8 +3570,42 @@ void player_trap_calculations(Tile* map, Entitiy *player, Entitiy_DA *monsters) 
 				break;
 				}
 
+		case TILE_SPIKE: {
+				da_append(&MESSAGES, "You step on a spike");
+				f64 whatPercantage = rand_f64() / 2.0f;
+				i32 dmg = whatPercantage*player->maxHealth;
+				CLAMP(dmg, 1, (i32)INF);
+				player->health-= dmg;
+				char msg[20];
+				snprintf(msg, 20, "You take %d damage", dmg);
+				CLAMP(player->health, 0, (i32)INF);
+				break;
+				}
+
+		case TILE_POI_TRAP: {
+				da_append(&MESSAGES, "Poison is all around you");
+
+				i32 startX = player->pos.x - 2;
+				CLAMP(startX, 2, MAP_X - 2);
+				i32 startY = player->pos.y - 2;
+				CLAMP(startY, 2, MAP_Y - 2);
+				i32 stopX = player->pos.x + 2;
+				CLAMP(stopX, 2, MAP_X - 2);
+				i32 stopY = player->pos.y + 2;
+				CLAMP(stopY, 2, MAP_Y - 2);
+				for (i32 y = startY; y < stopY; y++) {
+					for (i32 x = startX; x < stopX ; x++) {
+						MAP_CH(map, x, y) = TILE_POISION;
+						}
+					}
+				break;
+				}
+
+
+
 		default: {
-				ASSERT("UNRECHABLE");
+				LOG("ch %c\n", MAP_CH(map, player->pos.x, player->pos.y));
+				ASSERT("Not used trap");
 				break;
 				}
 		}

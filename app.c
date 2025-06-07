@@ -879,7 +879,7 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 void render_messages(i32 startX, i32 startY, char* message) {
 	if(message != NULL) {
 		u64 w_c = strlen(message) * 16;
-		Text_Renderer_C(RENDERER, FONT, startX, startY, (i32)w_c, 20, message, RED);
+		Text_Renderer_C(RENDERER, FONT, startX, startY, (i32)w_c, 20, message, GREEN);
 		}
 
 	}
@@ -1540,12 +1540,14 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, sW, sH, "-", WHITE);
 					}
-
+				
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
-					SDL_RenderFillRect(RENDERER, &textRect);
-					DROP(textRect);
+					//DROP(textRect);
+					//SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					//SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
+					//SDL_RenderDrawRect(RENDERER, &textRect);
+					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
 					}
 
 				}
@@ -1605,10 +1607,11 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					}
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
-					//SDL_SetRenderDrawColor(RENDERER, 10, 10, 10, 100);
-					//SDL_RenderFillRect(RENDERER, &textRect);
+					//DROP(textRect);
+					//SDL_SetRenderDrawColor(RENDERER, 20, 10, 10, 255);
+					//SDL_SetRenderDrawColor(RENDERER, 40, 40, 40, 100);
+					//SDL_RenderDrawRect(RENDERER, &textRect);
 					SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
-					DROP(textRect);
 					}
 				}
 			else {
