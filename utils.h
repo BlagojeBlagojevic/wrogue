@@ -35,7 +35,7 @@
 #include<SDL2/SDL_ttf.h>
 //static const char* fontLoc = "assets/fonts/f.ttf";
 //#define fontLoc "assets/fonts/f.ttf"
-#define fontLoc "assets/fonts/w.ttf"
+#define fontLoc "assets/fonts/LB.ttf"
 //ARROW KEYS
 #define KEY_Q 113
 #define KEY_W 119
