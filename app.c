@@ -1540,7 +1540,7 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, sW, sH, "-", WHITE);
 					}
-				
+
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					//DROP(textRect);
@@ -1735,13 +1735,300 @@ void render_map(Tile *map, Entitiy *player) {
 					}
 				}
 			}
+//#include <math.h>
 
+// must match your SDL window size
+#define SCREEN_WIDTH  WIDTH
+#define SCREEN_HEIGHT HEIGHT
+
+#include <math.h>
+
+// Constants for diagonal normalization
+#define NORM_DIAG 1.1
+//0.70710678  // 1 / sqrt(2)
+#define FOV_SCALE 0.99        // Adjusts field of view width
+
+		void get_player_view_vectors(double *dirX, double *dirY, double *planeX, double *planeY) {
+			switch (LASTKEY) {
+				// Cardinal directions
+				case KEY_W:
+					*dirX =  0.0;
+					*dirY = -1.0;
+					*planeX =  FOV_SCALE;
+					*planeY =  0.0;
+					break;
+				case KEY_S:
+					*dirX =  0.0;
+					*dirY =  1.0;
+					*planeX = -FOV_SCALE;
+					*planeY =  0.0;
+					break;
+				case KEY_A:
+					*dirX = -1.0;
+					*dirY =  0.0;
+					*planeX =  0.0;
+					*planeY =  FOV_SCALE;
+					break;
+				case KEY_D:
+					*dirX =  1.0;
+					*dirY =  0.0;
+					*planeX =  0.0;
+					*planeY = -FOV_SCALE;
+					break;
+
+				// Diagonal directions
+				case KEY_Q:
+					*dirX = -NORM_DIAG;
+					*dirY = -NORM_DIAG;
+					*planeX =  0;
+					*planeY =  0.66;
+					break;
+				case KEY_E:
+					*dirX =  NORM_DIAG;
+					*dirY = -NORM_DIAG;
+					*planeX =   0;
+					*planeY =   0.66;
+					break;
+
+				case KEY_Y:
+				case KEY_Z:
+					*dirX = -NORM_DIAG;
+					*dirY =  NORM_DIAG;
+					*planeX =  0;
+					*planeY =  0.66;
+					break;
+				case KEY_C:
+					*dirX =  NORM_DIAG;
+					*dirY =  NORM_DIAG;
+					*planeX = 0;
+					*planeY = 0.66;
+					break;
+
+				// Default
+				default:
+					*dirX = 0.0;
+					*dirY = -1.0;
+					*planeX = FOV_SCALE;
+					*planeY = 0.0;
+					break;
+				}
+
+			// Normalize only the direction vector
+			double len = sqrt((*dirX) * (*dirX) + (*dirY) * (*dirY));
+			if (len != 0.0) {
+				*dirX /= len;
+				*dirY /= len;
+				// DO NOT normalize planeX/planeY
+				}
+			}
+
+
+		void render_map_3d(Tile *map, Entitiy *player, SDL_Texture *wallTexture) {
+			int texWidth = 16, texHeight = 16;
+			//SDL_QueryTexture(wallTexture, NULL, NULL, &texWidth, &texHeight);
+
+			// =========================================================================
+			// Step 0: Define Player Direction and Camera Plane
+			// =========================================================================
+			// This setup uses hardcoded vectors for 8-directional movement,
+			// typical for a traditional roguelike. The plane vector is always
+			// perpendicular to the direction vector.
+			// The length of the plane vector determines the FOV (~66 degrees here).
+			// =========================================================================
+			double dirX = 0.0, dirY = -1.0; // Default to 'up'
+			double planeX = 0.66, planeY = 0.0;
+			get_player_view_vectors(&dirX, &dirY, &planeX, &planeY);
+
+			/*
+					switch (LASTKEY) {
+						// Cardinal Directions
+						case KEY_W:
+							dirX =  0.0;
+							dirY = -1.0;
+							planeX =  0.66;
+							planeY =  0.00;
+							break; // up
+						case KEY_S:
+							dirX =  0.0;
+							dirY =  1.0;
+							planeX = -0.66;
+							planeY =  0.00;
+							break; // down
+						case KEY_A:
+							dirX = -1.0;
+							dirY =  0.0;
+							planeX =  0.00;
+							planeY =  0.66;
+							break; // left
+						case KEY_D:
+							dirX =  1.0;
+							dirY =  0.0;
+							planeX =  0.00;
+							planeY = -0.66;
+							break; // right
+
+						// Corrected Diagonal Directions
+						case KEY_Q:
+							dirX = -1.0;
+							dirY = -1.0;
+							planeX =  0.47;
+							planeY =  0.47;
+							break; // up-left
+						case KEY_E:
+							dirX =  1.0;
+							dirY = -1.0;
+							planeX =  0.47;
+							planeY = -0.47;
+							break; // up-right
+						case KEY_Z:
+							dirX = -1.0;
+							dirY =  1.0;
+							planeX = -0.47;
+							planeY =  0.47;
+							break; // down-left
+						case KEY_C:
+							dirX =  1.0;
+							dirY =  1.0;
+							planeX = -0.47;
+							planeY = -0.47;
+							break; // down-right
+						}
+			*/
+			//FIRST PART SKY
+			SDL_Rect textRect = {.x = 0, .y = 0, .w = WIDTH, .h = HEIGHT/2};
+			SDL_SetRenderDrawColor(RENDERER, 10, 10, 200, 100);
+			//SDL_RenderFillRect(RENDERER, &textRect);
+			SDL_RenderCopy(RENDERER, groundTextures, NULL, &textRect);
+			//SECOND PART DIRT
+			SDL_Rect textRectA = {.x = 0, .y = HEIGHT/2, .w = WIDTH, .h = HEIGHT};
+			SDL_SetRenderDrawColor(RENDERER, 255, 10, 10, 100);
+			SDL_RenderCopy(RENDERER, blightTextures, NULL, &textRectA);
+			//SDL_RenderFillRect(RENDERER, &textRectA);
+
+			// Loop through every vertical stripe of the screen
+			for (int x = 0; x < WIDTH; x++) {
+				// =====================================================================
+				// Step 1: Ray Setup
+				// Calculate ray position and direction for this screen column (x).
+				// =====================================================================
+				double cameraX = 2.0 * x / (double)WIDTH - 1.0; // x-coord on camera plane (-1 to 1)
+				double rayDirX = dirX + planeX * cameraX;
+				double rayDirY = dirY + planeY * cameraX;
+
+				int mapX = (int)player->pos.x;
+				int mapY = (int)player->pos.y;
+
+				// Length of ray from one x or y-side to next x or y-side
+				double deltaDistX = (rayDirX == 0) ? 1e30 : fabs(1.0 / rayDirX);
+				double deltaDistY = (rayDirY == 0) ? 1e30 : fabs(1.0 / rayDirY);
+
+				// Length of ray from current position to next x or y-side
+				double sideDistX, sideDistY;
+
+				// Which direction to step in x or y-direction (either +1 or -1)
+				int stepX, stepY;
+
+				if (rayDirX < 0) {
+					stepX = -1;
+					sideDistX = (player->pos.x - mapX) * deltaDistX;
+					}
+				else {
+					stepX = 1;
+					sideDistX = (mapX + 1.0 - player->pos.x) * deltaDistX;
+					}
+				if (rayDirY < 0) {
+					stepY = -1;
+					sideDistY = (player->pos.y - mapY) * deltaDistY;
+					}
+				else {
+					stepY = 1;
+					sideDistY = (mapY + 1.0 - player->pos.y) * deltaDistY;
+					}
+
+				// =====================================================================
+				// Step 2: DDA Algorithm
+				// "Walk" the ray until it hits a wall.
+				// =====================================================================
+				int hit  = 0;
+				int side = 0; // Was a NS or a EW wall boundary hit?
+				while (hit == 0) {
+					if (sideDistX < sideDistY) {
+						sideDistX += deltaDistX;
+						mapX += stepX;
+						side = 0; // Hit a vertical (NS) wall face
+						}
+					else {
+						sideDistY += deltaDistY;
+						mapY += stepY;
+						side = 1; // Hit a horizontal (EW) wall face
+						}
+
+					// Check if ray is out of bounds
+					if (mapX < 0 || mapX >= MAP_X || mapY < 0 || mapY >= MAP_Y) {
+						hit = 1;
+						}
+					// Check if the ray has hit a wall tile at its new map coordinate
+					else if (MAP_ISV(map, mapX, mapY) && MAP_CH(map, mapX, mapY) == TILE_WALL) {
+						hit = 1;
+						}
+					}
+
+				// =====================================================================
+				// Step 3: Calculate Distance and Wall Height
+				// Use perpendicular distance to avoid fisheye effect.
+				// =====================================================================
+				double perpWallDist = (side == 0) ? (sideDistX - deltaDistX) : (sideDistY - deltaDistY);
+
+				int lineHeight = (int)(HEIGHT / perpWallDist);
+
+				// Calculate lowest and highest pixel to fill in current stripe
+				int drawStart = -lineHeight / 2 + HEIGHT / 2;
+				if (drawStart < 0) drawStart = 0;
+				int drawEnd = lineHeight / 2 + HEIGHT / 2;
+				if (drawEnd >= HEIGHT) drawEnd = HEIGHT - 1;
+
+				// =====================================================================
+				// Step 4: Calculate Texture Coordinates
+				// Determine which vertical stripe of the texture to use.
+				// =====================================================================
+				double wallX; // where exactly the wall was hit
+				if (side == 0) {
+					wallX = player->pos.y + perpWallDist * rayDirY;
+					}
+				else {
+					wallX = player->pos.x + perpWallDist * rayDirX;
+					}
+				wallX -= floor(wallX); // get the fractional part
+
+				// x coordinate on the texture
+				int texX = (int)(wallX * (double)texWidth);
+				if (texX < 0) texX = 0;
+				if (texX >= texWidth) texX = texWidth - 1;
+
+
+				// Flip the texture coordinate if necessary to prevent mirroring
+				if (side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
+				if (side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
+
+				// =====================================================================
+				// Step 5: Render the Slice
+				// =====================================================================
+				SDL_Rect srcRect = { texX, 0, 1, texHeight };
+				SDL_Rect dstRect = { x, drawStart, 1, drawEnd - drawStart + 1 };
+				SDL_RenderCopy(RENDERER, wallTexture, &srcRect, &dstRect);
+
+				}
+
+			}
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
 			//render_map(map, player);
 			//render_map_fov(player, map);
 			//render_map_dikstra(player, map);
+			//dif(COUNTMOVES%2)
 			render_map_graphical(player, map);
+			//else
+			//render_map_3d(map, player, wallTextures);
 			render_player(player);
 			//render_player(&monster->items[0]);
 			if(ITEMSREND == SDL_TRUE) {
@@ -1811,6 +2098,5 @@ void render_map(Tile *map, Entitiy *player) {
 				EVENT.type = 0;
 				}
 			}
-
 
 
