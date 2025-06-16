@@ -34,6 +34,8 @@ static Entitiy_DA monster;
 static Entitiy*   player;
 static Item_DA    items;
 
+
+
 void generate_level() {
 	Room_DA rooms = {0};
 	CHANCE_MONSTER_HUTING_WOUND = 0.3;
@@ -63,6 +65,7 @@ void generate_level() {
 	caved_part_generator(TILE_GRASS, map, 100);
 	MOVMENT = 0;
 	COUNTMOVES = 0;
+	LASTKEY = KEY_W; 
 	player->pos.x = rooms.items[0].center.x;
 	player->pos.y = rooms.items[0].center.y;
 	if(rooms.items != NULL) {
@@ -143,6 +146,7 @@ int main() {
 	SDL_ERR(SDL_Init(SDL_INIT_VIDEO));
 	SDL_ERR(TTF_Init());
 	u64 seed = (u64)time(0);
+	//seed = 1;
 	srand(seed);
 	for(i32 i = 0; i < NUM_RENDER_MSG; i++) {
 		da_append(&MESSAGES, "   ");
