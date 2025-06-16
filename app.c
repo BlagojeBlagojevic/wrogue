@@ -1540,7 +1540,7 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, sW, sH, "-", WHITE);
 					}
-				
+
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					//DROP(textRect);
@@ -1735,12 +1735,12 @@ void render_map(Tile *map, Entitiy *player) {
 					}
 				}
 			}
-
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
 			//render_map(map, player);
 			//render_map_fov(player, map);
 			//render_map_dikstra(player, map);
+
 			render_map_graphical(player, map);
 			render_player(player);
 			//render_player(&monster->items[0]);
@@ -1790,8 +1790,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 70;
-						FONT_H = 70;
+						FONT_W = 100;
+						FONT_H = 100;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
@@ -1811,6 +1811,5 @@ void render_map(Tile *map, Entitiy *player) {
 				EVENT.type = 0;
 				}
 			}
-
 
 

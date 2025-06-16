@@ -1711,7 +1711,7 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map) {
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 
 	f64 ox,oy;
-	ox = (f64)entity->pos.x;
+	ox = (f64)entity->pos.x + 0.0000000001f;
 	oy = (f64)entity->pos.y;
 
 	for(i32 i = 0; i < RADIUS; i++) {
