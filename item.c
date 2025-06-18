@@ -1,6 +1,6 @@
 #include "item.h"
 
-Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color, Item_Type type, u8 isCursed, SDL_bool isEquipped) {
+Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color,	Item_Type type, u8 isCursed, SDL_bool isEquipped) {
 	Item* item = calloc(1, sizeof(Item));
 	if(item == NULL) {
 		ASSERT("CALLOC FAIL");
