@@ -97,7 +97,7 @@ Tile* init_map_BSP(Room_DA* rooms,  int splitDepth);
 void  generate_traps(Tile* map);
 
 #define MIN_LEAF_SIZE 10
-#define MAX_LEAF_SIZE 70
+#define MAX_LEAF_SIZE 40
 
 typedef struct BSPNode {
 	// region bounds
