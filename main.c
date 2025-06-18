@@ -1,5 +1,6 @@
 //#include"utils.h"
 
+
 #include "map.h"
 #include "entity.h"
 #include "app.h"
@@ -29,6 +30,9 @@ SDL_Texture*      stairTextures;
 SDL_Texture*      rangeItemsTextures;
 SDL_Texture*      glyphTextures;
 SDL_Texture*      scrolTextures;
+
+SDL_Texture*      startTexture;
+
 static Tile*      map;
 static Entitiy_DA monster;
 static Entitiy*   player;
@@ -65,7 +69,7 @@ void generate_level() {
 	caved_part_generator(TILE_GRASS, map, 100);
 	MOVMENT = 0;
 	COUNTMOVES = 0;
-	LASTKEY = KEY_W; 
+	LASTKEY = KEY_W;
 	player->pos.x = rooms.items[0].center.x;
 	player->pos.y = rooms.items[0].center.y;
 	if(rooms.items != NULL) {
@@ -78,16 +82,48 @@ void generate_level() {
 	}
 
 void game_loop() {
-	
+
 	if(player->health <= 0) {
 		da_append(&MESSAGES, "You lose");
-		exit(-1);
-		player->health = 10;
-		player->maxHealth = 10;
+		//exit(-1);
+		player->health = 20;
+		player->maxHealth = 20;
+		STARTGAME = 1;
 		LEVEL = 0;
 		DEPTH = rand() % 7 + 1;
+
+		player->attack[0] = player->attack[1] = player->attack[2] = player->attack[3] = 2;
+		player->defence[0] = player->defence[1] = player->defence[2] = player->defence[3] = 2;
+		player->stamina = player->maxStamina = 15;
+		player->hunger = 255;
+		player->chanceToDecressStaminaMove = 0.1f;
+
+		//FREE ITEMS
+		for(u64 i = 0; i < player->inventory.count; i++) {
+			free(player->inventory.items[i].name);
+			free(player->inventory.items[i].descripction);
+			}
+		player->inventory.count = 0;
+		Item* sword = create_item(0, 0, DAGER_CREATE());
+		sword->isEquiped = SDL_TRUE;
+		da_append(&player->inventory, (*sword));
+		free(sword);
+		Item* armor = create_item(0, 0, PLAYER_ARMOR_CREATE());
+		armor->isEquiped = SDL_TRUE;
+		da_append(&player->inventory, (*armor));
+		free(armor);
+		armor = create_item(0, 0, MEAT_CREATE());
+		da_append(&player->inventory, (*armor));
+		free(armor);
+		Item* bow = create_item(player->pos.x, player->pos.y, BOW_CREATE());
+		bow->isEquiped = SDL_TRUE;
+		da_append(&player->inventory, (*bow));
+		free(bow);
+		Item* arrow = create_item(player->pos.x, player->pos.y, ARROW_CREATE());
+		da_append(&player->inventory, (*arrow));
+		free(arrow);
 		generate_level();
-		
+
 		}
 
 
@@ -156,6 +192,8 @@ int main() {
 	da_append(&MESSAGES, msg);
 
 	WINDOW   = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
+	WIDTH = 1200;
+	HEIGHT = 800;
 	(void)P_SDL_ERR(WINDOW);
 	RENDERER = SDL_CreateRenderer(WINDOW, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_SetWindowResizable(WINDOW, SDL_TRUE);
@@ -166,6 +204,7 @@ int main() {
 	QUIT = 0;
 	MOVMENT = SDL_TRUE;
 	ITEMSREND = SDL_TRUE;
+	STARTGAME = SDL_TRUE;
 
 	player = create_entity('@', "Some Name", 10, 20, (Position) {
 		40, 40
@@ -175,24 +214,24 @@ int main() {
 	player->stamina = player->maxStamina = 15;
 	player->hunger = 255;
 	player->chanceToDecressStaminaMove = 0.1f;
-
 	Item* sword = create_item(0, 0, DAGER_CREATE());
 	sword->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*sword));
-
+	free(sword);
 	Item* armor = create_item(0, 0, PLAYER_ARMOR_CREATE());
 	armor->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*armor));
-
+	free(armor);
 	armor = create_item(0, 0, MEAT_CREATE());
 	da_append(&player->inventory, (*armor));
-
+	free(armor);
 	Item* bow = create_item(player->pos.x, player->pos.y, BOW_CREATE());
 	bow->isEquiped = SDL_TRUE;
 	da_append(&player->inventory, (*bow));
+	free(bow);
 	Item* arrow = create_item(player->pos.x, player->pos.y, ARROW_CREATE());
 	da_append(&player->inventory, (*arrow));
-
+	free(arrow);
 	monster_definitions_export();
 	export_generators();
 	LEVEL = 0;
@@ -203,6 +242,7 @@ int main() {
 	emscripten_set_main_loop(game_loop, 0, 1);
 #else
 	while (!QUIT) {
+		render_start_screen();
 		game_loop();
 		SDL_Delay(10);
 		}
