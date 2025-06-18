@@ -169,6 +169,7 @@ typedef struct Graphics_State {
 	u8            isRangeAttack;
 	u32           lastKey;
 	f64           chanceHuntWound;
+	u8            isStartGame;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -194,6 +195,9 @@ extern SDL_Texture* stairTextures;
 extern SDL_Texture* rangeItemsTextures;
 extern SDL_Texture* glyphTextures;
 extern SDL_Texture* scrolTextures;
+
+extern SDL_Texture* startTexture;
+
 extern Graphics_State mainGraphics;
 #define WINDOW     mainGraphics.window
 #define RENDERER   mainGraphics.renderer
@@ -219,6 +223,7 @@ extern Graphics_State mainGraphics;
 #define GENMAP     mainGraphics.isTimeToGenerateMap
 #define RANGE      mainGraphics.isRangeAttack
 #define LASTKEY		 mainGraphics.lastKey
+#define STARTGAME  mainGraphics.isStartGame
 
 #define CHANCE_MONSTER_HUTING_WOUND mainGraphics.chanceHuntWound 
 
@@ -287,6 +292,8 @@ extern Graphics_State mainGraphics;
 #define MAX_SPLIT_RATIO 0.9f
 #define CORRIDOR_WIDTH 2
 
+
+#define ISO_VIEW
 
 
 #endif
