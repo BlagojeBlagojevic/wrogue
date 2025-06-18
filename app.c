@@ -109,6 +109,12 @@ void init_texture() {
 	scrolTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
 	SDL_FreeSurface(tempSur);
 
+	tempSur = IMG_Load("assets/cover.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	startTexture = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
 
 
 	}
@@ -1812,4 +1818,34 @@ void render_map(Tile *map, Entitiy *player) {
 				}
 			}
 
+
+		void render_start_screen() {
+			i32 counter = 0;
+			while(STARTGAME) {
+				counter++;
+				SDL_Rect temp = {0, 0, WIDTH, HEIGHT};
+				SDL_RenderClear(RENDERER);
+				SDL_RenderCopy(RENDERER, startTexture, &temp, NULL);
+				const char *text = "PRESS  S TO START";
+				if(counter%2)
+					Text_Renderer_C(RENDERER, FONT, WIDTH/2, HEIGHT/2, WIDTH/4, 30, text, RED);
+				SDL_RenderPresent(RENDERER);
+				SDL_Delay(100);
+				if(SDL_PollEvent(&EVENT)) {
+					if(EVENT.type == SDL_QUIT) {
+						MOVMENT = SDL_TRUE;
+						QUIT = 1;
+						STARTGAME = 0;
+						//exit(0);
+						}
+					if(EVENT.key.keysym.sym == KEY_S){
+						STARTGAME = 0;
+					}	
+					}
+					
+				}
+				
+				
+
+			}
 
