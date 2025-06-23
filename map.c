@@ -1,4 +1,5 @@
 
+
 #include "map.h"
 SDL_bool checkCollision(i32 x1, i32 y1, i32 w1, i32 h1, i32 x2, i32 y2, i32 w2, i32 h2) {
 	SDL_Rect A = {.h = h1, .w = w1, .x = x1, .y = y1 };
@@ -702,7 +703,7 @@ Tile* init_map(Room_DA* rooms) {
 		}
 	//RAND_MAP();
 	i32 maxRoom = 12, minRoom = 10;
-	generete_dungons(rooms, map, 200, 600);
+	generete_dungons(rooms, map, minRoom, maxRoom);
 
 
 	SDL_bool isGenerateDown  = SDL_FALSE;
@@ -918,8 +919,8 @@ Tile* init_map_RA(Room_DA* room) {
 	//add_room_wall_to_map(map, rooms[0]);
 	//SDL_bool isColided = SDL_FALSE;
 	i32 count = 0;
-	u8 isDrunc = rand()%2;
-	if(isDrunc) {
+	u8 isDrunc = rand()%4;
+	if(!isDrunc) {
 		u8 howStart = rand()%3 + 1;
 		Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);
 		add_room_drunkard_walk(map, allMap, 20000);
@@ -928,7 +929,7 @@ Tile* init_map_RA(Room_DA* room) {
 		}
 
 
-	for(i32 i = 1; i < nRooms && !isDrunc; i++) {
+	for(i32 i = 1; i < nRooms && isDrunc; i++) {
 
 		i32 y = (rand() % (MAP_Y - 25));
 		i32 x = (rand() % (MAP_X - 25));
@@ -1077,7 +1078,7 @@ static void bsp_carve(Room_DA* rooms, BSPNode* node, Tile* map) {
 	// Leaf: create and carve a room
 	if (!node->left && !node->right) {
 		i32 rw = (rand() % (node->width - 6)) + 6;
-		i32 rh = (rand() % (node->height - 6)) + 6;
+		i32 rh = (rand() % (node->height - 6)) + 4;
 		i32 rx = node->x + rand() % (node->width - rw);
 		i32 ry = node->y + rand() % (node->height - rh);
 		node->room = create_room(rx, ry, rh, rw);

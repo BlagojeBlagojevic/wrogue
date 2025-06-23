@@ -1711,7 +1711,7 @@ SDL_bool check_colison_entitiy(Entitiy* player, Entitiy* ent, Tile* map) {
 void cast_ray(Entitiy *entity, Tile* map, f64 x, f64 y) {
 
 	f64 ox,oy;
-	ox = (f64)entity->pos.x + 0.0000000001f;
+	ox = (f64)entity->pos.x;
 	oy = (f64)entity->pos.y;
 
 	for(i32 i = 0; i < RADIUS; i++) {
@@ -1735,7 +1735,7 @@ void field_of_vison(Entitiy *entity, Tile* map) {
 	CLAMP(xE, 1, (MAP_X-2));
 	CLAMP(yE, 1, (MAP_X-2));
 	MAP_ISW(map, xE, yE) = SDL_TRUE;
-	for(u64 i = 1; i < 359; i++) {
+	for(u64 i = 0; i < 360; i++) {
 		x = cos((f64)i*0.01745329251f); //to rad
 		y = sin((f64)i*0.01745329251f);
 		cast_ray(entity, map, x, y);

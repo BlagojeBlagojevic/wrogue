@@ -170,6 +170,9 @@ typedef struct Graphics_State {
 	u32           lastKey;
 	f64           chanceHuntWound;
 	u8            isStartGame;
+	u8            isEndGame;
+	u8            whatVision;
+	i32           score;
 	} Graphics_State;
 
 //static const char* title = "Ime kakvo";
@@ -224,6 +227,10 @@ extern Graphics_State mainGraphics;
 #define RANGE      mainGraphics.isRangeAttack
 #define LASTKEY		 mainGraphics.lastKey
 #define STARTGAME  mainGraphics.isStartGame
+#define ENDGAME    mainGraphics.isEndGame
+#define WHATVISION mainGraphics.whatVision
+#define SCORE      mainGraphics.score
+
 
 #define CHANCE_MONSTER_HUTING_WOUND mainGraphics.chanceHuntWound 
 
@@ -254,7 +261,7 @@ extern Graphics_State mainGraphics;
 
 #define MAX_HEALTH_VALUE 255
 #define NUM_RENDER_MSG 5
-#define RADIUS 60
+#define RADIUS 10
 #define CHANCE_INCREMENT_HEALTH 0.05f
 #define CHANCE_SPAWN_DOOR 0.1f
 #define CHANCE_NON_IN_ROOM 0.1f
@@ -264,7 +271,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_CHANGE_DIRECTION 0.05f
 #define CHANCE_CAVE_ROAD 0.05f
 #define CHANCE_SPIRIT_ATTACK 0.01f
-#define NUM_SCROLS_LEVEL 3
+#define NUM_SCROLS_LEVEL 8
 //#define CHANCE_MONSTER_HUTING_WOUND 0.3 move to game_state for agregate scrol 
 
 #define CHANCE_LIFESTEAL 0.1f
@@ -278,7 +285,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_ITEM_PER_LEVEL 0.05f
 #define CHANCE_DROP_SELING_CAUSE_DAMAGE 0.8f
 #define CHANCE_MONSTER_HAVE_ITEM 0.05f
-#define CHANCE_CRITICAL_PLAYER 0.05f
+#define CHANCE_CRITICAL_PLAYER 0.02f
 #define CHANCE_PLAYER_LEVEL  0.05f
 #define CHANCE_DISIPATE_POISON 0.1f
 #define CHANCE_LEVEL_AD   0.05f
@@ -292,8 +299,8 @@ extern Graphics_State mainGraphics;
 #define MAX_SPLIT_RATIO 0.9f
 #define CORRIDOR_WIDTH 2
 
+#define MONSTER_MIN_IN_DUNGON 12
 
-#define ISO_VIEW
 
 
 #endif
