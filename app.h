@@ -28,5 +28,7 @@ void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *m
 void event_user(Entitiy *player, Entitiy_DA *entitis, Item_DA *items, Tile* map);
 void render_inventory(Item_DA *inventory);
 
+void render_start_screen();
+void render_endgame_screen();
 
 #endif

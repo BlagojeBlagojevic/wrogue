@@ -109,6 +109,12 @@ void init_texture() {
 	scrolTextures = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
 	SDL_FreeSurface(tempSur);
 
+	tempSur = IMG_Load("assets/cover.png");
+	if(tempSur == NULL) {
+		ASSERT("We have no file");
+		}
+	startTexture = P_SDL_ERR(SDL_CreateTextureFromSurface(RENDERER, tempSur));
+	SDL_FreeSurface(tempSur);
 
 
 	}
@@ -862,16 +868,16 @@ void render_monsters(Entitiy_DA *monsters, Entitiy *player, Tile *map) {
 	CLAMP(stopY,  0, MAP_Y-1);//*/
 
 	for(u64 count = 0; count < monsters->count; count++) {
-		//if(monsters->items[count].pos.x >= startX && monsters->items[count].pos.x <= stopX
-		//    && monsters->items[count].pos.y >= startY && monsters->items[count].pos.y <= stopY) {
-		//f64 distance = DISTANCE(player->pos.x, player->pos.y, monsters->items[count].pos.x, monsters->items[count].pos.y);
-		if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
-			//render_player(&monsters->items[count]);
-			render_player_texture(&monsters->items[count]);
-			//SDL_RenderPresent(RENDERER);
-			//SDL_Delay(10);
-			}
-
+		if(monsters->items[count].pos.x > startX && monsters->items[count].pos.x < stopX
+		    && monsters->items[count].pos.y > startY && monsters->items[count].pos.y < stopY) {
+			//f64 distance = DISTANCE(player->pos.x, player->pos.y, monsters->items[count].pos.x, monsters->items[count].pos.y);
+			if(MAP_ISV(map, monsters->items[count].pos.x, monsters->items[count].pos.y) == SDL_TRUE) {
+				//render_player(&monsters->items[count]);
+				render_player_texture(&monsters->items[count]);
+				//SDL_RenderPresent(RENDERER);
+				//SDL_Delay(10);
+				}
+			} //
 		}
 
 	}
@@ -1106,7 +1112,7 @@ void render_items(Item_DA *items, Tile* map, Entitiy* player) {
 		Item item = items->items[i];
 		i32 x = item.pos.x;
 		i32 y = item.pos.y;
-		if(x >= startX && y >= startY && x <= stopX && y <= stopY ) {
+		if(x > startX && y > startY && x < stopX && y < stopY ) {
 			render_item(&items->items[i], map);
 			//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H, &item.ch, item.color);
 			}
@@ -1452,10 +1458,21 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 //field_of_vison(player, map);
 	update_camera(player, MAP_X, MAP_Y);
 	i32 radius = player->radius;
-	i32 startX = (player->pos.x) - radius;
-	i32 startY = ( player->pos.y) - radius;
-	i32 stopX  = ( player->pos.x) + radius;
-	i32 stopY  = ( player->pos.y) + radius;
+	//player->radius = 3;
+	i32 startX, startY, stopX, stopY;
+	if(WHATVISION) {
+		startX = (player->pos.x) - radius;
+		startY = ( player->pos.y) - radius;
+		stopX  = ( player->pos.x) + radius;
+		stopY  = ( player->pos.y) + radius;
+		}
+	else {
+		startX = 0;
+		startY = 0;
+		stopX  = MAP_X;
+		stopY  = MAP_Y;
+
+		}
 	CLAMP(startX, 0, MAP_X-1);
 	CLAMP(stopX,  0, MAP_X-1);
 	CLAMP(startY, 0, MAP_Y-1);
@@ -1464,8 +1481,8 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 	i32 sH  = FONT_H;
 	i32 ofsetX = player->pos.x;
 	i32 ofsetY = player->pos.y;
-	for(i32 y  = 0; y < MAP_Y; y++) {
-		for(i32 x = 0; x < MAP_X; x++) {
+	for(i32 y  = startY; y < stopY; y++) {
+		for(i32 x = startX; x < stopX; x++) {
 
 			f64 distance = DISTANCE(x, y, player->pos.x, player->pos.y);
 			//distance*=distance;
@@ -1540,7 +1557,7 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderFillRect(RENDERER, &textRect);
 					Text_Renderer_C(RENDERER, FONT, startX, startY, sW, sH, "-", WHITE);
 					}
-				
+
 				else {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					//DROP(textRect);
@@ -1735,12 +1752,12 @@ void render_map(Tile *map, Entitiy *player) {
 					}
 				}
 			}
-
 		void main_renderer(Entitiy* player, Entitiy_DA *monster, Item_DA *items, Tile *map) {
 			SDL_ERR(SDL_RenderClear(RENDERER));
 			//render_map(map, player);
 			//render_map_fov(player, map);
 			//render_map_dikstra(player, map);
+
 			render_map_graphical(player, map);
 			render_player(player);
 			//render_player(&monster->items[0]);
@@ -1790,8 +1807,8 @@ void render_map(Tile *map, Entitiy *player) {
 						SDL_GetWindowSize(WINDOW, &WIDTH, &HEIGHT);
 						//FONT_H = HEIGHT / MAP_Y - 4;
 						//FONT_W = WIDTH  / MAP_X;
-						FONT_W = 70;
-						FONT_H = 70;
+						FONT_W = 50;
+						FONT_H = 50;
 						CAMERA.w = WIDTH;
 						CAMERA.h = HEIGHT;
 						//FONT_H = 6;
@@ -1805,12 +1822,73 @@ void render_map(Tile *map, Entitiy *player) {
 						player_input(&EVENT, player, entitis, items, map);
 						//
 						player_negative_effect(player, map);
-						SDL_Delay(1);
+						//SDL_Delay(1);
 						}
 					}
 				EVENT.type = 0;
 				}
 			}
 
+
+		void render_start_screen() {
+			i32 counter = 0;
+			while(STARTGAME) {
+				counter++;
+				SDL_Rect temp = {0, 0, WIDTH, HEIGHT};
+				SDL_RenderClear(RENDERER);
+				SDL_RenderCopy(RENDERER, startTexture, &temp, NULL);
+				const char *text = "PRESS  S TO START";
+				if(counter%2)
+					Text_Renderer_C(RENDERER, FONT, WIDTH/2, HEIGHT/2, WIDTH/4, 30, text, RED);
+				SDL_RenderPresent(RENDERER);
+				SDL_Delay(100);
+				if(SDL_PollEvent(&EVENT)) {
+					if(EVENT.type == SDL_QUIT) {
+						MOVMENT = SDL_TRUE;
+						QUIT = 1;
+						STARTGAME = 0;
+						//exit(0);
+						}
+					if(EVENT.key.keysym.sym == KEY_S) {
+						STARTGAME = 0;
+						}
+					}
+
+				}
+			}
+
+
+//TBD Score save
+		void render_endgame_screen() {
+			i32 counter = 0;
+			char *stats = malloc(MAX_DESCRIPTION * sizeof(char));
+
+			snprintf(stats,  MAX_DESCRIPTION, "YOU DIE WITH SCORE OF %d !!!",  SCORE);
+			while(ENDGAME) {
+				counter++;
+				SDL_Rect temp = {0, 0, WIDTH, HEIGHT};
+				SDL_RenderClear(RENDERER);
+				SDL_RenderCopy(RENDERER, startTexture, &temp, NULL);
+				Text_Renderer_C(RENDERER, FONT, 1600/3, 10, WIDTH/4, 50, stats, BLACK);
+				const char *text = "PRESS  S TO START";
+				if(counter%2)
+					Text_Renderer_C(RENDERER, FONT, 1600/3, 10 + 60, WIDTH/4, 30, text, RED);
+				SDL_RenderPresent(RENDERER);
+				SDL_Delay(100);
+				if(SDL_PollEvent(&EVENT)) {
+					if(EVENT.type == SDL_QUIT) {
+						MOVMENT = SDL_TRUE;
+						QUIT = 1;
+						ENDGAME = 0;
+						//exit(0);
+						}
+					if(EVENT.key.keysym.sym == KEY_S) {
+						ENDGAME = 0;
+						}
+					}
+
+				}
+			free(stats);
+			}
 
 

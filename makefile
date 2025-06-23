@@ -11,7 +11,7 @@ mem:
 
 CCEMCC      = emcc
 CFLAGSEMCC  = -Wall -Wextra -Wno-unused-variable -std=c11 -ggdb \
-          -s USE_SDL=2 -s USE_SDL_TTF=2 -s USE_SDL_IMAGE=2  -s ASYNCIFY -O3 
+          -s USE_SDL=2 -s USE_SDL_TTF=2 -s USE_SDL_IMAGE=2  -s ASYNCIFY -O2 
 OUT     = index.html
 
 buildemcc:
