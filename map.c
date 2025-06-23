@@ -919,7 +919,7 @@ Tile* init_map_RA(Room_DA* room) {
 	//add_room_wall_to_map(map, rooms[0]);
 	//SDL_bool isColided = SDL_FALSE;
 	i32 count = 0;
-	u8 isDrunc = rand()%4;
+	u8 isDrunc = rand()%6;
 	if(!isDrunc) {
 		u8 howStart = rand()%3 + 1;
 		Room allMap = create_room(0, 0, MAP_Y - 1, MAP_X - 1);

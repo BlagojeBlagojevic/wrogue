@@ -46,8 +46,8 @@ void generate_level() {
 	CHANCE_MONSTER_HUTING_WOUND = 0.3;
 	LEVEL++;
 	player->radius = 3 + rand()%5;
-	i32 whatMap = rand()%4;
-	if(whatMap < 2) map = init_map_BSP(&rooms, 4);
+	i32 whatMap = rand()%5;
+	if(whatMap == 0) map = init_map_BSP(&rooms, 4);
 	else map = init_map_RA(&rooms);
 	monster.count = 0;
 	items.count = 0;

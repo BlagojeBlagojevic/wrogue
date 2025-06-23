@@ -27,7 +27,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: /tmp/tmpx1uwokuq.js
+// include: /tmp/tmpnzk9n7l2.js
 
   Module['expectedDataFileDownloads'] ??= 0;
   Module['expectedDataFileDownloads']++;
@@ -212,7 +212,7 @@ Module['FS_createPath']("/assets", "fonts", true, true);
 
   })();
 
-// end include: /tmp/tmpx1uwokuq.js
+// end include: /tmp/tmpnzk9n7l2.js
 
 
 var arguments_ = [];
