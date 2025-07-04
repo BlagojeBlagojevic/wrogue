@@ -2,6 +2,8 @@
 #define _MAP_H
 
 #include "utils.h"
+#include "Map/map.h"
+
 
 
 typedef enum {
@@ -94,6 +96,7 @@ SDL_bool is_trap(Tile* map, i32 x, i32 y);
 Tile* init_map(Room_DA* rooms);
 Tile* init_map_RA(Room_DA* rooms);
 Tile* init_map_BSP(Room_DA* rooms,  int splitDepth);
+Tile* init_map_XMAPGEN(Room_DA *rooms);
 void  generate_traps(Tile* map);
 
 #define MIN_LEAF_SIZE 10
