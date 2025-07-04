@@ -895,6 +895,67 @@ void plot_basic_bezier (i32 x0, i32 y0, i32 x1, i32 y1, i32 x2, i32 y2, Tile* ma
 
 
 
+Tile* init_map_XMAPGEN(Room_DA *room) {
+	Tile *map;
+	map = calloc(MAP_Y*MAP_Y + 1, sizeof(Tile));
+	const Map mapG = xmgen(MAP_X, MAP_Y, 10, 20);
+	xmprint(mapG);
+	map = calloc(MAP_Y*MAP_Y + 1, sizeof(Tile));
+	Room rooms = create_room(0, 0, 20, 20);
+	
+	for(i32 y = 0; y < MAP_Y - rooms.height; y+=rooms.height) {
+		rooms.pos.y=y;
+		da_append(room, rooms);//Add room
+		for(i32 x = 0; x < MAP_X - rooms.width; x+=rooms.width) {
+			rooms.pos.x=x;
+			}
+		}
+
+
+	for(int y = 0; y < MAP_Y; y++) {
+		for(int x = 0; x < MAP_X; x++) {
+			if(mapG.walling[y][x] == '#') {
+				MAP_CH(map, x, y) = TILE_WALL;
+				MAP_ISW(map, x, y) = SDL_FALSE;
+				}
+			else {
+				MAP_CH(map, x, y) = TILE_FLOOR;
+				MAP_ISW(map, x, y) = SDL_TRUE;
+				}
+
+			}
+		}
+
+
+	for(i32 y = 0; y < MAP_Y; y++) {
+		for(i32 x = 0; x < MAP_X; x++) {
+			if(y == 0 || x == 0 || y == MAP_Y-1 || x == MAP_X-1 ) {
+				MAP_CH(map, x, y) = TILE_WALL;
+				MAP_ISW(map, x, y) = SDL_FALSE;
+
+				}
+			}
+		}
+	//DOWN
+	SDL_bool isGenerateDown  = SDL_FALSE;
+	while(!isGenerateDown) {
+		i32 x = rand()%(MAP_X - 4) + 2;
+		i32 y = rand()%(MAP_X - 4) + 2;
+		CLAMP(x, 4, MAP_X - 4);
+		CLAMP(y, 4, MAP_Y - 4);
+		if(MAP_CH(map, x, y) == TILE_FLOOR) {
+			MAP_CH(map, x, y) = TILE_STAIRS;
+			isGenerateDown = SDL_TRUE;
+			break;
+			}
+		}
+
+
+		
+	return map;
+	}
+
+
 
 Tile* init_map_RA(Room_DA* room) {
 	Tile *map;
@@ -1196,10 +1257,10 @@ void  generate_traps(Tile* map) {
 						MAP_CH(map, x, y) = TILE_SPIKE;
 						break;
 						}
-				case 3:{
-					MAP_CH(map, x, y)   = TILE_POI_TRAP; 
-					break;
-				}		
+				case 3: {
+						MAP_CH(map, x, y)   = TILE_POI_TRAP;
+						break;
+						}
 				default: {
 						ASSERT("Not defined trap");
 						break;
