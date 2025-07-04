@@ -3,7 +3,7 @@ CC = gcc
 
 
 build: 
-	$(CC) -o app main.c app.c entity.c item.c map.c $(CFLAGS) 
+	$(CC) -o app Map/Map.o main.c app.c entity.c item.c map.c $(CFLAGS) 
 
 mem: 
 	$(CC) -o app main.c app.c entity.c item.c map.c $(CFLAGS) -O2 -fsanitize=address -static-libasan
