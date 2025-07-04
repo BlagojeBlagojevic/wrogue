@@ -46,9 +46,10 @@ void generate_level() {
 	CHANCE_MONSTER_HUTING_WOUND = 0.3;
 	LEVEL++;
 	player->radius = 3 + rand()%5;
-	i32 whatMap = rand()%5;
-	if(whatMap == 0) map = init_map_BSP(&rooms, 4);
-	else map = init_map_RA(&rooms);
+	i32 whatMap = rand()%4;
+	if(whatMap < 1) map = init_map_BSP(&rooms, 4);
+	else if(whatMap == 2) map = init_map_RA(&rooms);
+	else map = init_map_XMAPGEN(&rooms);
 	monster.count = 0;
 	items.count = 0;
 	if(rooms.count <= 2) {
@@ -65,15 +66,23 @@ void generate_level() {
 			genereate_monsters_generator(player, &monster, map, LEVEL, rooms.items[i], SDL_TRUE);
 			}
 		}
-	calculate_diakstra_map(player, map, &monster, rooms.items[0].pos.x, rooms.items[0].pos.y);
-	caved_part_generator(TILE_TREE, map, 2);
-	calculate_diakstra_map(player, map, &monster,  rooms.items[0].pos.x, rooms.items[0].pos.y);
-	caved_part_generator(TILE_GRASS, map, 100);
+
 	MOVMENT = 0;
 	COUNTMOVES = 0;
 	LASTKEY = KEY_W;
-	player->pos.x = rooms.items[0].center.x;
-	player->pos.y = rooms.items[0].center.y;
+	u8 isGenPlayer = 0;
+	while(!isGenPlayer) {
+		player->pos.x = rand()%MAP_X;
+		player->pos.y = rand()%MAP_Y;
+		if(MAP_CH(map, player->pos.x, player->pos.y) == TILE_FLOOR) {
+			isGenPlayer = 1;
+			//calculate_diakstra_map(player, map, &monster,player->pos.x, player->pos.y);
+			//caved_part_generator(TILE_TREE, map, 2);
+			calculate_diakstra_map(player, map, &monster, player->pos.x, player->pos.y);
+			caved_part_generator(TILE_GRASS, map, 100);
+			}
+		}
+
 	if(rooms.items != NULL) {
 		free(rooms.items);
 		}
@@ -93,7 +102,7 @@ void game_loop() {
 		da_append(&MESSAGES, "You lose");
 		for(u64 i = 0; i < player->inventory.count; i++) {
 			if(player->inventory.items[i].type == GOLD_ITEM) {
-				SCORE = player->inventory.items[i].itemValue;
+				SCORE = player->inventory.items[i].health;
 				break;
 				}
 			}

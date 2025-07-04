@@ -1517,9 +1517,9 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 				else if(ch == TILE_RUINS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					SDL_RenderCopy(RENDERER, wallTextures, NULL, &textRect);
-					textRect.w = sW+10;
-					textRect.h = sH+10;
-					SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
+				//	textRect.w = sW+10;
+				//	textRect.h = sH+10;
+					//SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_BLIGHT) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
@@ -1593,7 +1593,7 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderCopy(RENDERER, wallTextures, NULL, &textRect);
 					textRect.w = sW+10;
 					textRect.h = sH+10;
-					SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
+				//	SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_STAIRS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
