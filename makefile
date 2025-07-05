@@ -1,9 +1,9 @@
-CFLAGS  = -Wall -Wextra -Wno-unused-variable -Wimplicit-fallthrough=0 -Werror -std=c11 -ggdb -lSDL2 -lm -lSDL2_ttf -lSDL2_image
+CFLAGS  = -Wall -Wextra -Wno-unused-variable -Wimplicit-fallthrough=0  -std=c11 -ggdb -lSDL2 -lm -lSDL2_ttf -lSDL2_image
 CC = gcc
 
 
 build: 
-	$(CC) -o app Map/Map.o main.c app.c entity.c item.c map.c $(CFLAGS) 
+	$(CC) -o app main.c app.c entity.c item.c map.c Map/Map.c $(CFLAGS) 
 
 mem: 
 	$(CC) -o app main.c app.c entity.c item.c map.c $(CFLAGS) -O2 -fsanitize=address -static-libasan
@@ -15,6 +15,6 @@ CFLAGSEMCC  = -Wall -Wextra -Wno-unused-variable -std=c11 -ggdb \
 OUT     = index.html
 
 buildemcc:
-	$(CCEMCC) $(CFLAGSEMCC) main.c app.c entity.c item.c map.c \
+	$(CCEMCC) $(CFLAGSEMCC) main.c app.c entity.c item.c map.c Map/Map.c \
 	--preload-file assets@/assets --use-preload-plugins \
 	-o $(OUT)

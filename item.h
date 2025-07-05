@@ -172,7 +172,7 @@ typedef struct {
 Item* create_item(i32 x, i32 y, i32 health,  const char* name, char ch, SDL_Color color,	Item_Type type, u8 isCursed, SDL_bool isEquipped);
 void pick_item_from_ground(Item* item, Item_DA *inventory);
 void equiped_item(Item_DA *items, u64 numItem);
-
+void drop_item(Item_DA *inventory, Item_DA *items, u64 numItem, i32 x, i32 y);
 //ALL LOGIC WILL BE HANDLED IN A player_attack and monster_attack for adjustin the stats
 
 #endif

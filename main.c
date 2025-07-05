@@ -111,8 +111,8 @@ void game_loop() {
 		player->maxHealth = 20;
 		ENDGAME = 1;
 		LEVEL = 0;
-		DEPTH = rand() % 7 + 1;
-
+		//DEPTH = rand() % 7 + 1;
+		DEPTH = 7;
 		player->attack[0] = player->attack[1] = player->attack[2] = player->attack[3] = 2;
 		player->defence[0] = player->defence[1] = player->defence[2] = player->defence[3] = 2;
 		player->stamina = player->maxStamina = 15;
