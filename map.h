@@ -2,7 +2,7 @@
 #define _MAP_H
 
 #include "utils.h"
-#include "Map/map.h"
+#include "Map/Map.h"
 
 
 
