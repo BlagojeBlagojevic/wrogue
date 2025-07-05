@@ -16,6 +16,8 @@ Entitiy* create_entity(char ch, const char* name, i32 radius, i32 health, Positi
 			if(CHANCE_LEVEL_AD < rand_f64())
 				entity->attack[i]+= LEVEL;
 			entity->defence[i]+= LEVEL;
+			entity->health+=LEVEL;
+			entity->maxHealth+=LEVEL;
 			}
 		}
 	else {
