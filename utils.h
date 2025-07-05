@@ -58,6 +58,7 @@
 #define DOWN_ARROW 1073741905
 #define SPACE 32
 #define KEY_I 105
+#define KEY_J 106
 #define KEY_P 112
 #define KEY_O 111
 
@@ -162,6 +163,7 @@ typedef struct Graphics_State {
 	SDL_bool      isPickingItem;
 	SDL_bool      isOpeningDoor;
 	SDL_bool      isEquItem;
+	SDL_bool      isDropItem;
 	u64           countMoves;
 	i16           depth;
 	u8            levelPlayer;
@@ -221,6 +223,7 @@ extern Graphics_State mainGraphics;
 #define OPENDOOR   mainGraphics.isOpeningDoor
 #define COUNTMOVES mainGraphics.countMoves
 #define EQUITEM    mainGraphics.isEquItem
+#define DROPITEM   mainGraphics.isDropItem
 #define DEPTH      mainGraphics.depth
 #define LEVEL      mainGraphics.levelPlayer
 #define GENMAP     mainGraphics.isTimeToGenerateMap
@@ -280,7 +283,7 @@ extern Graphics_State mainGraphics;
 #define CHANCE_DROP_ITEM_CONS 0.7
 #define CHANCE_ITEM_CURSED 0.06f
 #define CHANCE_ITEM_USED_IN_COMBAT 0.80f
-#define CHANCE_USE_DEF 0.3f
+#define CHANCE_USE_DEF 0.1f
 #define CHANCE_NEGATIVE_DAMAGE 0.05f
 #define CHANCE_ITEM_PER_LEVEL 0.05f
 #define CHANCE_DROP_SELING_CAUSE_DAMAGE 0.8f
