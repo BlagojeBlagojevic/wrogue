@@ -648,4 +648,25 @@ void equiped_item(Item_DA *items, u64 numItem) {
 	}
 
 
+void drop_item(Item_DA *inventory, Item_DA *items, u64 numItem, i32 x, i32 y) {
+	if(inventory->items  == NULL || inventory->count == 0) {
+		da_append(&MESSAGES, "Number is larger then number of items");
+		return;
+		}
+	if(numItem > inventory->count-1) {
+		da_append(&MESSAGES, "Number is larger then number of items");
+		DROPITEM = SDL_FALSE;
+		return;
+		}
 
+	Item i = inventory->items[numItem];//.isEquiped = SDL_FALSE;
+	i.pos.x = x;
+	i.pos.y = y;
+	i.isEquiped = SDL_FALSE;
+	da_append(items, i);
+	da_remove_unordered(inventory, numItem);
+	//Tbd free
+	
+
+
+}
