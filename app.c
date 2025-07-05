@@ -346,7 +346,6 @@ void render_player_texture(Entitiy *player) {
 
 
 
-
 void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_DA *items, Tile* map) {
 	const u32 key = event->key.keysym.sym;
 	player->oldPos = player->pos;
@@ -389,6 +388,30 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 			BUFFER.count = 0;
 			}
 		}
+	else if(DROPITEM == SDL_TRUE) {
+		//exit(-1);
+		MOVMENT = SDL_TRUE;
+		if(key >= '0' && key <= '9') {
+			da_append(&BUFFER, key);
+			}
+		else if(key == KEY_BACKSPACE) {
+			da_remove_last(&BUFFER);
+			}
+		else if(key == KEY_J) {
+			DROPITEM = SDL_FALSE;
+			MOVMENT = SDL_TRUE;
+			i32 buffer = 0, p = 1;
+			for(i32 i = BUFFER.count - 1; i >= 0; i--) {
+				buffer += ((BUFFER.items[i] - '0') * p);
+				p*=10;
+				}
+			//LOG("Buffer %d\n", buffer);
+			drop_item(&player->inventory, items, (u64)buffer, player->pos.x, player->pos.y);
+			BUFFER.count = 0;
+			}
+		}
+
+
 	else if(player->isStunded > 0) {
 
 		MOVMENT = SDL_TRUE;
@@ -808,6 +831,15 @@ void player_input(SDL_Event *event, Entitiy* player, Entitiy_DA *entitis, Item_D
 		da_append(&MESSAGES, "Type what item you want to equip");
 		MOVMENT = SDL_TRUE;
 		EQUITEM = SDL_TRUE;
+		//DROPITEM = SDL_TRUE;
+		}
+	else if(key == KEY_J) {
+		//exit(-1);
+		char* msg = "What item you want to drop ";
+		da_append(&MESSAGES, msg);
+		da_append(&MESSAGES, "Type what item you want to drop");
+		MOVMENT = SDL_TRUE;
+		DROPITEM = SDL_TRUE;
 		}
 
 	}
@@ -1133,13 +1165,14 @@ void render_inventory(Item_DA *inventory) {
 		buffer += ((BUFFER.items[i] - '0') * p);
 		p*=10;
 		}
-	for(u64 i = (u64)buffer; i < inventory->count && EQUITEM; i++) {
-		//LOG("NAME:%s\n", inventory->items[i].name);
-		char msg[256];
-		snprintf(msg, 256, "%d. %s", (i16)i, inventory->items[i].descripction);
-		render_messages(startX, startY + ((count++)*FONT_H_MESSAGES), msg);
-		//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H_MESSAGES, inventory->items[i].name, WHITE);
-		}
+	if(EQUITEM || DROPITEM)
+		for(u64 i = (u64)buffer; i < inventory->count; i++) {
+			//LOG("NAME:%s\n", inventory->items[i].name);
+			char msg[256];
+			snprintf(msg, 256, "%d. %s", (i16)i, inventory->items[i].descripction);
+			render_messages(startX, startY + ((count++)*FONT_H_MESSAGES), msg);
+			//Text_Renderer_C(RENDERER, FONT, startX, startY, FONT_W, FONT_H_MESSAGES, inventory->items[i].name, WHITE);
+			}
 	}
 
 
@@ -1517,9 +1550,9 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 				else if(ch == TILE_RUINS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
 					SDL_RenderCopy(RENDERER, wallTextures, NULL, &textRect);
-					textRect.w = sW+10;
-					textRect.h = sH+10;
-					SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
+					//	textRect.w = sW+10;
+					//	textRect.h = sH+10;
+					//SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_BLIGHT) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
@@ -1593,7 +1626,7 @@ void render_map_graphical(Entitiy *player, Tile *map) {
 					SDL_RenderCopy(RENDERER, wallTextures, NULL, &textRect);
 					textRect.w = sW+10;
 					textRect.h = sH+10;
-					SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
+					//	SDL_RenderCopy(RENDERER, boulderTextures, NULL, &textRect);
 					}
 				else if(ch == TILE_STAIRS) {
 					SDL_Rect textRect = {.x=startX, .y = startY, .w = sW, .h = sH};
